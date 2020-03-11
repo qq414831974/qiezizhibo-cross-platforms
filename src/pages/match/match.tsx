@@ -70,13 +70,13 @@ class Match extends Component<PageOwnProps, PageState> {
         bottom: number
       }).top;
     }).exec();
+    this.switchTab(0);
   }
 
   componentWillUnmount() {
   }
 
   componentDidShow() {
-    this.switchTab(0);
   }
 
   componentDidHide() {
