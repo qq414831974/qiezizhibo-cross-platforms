@@ -53,8 +53,8 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
       if (action.payload == null) {
         return state;
       }
-      const matchlist = state.matchList.list.concat(action.payload.list);
-      action.payload.list = matchlist;
+      const matchlist = state.matchList.records.concat(action.payload.records);
+      action.payload.records = matchlist;
       return {
         ...state,
         matchList: action.payload
@@ -71,8 +71,8 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
       if (action.payload == null) {
         return state;
       }
-      const commentList = state.comment.list.concat(action.payload.list);
-      action.payload.list = commentList;
+      const commentList = state.comment.records.concat(action.payload.records);
+      action.payload.records = commentList;
       return {
         ...state,
         comment: action.payload
@@ -96,8 +96,8 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
       if (action.payload == null) {
         return state;
       }
-      const recommendList = state.recommend.list.concat(action.payload.list);
-      action.payload.list = recommendList;
+      const recommendList = state.recommend.records.concat(action.payload.records);
+      action.payload.records = recommendList;
       return {
         ...state,
         recommend: action.payload

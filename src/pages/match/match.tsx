@@ -35,10 +35,6 @@ type PageState = {
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
-interface Match {
-  props: IProps;
-}
-
 @withShare({})
 class Match extends Component<PageOwnProps, PageState> {
 
@@ -70,13 +66,13 @@ class Match extends Component<PageOwnProps, PageState> {
         bottom: number
       }).top;
     }).exec();
+    this.switchTab(0);
   }
 
   componentWillUnmount() {
   }
 
   componentDidShow() {
-    this.switchTab(0);
   }
 
   componentDidHide() {
@@ -222,6 +218,10 @@ class Match extends Component<PageOwnProps, PageState> {
       </ScrollView>
     )
   }
+}
+
+interface Match {
+  props: IProps;
 }
 
 const mapStateToProps = (state) => {
