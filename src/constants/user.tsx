@@ -1,0 +1,2 @@
+export const USERINFO = 'USERINFO'
+export const USERINFO_REMOVE = 'USERINFO_REMOVE'

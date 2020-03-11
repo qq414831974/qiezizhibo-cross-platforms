@@ -1,0 +1,145 @@
+import Taro, {Component} from '@tarojs/taro'
+import {AtAvatar, AtIcon} from "taro-ui"
+import {View, Text} from '@tarojs/components'
+
+import defaultLogo from '../../../../assets/default-logo.png'
+import './index.scss'
+import {formatTime, formatMonthDayTime} from "../../../../utils/utils";
+
+const eventType: { [key: number]: { text: string, color: string }; } = {}
+eventType[-1] = {text: "未开始", color: "unopen"};
+eventType[0] = {text: "比赛中", color: "live"};
+eventType[11] = {text: "加时", color: "live"};
+eventType[12] = {text: "点球大战", color: "live"};
+eventType[13] = {text: "伤停", color: "live"};
+eventType[14] = {text: "中场", color: "live"};
+eventType[15] = {text: "下半场", color: "live"};
+eventType[16] = {text: "暂停", color: "live"};
+eventType[21] = {text: "比赛结束", color: "finish"};
+
+type PageStateProps = {}
+
+type PageDispatchProps = {}
+
+type PageOwnProps = {
+  matchInfo: any;
+  matchStatus: any;
+  onClick?: any | null;
+  className?: string | null;
+  onlytime?: boolean | null;
+}
+
+type PageState = {}
+
+type IProps = PageStateProps & PageDispatchProps & PageOwnProps
+
+interface MatchUp {
+  props: IProps;
+}
+
+class MatchUp extends Component<PageOwnProps, PageState> {
+  static defaultProps = {}
+
+  onItemClick = () => {
+    if (this.props.matchInfo.activityid) {
+      this.props.onClick();
+    }
+  }
+
+  render() {
+    const {matchInfo, matchStatus, className = "", onlytime = false} = this.props
+    if (matchInfo == null) {
+      return <View/>
+    }
+    return (
+      <View className={'qz-match-up-content ' + className}>
+        <View className='qz-match-up-content__inner'>
+          <View className='qz-match-up-item' onClick={this.onItemClick}>
+            {matchInfo.hostteam != null && matchInfo.guestteam != null ?
+              <View className='qz-match-up-item-content'>
+                <View className='qz-match-up-item__team'>
+                  <View className='qz-match-up-item__team-avatar'>
+                    <AtAvatar circle
+                              size='large'
+                              image={matchInfo.hostteam && matchInfo.hostteam.headImg ? matchInfo.hostteam.headImg : defaultLogo}/>
+                  </View>
+                  <Text
+                    className='qz-match-up-item__team-name'>
+                    {matchInfo.hostteam ? matchInfo.hostteam.name : ""}
+                  </Text>
+                </View>
+                <View className='qz-match-up-item__vs'>
+                  {matchInfo.startTime && <View className='qz-match-up-item__vs-content'>
+                    <Text className='qz-match-up-item__vs-match-time'>
+                      {`${onlytime ? formatMonthDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))} ${eventType[matchStatus.status ? matchStatus.status : -1].text}`}
+                    </Text>
+                    <Text
+                      className={matchStatus.penaltyscore ? 'qz-match-up-item__vs-match-score qz-match-up-item__vs-match-score-small' : 'qz-match-up-item__vs-match-score'}>
+                      {matchStatus.status == -1 ? "VS" : matchStatus.score}
+                    </Text>
+                    {matchStatus.penaltyscore ?
+                      <Text className='qz-match-up-item__vs-match-score-penalty'>
+                        {matchStatus.penaltyscore}
+                      </Text> : null
+                    }
+                    {matchInfo.round != null ?
+                      <Text className='qz-match-up-item__vs-match-round'>
+                        {matchInfo.round}
+                      </Text> : <View/>}
+                    {matchInfo.place ?
+                      <View className='qz-match-up-item__vs-match-place'>
+                        <AtIcon value='map-pin' size='12' className='qz-match-up-item__vs-match-place-icon'/>
+                        <Text className='text'>
+                          {matchInfo.place}
+                        </Text>
+                      </View>
+                      : null
+                    }
+                  </View>}
+                </View>
+                <View className='qz-match-up-item__team'>
+                  <View className='qz-match-up-item__team-avatar'>
+                    <AtAvatar circle
+                              size='large'
+                              image={matchInfo.guestteam && matchInfo.guestteam.headImg ? matchInfo.guestteam.headImg : defaultLogo}/>
+                  </View>
+                  <Text
+                    className='qz-match-up-item__team-name'>
+                    {matchInfo.guestteam ? matchInfo.guestteam.name : ""}
+                  </Text>
+                </View>
+              </View>
+              :
+              <View className='qz-match-up-item-content'>
+                <View className='qz-match-up-item__vs qz-match-up-item__vs-full'>
+                  {matchInfo.startTime && <View className='qz-match-up-item__vs-content'>
+                    <Text className='qz-match-up-item__vs-match-time'>
+                      {`${onlytime ? formatMonthDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))} ${eventType[matchStatus.status ? matchStatus.status : -1].text}`}
+                    </Text>
+                    <Text className='qz-match-up-item__vs-match-name'>
+                      {matchInfo.name}
+                    </Text>
+                    {matchInfo.round != null ?
+                      <Text className='qz-match-up-item__vs-match-round'>
+                        {matchInfo.round}
+                      </Text> : <View/>}
+                    {matchInfo.place ?
+                      <View className='qz-match-up-item__vs-match-place'>
+                        <AtIcon value='map-pin' size='12' className='qz-match-up-item__vs-match-place-icon'/>
+                        <Text className='text'>
+                          {matchInfo.place}
+                        </Text>
+                      </View>
+                      : null
+                    }
+                  </View>}
+                </View>
+              </View>}
+          </View>
+        </View>
+      </View>
+    )
+  }
+}
+
+export default MatchUp

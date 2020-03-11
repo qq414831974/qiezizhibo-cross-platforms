@@ -1,0 +1,196 @@
+@import '../../../../app.scss';
+@import '../../live.scss';
+
+.qz-match-up-content {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: $color-bg;
+  &__inner {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 5%;
+  }
+}
+
+.qz-match-up-item-small {
+  width: 85vw !important;
+}
+
+.qz-match-up-item-no-margin {
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+.qz-match-up-item-margin {
+  margin: 1vw 0 0 0 !important;
+  border-radius: 0 !important;
+}
+
+.qz-match-up-item {
+  //margin: 2vw 0;
+  width: 90vw;
+  height: $at-avatar-size-lg + $spacing-v-md + $spacing-v-xs + $font-size-sm * 2 * $line-height-en - $font-size-sm * ($line-height-en - 1) * 2;
+  background-color: #fff;
+  //border-radius: 10px;
+  //box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+  padding: $spacing-v-md/2 0;
+  &-content {
+    height: $at-avatar-size-lg + $spacing-v-md + $spacing-v-xs + $font-size-sm * 2 * $line-height-en - $font-size-sm * ($line-height-en - 1) * 2;
+    width: 100%;
+  }
+  &__team {
+    vertical-align: middle;
+    display: inline-block;
+    height: $at-avatar-size-lg + $spacing-v-md + $spacing-v-xs + $font-size-sm * 2 * $line-height-en - $font-size-sm * ($line-height-en - 1) * 2;
+    //width: 30 / 100 * 90vw;
+    width: 30%;
+    overflow: hidden;
+    margin-top: $spacing-v-md/2;
+    &-avatar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    &-name {
+      display: flex !important;
+      margin-top: $spacing-v-xs;
+      font-size: $font-size-sm;
+      color: $color-text-base;
+      line-height: $line-height-en;
+      width: 100%;
+      height: $font-size-sm * 2 * $line-height-en !important;
+      text-align: center;
+      display: -webkit-box;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-wrap: break-word;
+      word-break: break-all;
+      white-space: normal !important;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+  }
+  &__vs {
+    margin-top: -1 * $spacing-v-sm;
+    vertical-align: middle;
+    //display: inline-block;
+    //width: 40 / 100 * 90vw;
+    width: 40%;
+    height: $at-avatar-size-lg + $spacing-v-md + $spacing-v-xs + $font-size-sm * 2 * $line-height-en - $font-size-sm * ($line-height-en - 1) * 2;
+    //overflow: hidden;
+    //text-overflow: ellipsis;
+    //white-space: nowrap;
+    //text-align: center;
+    //position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    &-content {
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: center;
+      position: relative;
+    }
+    &-league-name {
+      font-size: $font-size-xs;
+      line-height: $line-height-base;
+      color: $color-text-paragraph;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+      text-align: center;
+    }
+    &-match-time {
+      font-size: $font-size-xs;
+      color: $color-grey-2;
+      width: 100%;
+      line-height: $line-height-en;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      margin-top: $spacing-v-xs/2;
+      //position: absolute;
+      //bottom: $spacing-v-xs;
+      &-status {
+        margin-left: $spacing-h-sm;
+      }
+    }
+    &-match-place {
+      font-size: $font-size-xs;
+      color: $color-grey-2;
+      width: 100%;
+      line-height: $line-height-en;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      margin-top: $spacing-v-xs/2;
+      margin-left: -$font-size-sm/2;
+      .icon {
+
+      }
+      .text {
+
+      }
+    }
+    &-match-round {
+      font-size: $font-size-xs;
+      color: $color-grey-2;
+      width: 100%;
+      line-height: $line-height-en;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+    }
+    &-match-name {
+      font-size: $font-size-base;
+      color: $color-text-title;
+      width: 100%;
+      line-height: $line-height-zh;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+    }
+    &-match-score {
+      font-size: $font-size-xxxl;
+      color: $color-text-title;
+      width: 100%;
+      line-height: 1.1;
+      letter-spacing: $spacing-v-lg;
+      text-indent: $spacing-v-lg;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+    }
+    &-match-score-small {
+      font-size: $font-size-lg !important;
+    }
+    &-match-score-penalty {
+      font-size: $font-size-xs;
+      color: $color-grey-2;
+      width: 100%;
+      letter-spacing: $spacing-v-md;
+      text-indent: $spacing-v-md;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+    }
+  }
+  &__vs-full {
+    width: 100% !important;
+    margin-top: 0 !important;
+    .qz-match-up-item__vs-match-name {
+      display: inline !important;
+    }
+  }
+}

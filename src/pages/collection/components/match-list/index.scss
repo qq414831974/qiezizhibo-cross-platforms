@@ -1,0 +1,35 @@
+@import '../../../../app.scss';
+
+.qz-match-list {
+  &-loading {
+    width: 100vw;
+    height: 10vw;
+    position: relative;
+    margin-top: $spacing-v-md;
+  }
+  &-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: $spacing-v-md;
+    &__inner {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 5%;
+    }
+  }
+  &-time{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $color-bg-grey;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    color: $color-text-base;
+  }
+}

@@ -1,0 +1,62 @@
+@import '../../../../app';
+@import '../../live';
+
+.qz-stat-bar {
+  display: flex;
+  align-items: center;
+  background-color: $color-bg;
+
+  &__outer {
+    flex: 1 1 100%;
+
+    &-inner {
+      width: 100%;
+      background-color: $color-bg;
+      vertical-align: middle;
+      clear: both;
+      //overflow: hidden;
+
+      &-background {
+        display: inline-block;
+        position: relative;
+        height: $at-progress-height * 1.5;
+        background-color: $at-progress-bar-bg-color;
+        transition: all 0.3s $ease-in-out-quad;
+      }
+      &-text {
+        color: $color-text-base-inverse;
+        font-size: $font-size-sm;
+        line-height: 1;
+        padding: 0 $spacing-h-lg;
+      }
+      &-text-add{
+        transform: translateY(100%);
+        opacity: 0;
+        font-size: $font-size-sm;
+      }
+      &-nooice-img{
+        width: $at-avatar-size-sm / 2;
+        height: $at-avatar-size-sm / 2;
+      }
+      &-left {
+        float: left;
+      }
+      &-right {
+        float: right;
+      }
+    }
+  }
+}
+@keyframes move{
+  0%{
+    opacity: 1;
+    transform: translateY(0%);
+  }
+  100%{
+    opacity: 0;
+    transform: translateY(-300%);
+  }
+}
+.move{
+  animation: move 1s linear 0s forwards;
+}

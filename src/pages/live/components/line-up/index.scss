@@ -1,0 +1,160 @@
+@import '../../../../app';
+
+@mixin active {
+  transition: background-color 0.3s;
+
+  &:active {
+    background-color: $color-grey-5;
+  }
+}
+
+@mixin hairline-common() {
+  content: '';
+  position: absolute;
+  transform-origin: center;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+@mixin hairline-bottom-relative(
+  $color: $color-border-grey-light,
+  $style: solid,
+  $width: 1px,
+  $left: 0
+) {
+  position: relative;
+
+  &::after {
+    @include hairline-common();
+
+    top: auto;
+    left: $left;
+    right: 0;
+    bottom: 0;
+    transform: scaleY(0.5);
+    border-bottom: $width $style $color;
+  }
+}
+
+.qz-lineup {
+  width: 90vw;
+  margin: 0 5vw;
+  padding: 5vw 0;
+}
+
+.qz-lineup-scroll-content {
+  height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 5vw - 12px - 1.45 * 28px); //减去tab的高度
+}
+
+.qz-lineup-content {
+  &-loading {
+    width: 100vw;
+    height: 10vw;
+    position: relative;
+    margin-top: $spacing-v-md;
+  }
+}
+
+.qz-lineup-list {
+  background-color: $color-bg;
+  position: relative;
+  &__item-container {
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+  }
+  &__item {
+    padding: $spacing-v-sm $spacing-h-sm;
+    position: relative;
+    box-sizing: border-box;
+    color: $at-list-text-color;
+    font-size: $font-size-lg;
+    line-height: $line-height-zh;
+    @include active;
+    @include hairline-bottom-relative($left: $spacing-h-sm);
+    &-avatar {
+      width: $at-avatar-size-sm;
+      height: $at-avatar-size-sm;
+      margin-right: $spacing-v-xl;
+      image {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+      }
+    }
+  }
+  .item-content {
+    &__info {
+      &-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: inherit;
+        font-size: inherit;
+        line-height: $line-height-zh;
+      }
+
+      &-note {
+        color: $at-list-content-color;
+        font-size: $font-size-base;
+        line-height: $line-height-zh;
+      }
+    }
+  }
+  &__item-content {
+    flex: 1;
+    -webkit-box-flex: 1;
+    overflow: hidden;
+    margin-right: 40px;
+  }
+  .item-extra {
+    position: relative;
+
+    &__image {
+      position: relative;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: $spacing-v-xl;
+      width: 60px;
+      height: 60px;
+      image {
+        width: 100%;
+        height: 100%;
+      }
+      text {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: $font-size-base;
+        color: $color-grey-2;
+        padding-top: 2px;
+      }
+    }
+  }
+  &__item-extra {
+    flex: 0 0 $at-list-extra-width;
+    -webkit-box-flex: $at-list-extra-width;
+    width: $at-list-extra-width;
+    text-align: right;
+  }
+}
+
+.qz-lineup-list:after {
+  content: '';
+  position: absolute;
+  transform-origin: center;
+  box-sizing: border-box;
+  pointer-events: none;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  border: 0 solid $color-border-grey-lighter;
+  transform: scale(0.5);
+  border-bottom-width: 1px;
+}

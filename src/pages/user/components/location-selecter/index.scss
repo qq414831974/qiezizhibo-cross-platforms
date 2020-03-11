@@ -1,0 +1,41 @@
+@import '../../../../app';
+
+.qz-user-location {
+  width: 100vw;
+  height: 88px;
+  background-color: $color-bg-blue-main;
+  padding-top: 2vw;
+  &__left {
+    color: white;
+    z-index: $zindex-search-bar;
+    padding: $spacing-v-md 0 $spacing-v-md $spacing-h-xl;
+    display: flex;
+    align-items: center;
+    &-text {
+      font-size: $font-size-base;
+    }
+  }
+  &__right {
+    //在app.scsss里更改样式
+  }
+}
+
+.qz-user-location__city-content {
+  height: 100px;
+}
+
+.qz-user-location__city-title {
+  font-size: $font-size-base;
+  &-href {
+    color: $color-link;
+  }
+}
+
+.qz-user-location__city {
+  display: flex;
+  align-items: center;
+  margin: $spacing-v-md 0;
+  &-text {
+    font-size: $font-size-lg;
+  }
+}

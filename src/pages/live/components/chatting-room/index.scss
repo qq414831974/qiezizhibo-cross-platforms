@@ -1,0 +1,146 @@
+@import '../../../../app';
+
+.qz-chatting-room {
+  position: relative;
+  height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px); //减去tab的高度
+  background-color: $color-bg-grey;
+  &__loading {
+    width: 100vw;
+    height: 10vw;
+    position: absolute;
+    top: $spacing-v-md;
+    left: 0;
+  }
+  &__chat-content {
+    position: absolute;
+    top: 0;
+    height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 110px); //减去tab的高度
+    width: 100vw;
+    &__container {
+      min-height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 110px); //减去tab的高度
+      width: 94vw;
+      padding: 3vw;
+    }
+  }
+  &__chat-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-top: $spacing-v-md;
+  }
+  &__chat-item-left {
+    justify-content: flex-start;
+    .qz-chatting-room__chat-text-container {
+      .qz-chatting-room__chat-text__text:before {
+        content: "";
+        width: 0;
+        height: 0;
+        border-width: 20px;
+        border-style: solid;
+        border-color: $color-bg-blue-main transparent transparent transparent;
+        position: absolute;
+        left: calc(90px + 3vw);
+      }
+    }
+  }
+  &__chat-item-right {
+    justify-content: flex-end;
+    .qz-chatting-room__chat-text-container {
+      .qz-chatting-room__chat-text__text:before {
+        content: "";
+        width: 0;
+        height: 0;
+        border-width: 20px;
+        border-style: solid;
+        border-color: $color-bg-blue-main transparent transparent transparent;
+        position: absolute;
+        right: calc(90px + 3vw);
+      }
+    }
+  }
+  &__chat-avatar-container {
+    height: 100px;
+    width: 100px;
+  }
+  &__chat-avatar {
+    &__avatar {
+      width: 100px;
+      display: flex;
+      justify-content: center;
+      image {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+      }
+    }
+    &__name {
+      width: 100px;
+      overflow: hidden;
+      &-text {
+        font-size: $font-size-xs;
+        color: $color-text-paragraph;
+        line-height: $line-height-base;
+        width: 100%;
+        height: $font-size-xs * 2 * $line-height-base !important;
+        text-align: center;
+        display: -webkit-box;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+        word-break: break-all;
+        white-space: normal !important;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+  }
+  &__chat-text-container {
+    text-align: left;
+    overflow: auto;
+    padding: $spacing-h-sm;
+  }
+  &__chat-text {
+    &__text {
+      background-color: $color-bg-blue-main;
+      border-radius: 15px;
+      padding: 15px;
+      word-wrap: break-word;
+      word-break: break-all;
+      //width: fit-content;
+      //height: fit-content;
+      text {
+        display: flex;
+        justify-content: center;
+        font-size: $font-size-sm;
+        color: $color-text-base-inverse;
+        line-height: $line-height-en;
+        letter-spacing: 1px;
+      }
+    }
+  }
+  &__chat-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    background-color: $color-bg-grey-dark;
+    width: calc(100% - 20px);
+    padding: $spacing-h-sm;
+    //margin: 0 $spacing-h-sm;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
+    &-button {
+      width: 100%;
+      height: 100%;
+      color: $color-bg-blue-main;
+      font-size: $font-size-base;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
+    }
+  }
+}
+.none{
+  display: none;
+}

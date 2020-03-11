@@ -1,0 +1,110 @@
+@import '../../../../app.scss';
+
+.qz-league-team-table__result {
+  &-loading {
+    width: 100vw;
+    height: 10vw;
+    position: relative;
+    margin-top: $spacing-v-md;
+  }
+  &-header {
+    background-color: $color-bg-grey;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+    view {
+      width: 10vw;
+      text-align: center;
+      font-size: $font-size-sm;
+      height: 60px;
+      line-height: 60px;
+      padding: $spacing-h-sm 0;
+      float: right;
+    }
+  }
+  &-header:after {
+    content: "";
+    display: table;
+    clear: both;
+    overflow: hidden;
+  }
+  &-content {
+    padding: $spacing-h-sm 0;
+  }
+}
+
+.qz-league-team-table {
+  &__container {
+
+  }
+  &__header {
+    font-size: $font-size-sm;
+    color: $color-text-title;
+    height: 50px;
+    line-height: 50px;
+    padding: 0 $spacing-h-lg;
+  }
+  &__header-none {
+    display: none;
+  }
+  &__list {
+    padding: $spacing-h-sm 0;
+    &-item {
+      display: flex;
+      align-items: center;
+      background-color: $color-bg-lighter;
+      //box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+      margin: 2px 0;
+      &__team {
+        width: 35vw;
+        padding: 0 $spacing-h-sm;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        &-img {
+          height: 60px;
+          width: 60px;
+          min-height: 60px;
+          min-width: 60px;
+          border-radius: 30px;
+        }
+        &-name {
+          font-size: $font-size-sm;
+          line-height: $line-height-base;
+          color: $color-text-paragraph;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          text-align: left;
+          padding: 0 $spacing-h-sm;
+        }
+      }
+      &-item:before {
+        content: "";
+        display: table;
+        clear: both;
+        overflow: hidden;
+      }
+      &__no {
+        width: 5vw;
+        height: 60px;
+        line-height: 60px;
+        font-size: $font-size-sm;
+        color: $color-text-paragraph;
+        text-align: right;
+        padding: $spacing-h-sm 0;
+        //float: right;
+      }
+      &__point {
+        width: 10vw;
+        height: 60px;
+        line-height: 60px;
+        font-size: $font-size-sm;
+        color: $color-text-paragraph;
+        text-align: center;
+        padding: $spacing-h-sm 0;
+        //float: right;
+      }
+    }
+  }
+}

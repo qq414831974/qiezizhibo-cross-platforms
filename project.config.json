@@ -1,0 +1,13 @@
+{
+  "miniprogramRoot": "./dist",
+  "projectname": "qiezizhibo-cross-platforms",
+  "description": "qiezizhibo-cross-platforms",
+  "appid": "wxda885edb9daf0c9d",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram"
+}

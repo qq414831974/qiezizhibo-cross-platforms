@@ -1,0 +1,7 @@
+export const CONFIG = 'CONFIG'
+export const VISIT = 'VISIT'
+export const CONFIG_BANNER = 'CONFIG_BANNER'
+export const CONFIG_BULLETIN = 'CONFIG_BULLETIN'
+export const CONFIG_WECHAT = 'CONFIG_WECHAT'
+export const CONFIG_LOCATION = 'CONFIG_LOCATION'
+export const CONFIG_LOCATION_SET = 'CONFIG_LOCATION_SET'
