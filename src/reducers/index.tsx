@@ -1,0 +1,20 @@
+import {combineReducers} from 'redux'
+import user from './user'
+import config from './config'
+import search from './search'
+import league from './league'
+import match from './match'
+import live from './live'
+import player from './player'
+import area from './area'
+
+export default combineReducers({
+  user,
+  config,
+  search,
+  league,
+  match,
+  live,
+  player,
+  area,
+})

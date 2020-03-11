@@ -1,0 +1,26 @@
+@import '../../../../app.scss';
+
+.qz-search__result {
+  &-loading {
+    width: 100vw;
+    height: 10vw;
+    position: relative;
+    margin-top: $spacing-v-md;
+  }
+  &-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: $spacing-v-md;
+    &__inner {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 5%;
+    }
+  }
+}

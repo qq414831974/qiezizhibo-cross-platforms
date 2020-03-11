@@ -1,0 +1,13 @@
+{
+  "miniprogramRoot": "./dist",
+  "projectname": "qiezizhibo-qingshaonian",
+  "description": "qiezizhibo-qingshaonian",
+  "appid": "wx8fcca0d182bb6ae6",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram"
+}

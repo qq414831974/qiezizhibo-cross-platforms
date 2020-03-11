@@ -1,0 +1,34 @@
+@import '../../../../app.scss';
+
+.qz-league-player-table__result {
+  &-loading {
+    width: 100vw;
+    height: 10vw;
+    position: relative;
+    margin-top: $spacing-v-md;
+  }
+  &-header {
+    background-color: $color-bg-grey;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+    view {
+      width: 20vw;
+      text-align: center;
+      font-size: $font-size-base;
+      height: 60px;
+      line-height: 60px;
+      padding: $spacing-h-sm 0;
+    }
+    view:first-child {
+      float: left;
+    }
+    view:last-child {
+      float: right;
+    }
+  }
+  &-header:after {
+    content: "";
+    display: table;
+    clear: both;
+    overflow: hidden;
+  }
+}

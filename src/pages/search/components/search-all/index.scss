@@ -1,0 +1,125 @@
+@import '../../../../app.scss';
+
+.qz-search__result {
+  &-loading {
+    width: 100vw;
+    height: 10vw;
+    position: relative;
+    margin-top: $spacing-v-md;
+  }
+  &-league {
+    background-color: #fff;
+    width: 100vw;
+    padding: $spacing-v-md 0;
+    &-title {
+      padding: 2vw 5% 4vw 5%;
+      &-desc {
+        font-size: $font-size-lg;
+      }
+      &-count {
+        font-size: $font-size-base;
+        color: $color-text-base-inverse;
+        background-color: $color-bg-blue-main;
+        padding: 0 $spacing-h-sm;
+        margin-left: $spacing-h-lg;
+      }
+      &-more {
+        margin-top: $spacing-v-xs;
+        font-size: $font-size-base;
+        float: right;
+      }
+    }
+    &-content {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      &__inner {
+        height: $at-avatar-size-lg + $spacing-v-md + $spacing-v-xs + $font-size-sm * 2 * $line-height-en;
+        overflow-y: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        background-color: #fff;
+        width: 90%;
+        border-radius: 10px;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+      }
+      &__inner:before,
+      &__inner:after /* :after 可以不需要 */
+      {
+        display: inline-block;
+        vertical-align: middle;
+        content: '';
+        height: 100%;
+      }
+    }
+    &-item {
+      vertical-align: middle;
+      display: inline-block;
+      padding: $spacing-v-md/2;
+      height: $at-avatar-size-lg + $spacing-v-md + $spacing-v-xs + $font-size-sm * 2 * $line-height-en - $font-size-sm * ($line-height-en - 1) * 2;
+      width: $at-avatar-size-lg+$spacing-v-md*5;
+      overflow: hidden;
+      &-avatar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      &-name {
+        margin-top: $spacing-v-xs;
+        font-size: $font-size-sm;
+        color: $color-text-base;
+        line-height: $line-height-en;
+        max-width: $at-avatar-size-lg+$spacing-v-md*4;
+        height: $font-size-sm * 2 * $line-height-en !important;
+        text-align: center;
+        display: -webkit-box;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+        word-break: break-all;
+        white-space: normal !important;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+  }
+  &-match {
+    background-color: #fff;
+    &-title {
+      padding: 2vw 5% 4vw 5%;
+      &-desc {
+        font-size: $font-size-lg;
+      }
+      &-count {
+        font-size: $font-size-base;
+        color: $color-text-base-inverse;
+        background-color: $color-bg-blue-main;
+        padding: 0 $spacing-h-sm;
+        margin-left: $spacing-h-lg;
+      }
+      &-more {
+        margin-top: $spacing-v-xs;
+        font-size: $font-size-base;
+        float: right;
+      }
+    }
+    &-content {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      &__inner {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        width: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 5%;
+      }
+    }
+  }
+}

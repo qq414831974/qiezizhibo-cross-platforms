@@ -1,0 +1,93 @@
+@import '../../app.scss';
+
+.qz-league-manager-content {
+  width: 100%;
+  height: 100%;
+  &-header {
+    width: 100%;
+    background-color: $color-bg-blue-main;
+    //position: fixed;
+    //top: 0;
+    z-index: 800;
+    &-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 70px;
+      .img {
+        height: 50px;
+        width: 50px;
+        border-radius: 50%;
+      }
+      .text {
+        font-size: $font-size-lg;
+        color: $color-text-base-inverse;
+        text-align: center;
+        margin-left: $spacing-h-md;
+      }
+    }
+  }
+}
+.qz-league-manager-header{
+  width: 100%;
+  background-color: $color-bg-blue-main;
+  //position: fixed;
+  //top: 0;
+  z-index: $zindex-nav;
+  &-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 70px;
+    .img {
+      height: 50px;
+      width: 50px;
+      min-height: 50px;
+      min-width: 50px;
+      border-radius: 50%;
+    }
+    .text {
+      font-size: $font-size-lg;
+      color: $color-text-base-inverse;
+      text-align: center;
+      margin-left: $spacing-h-md;
+    }
+  }
+}
+.qz-league-manager__result {
+  &-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 70px + $spacing-v-md;
+    &__inner {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 5%;
+    }
+  }
+}
+
+.qz-league-manager-loading {
+  width: 100vw;
+  height: 10vw;
+  position: relative;
+  margin-top: $spacing-v-md;
+}
+.qz-league-manager__top-tabs__content--fixed {
+  .at-tabs__header {
+    position: fixed;
+    top: 0;
+    z-index: 800;
+  }
+}
+.qz-league-manager__top-tabs__content {
+  width: 100%;
+}

@@ -1,0 +1,35 @@
+@import '../../../../app';
+
+.qz-statistics-item {
+  width: 90vw;
+  margin-top: $spacing-v-xl;
+  &-text {
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    &-title {
+      font-size: $font-size-base;
+      color: $color-text-paragraph;
+    }
+    &-host {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      font-size: $font-size-sm;
+      color: $color-grey-2;
+    }
+    &-guest {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      font-size: $font-size-sm;
+      color: $color-grey-2;
+    }
+  }
+  &-stat {
+    width: 100%;
+  }
+}
