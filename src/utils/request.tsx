@@ -84,7 +84,9 @@ const request = async (options) => {
                   title: res && res.errorMsg || defaultMsg,
                   icon: 'none',
                   complete: () => {
-                    toLogin();
+                    if(statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN){
+                      toLogin();
+                    }
                   }
                 })
               }

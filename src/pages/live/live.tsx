@@ -37,6 +37,7 @@ import change from "../../assets/live/change.png";
 import substitutionLeft from "../../assets/live/substitution_arrow.png";
 import substitutionRight from "../../assets/live/substitution_arrow_right.png";
 import owngoal from "../../assets/live/owngoal.png";
+import Request from "../../utils/request";
 
 type Bulletin = {
   id: number,
@@ -313,16 +314,23 @@ class Live extends Component<PageOwnProps, PageState> {
           danmusecond: this.state.videoTime + 1,
         };
       }
-      this.socketTask.send({
-        data: JSON.stringify(params),
-        success: () => {
-          resolve();
-        },
-        fail: () => {
+      new Request().post(`${api.API_SYSTEM_SECURITY_CHECK}`, message).then(res => {
+        if (res == true) {
+          this.socketTask.send({
+            data: JSON.stringify(params),
+            success: () => {
+              resolve();
+            },
+            fail: () => {
+              reject();
+              Taro.showToast({title: "发送失败", icon: "none"});
+            }
+          })
+        } else {
           reject();
-          Taro.showToast({title: "发送失败", icon: "none"});
+          Taro.showToast({title: "内容含有违法违规内容", icon: "none"});
         }
-      })
+      });
     })
   }
   clearTimer_playCountDown = () => {
