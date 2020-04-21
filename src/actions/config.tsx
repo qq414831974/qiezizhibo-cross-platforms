@@ -14,7 +14,7 @@ export const setLocationConfig: any = createApiAction(config.CONFIG_LOCATION_SET
   key: "location",
   data: data
 }))
-export const setVisit: any = createApiAction(config.VISIT, () => new Request().get(api.API_VISIT, null))
+export const setVisit: any = createApiAction(config.VISIT, () => new Request().post(api.API_VISIT, {"areatype":2}))
 
 export default bindActionCreators({
   getBannerConfig,

@@ -1,6 +1,6 @@
-export const protocol_http = "http://";
-export const protocol_ws = "ws://";
-export const gateway_client_service  = "192.168.31.224:8801";
+export const protocol_http = "https://";
+export const protocol_ws = "wss://";
+export const gateway_client_service  = "git.qiezizhibo.com";
 export const gateway_admin_service = `${protocol_http}${gateway_client_service}/gateway-admin`
 export const auth_service = `${protocol_http}${gateway_client_service}/service-auth`
 export const user_service = `${protocol_http}${gateway_client_service}/service-user`
@@ -18,6 +18,7 @@ export const websocket = (id) => `${websocket_service}/websocket/${id}`;
 //config
 export const API_CONFIG_BANNER = `${system_service}/system/config/banner`;
 export const API_CONFIG_BULLETIN = `${system_service}/system/config/bulletin`;
+export const API_SYSTEM_SECURITY_CHECK = `${system_service}/system/wxa_security_check`;
 export const API_VISIT = `${user_service}/user/visit`;
 
 //user
