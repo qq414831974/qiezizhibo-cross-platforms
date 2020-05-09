@@ -23,6 +23,7 @@ export const API_VISIT = `${user_service}/user/visit`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth/wechat`;
+export const API_PHONENUMBER = `${auth_service}/auth/getPhoneNumber`;
 export const API_AUTH_USER = `${auth_service}/auth/user`;
 export const API_USER = `${user_service}/user`;
 export const API_REFRESH_TOKEN = `${auth_service}/auth/refresh_token`;

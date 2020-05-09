@@ -27,6 +27,7 @@ import Statistics from "./components/statistics";
 import LineUp from "./components/line-up";
 import ChattingRoom from "./components/chatting-room";
 import LoginModal from "../../components/modal-login";
+import PhoneModal from "../../components/modal-phone";
 import * as error from "../../constants/error";
 import userAction from "../../actions/user";
 import goal from "../../assets/live/goal.png";
@@ -77,6 +78,7 @@ type PageState = {
   chatLoading: boolean;
   commentIntoView: any;
   loginOpen: boolean;
+  phoneOpen: boolean;
   currentMedia: number;
   isFullScreen: boolean;
   videoShowMore: boolean;
@@ -162,6 +164,7 @@ class Live extends Component<PageOwnProps, PageState> {
       chatLoading: false,
       commentIntoView: null,
       loginOpen: false,
+      phoneOpen: false,
       currentMedia: 0,
       isFullScreen: false,
       videoShowMore: true,
@@ -302,6 +305,10 @@ class Live extends Component<PageOwnProps, PageState> {
       if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
         reject();
         this.showAuth();
+        return;
+      } else if (this.props.userInfo.phone == null || this.props.userInfo.phone == '') {
+        reject();
+        this.showPhone();
         return;
       }
       let params: any = {content: message, userNo: this.props.userInfo.userNo, token: token};
@@ -732,6 +739,59 @@ class Live extends Component<PageOwnProps, PageState> {
     this.setState({loginOpen: false})
     this.getUserInfo()
   }
+
+  showPhone = async () => {
+    const {userInfo} = this.props
+    if (userInfo && userInfo.phone) {
+      return;
+    }
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      Taro.showToast({title: "请登录后再操作", icon: "none"});
+      this.setState({loginOpen: true})
+    } else {
+      this.setState({phoneOpen: true})
+    }
+  }
+
+  onPhoneClose = () => {
+    this.setState({phoneOpen: false})
+  }
+
+  onPhoneCancel = () => {
+    this.setState({phoneOpen: false})
+  }
+
+  onPhoneError = (reason) => {
+    switch (reason) {
+      case error.ERROR_WX_UPDATE_USER: {
+        Taro.showToast({
+          title: "更新用户信息失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_WX_LOGIN: {
+        Taro.showToast({
+          title: "微信登录失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_LOGIN: {
+        Taro.showToast({
+          title: "登录失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
+
+  onPhoneSuccess = () => {
+    this.setState({phoneOpen: false})
+    this.getUserInfo()
+  }
   clearLoginState = () => {
     clearLoginToken();
     userAction.clearUserInfo();
@@ -1107,6 +1167,12 @@ class Live extends Component<PageOwnProps, PageState> {
           handleCancel={this.onAuthCancel}
           handleClose={this.onAuthClose}
           handleError={this.onAuthError}/>
+        <PhoneModal
+          isOpened={this.state.phoneOpen}
+          handleConfirm={this.onPhoneSuccess}
+          handleCancel={this.onPhoneCancel}
+          handleClose={this.onPhoneClose}
+          handleError={this.onPhoneError}/>
       </View>
     )
   }
