@@ -228,8 +228,11 @@ class User extends Component<PageOwnProps, PageState> {
     switch (reason) {
       case  error.ERROR_WX_UPDATE_USER: {
         Taro.showToast({
-          title: "更新用户信息失败",
+          title: "更新用户信息失败,请重新登录后再试",
           icon: 'none',
+          complete: () => {
+            this.logout();
+          }
         });
         return;
       }
