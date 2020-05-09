@@ -15,6 +15,7 @@ import withShare from "../../utils/withShare";
 import userAction from '../../actions/user'
 import * as global from '../../constants/global'
 import LoginModal from '../../components/modal-login/index';
+import PhoneModal from '../../components/modal-phone/index';
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import * as error from "../../constants/error";
@@ -27,6 +28,7 @@ type PageStateProps = {
     avatar: string,
     name: string,
     userNo: string,
+    phone: string,
   },
   locationConfig: any,
 }
@@ -37,6 +39,7 @@ type PageOwnProps = {}
 
 type PageState = {
   loginOpen: boolean,
+  phoneOpen: boolean,
   isLogin: boolean | string | null,
   locationShow: boolean,
   locationSelecterShow: boolean,
@@ -164,7 +167,7 @@ class User extends Component<PageOwnProps, PageState> {
   }
   logout = () => {
     // new Request().get(api.API_LOGIN_OUT, null).then(() => {
-      this.clearLoginState();
+    this.clearLoginState();
     // });
   }
   clearLoginState = () => {
@@ -210,6 +213,45 @@ class User extends Component<PageOwnProps, PageState> {
 
   onAuthSuccess = () => {
     this.setState({loginOpen: false, isLogin: true})
+    this.getUserInfo()
+  }
+
+  onPhoneClose = () => {
+    this.setState({phoneOpen: false})
+  }
+
+  onPhoneCancel = () => {
+    this.setState({phoneOpen: false})
+  }
+
+  onPhoneError = (reason) => {
+    switch (reason) {
+      case  error.ERROR_WX_UPDATE_USER: {
+        Taro.showToast({
+          title: "更新用户信息失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case  error.ERROR_WX_LOGIN: {
+        Taro.showToast({
+          title: "微信登录失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case  error.ERROR_LOGIN: {
+        Taro.showToast({
+          title: "登录失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
+
+  onPhoneSuccess = () => {
+    this.setState({phoneOpen: false})
     this.getUserInfo()
   }
   getAreas = () => {
@@ -298,9 +340,23 @@ class User extends Component<PageOwnProps, PageState> {
     if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
       this.setState({loginOpen: true})
       return;
-      }
+    }
     Taro.navigateTo({url: `../collection/collection`});
   }
+  onVerificationClick = () => {
+    const {userInfo} = this.props
+    if (userInfo && userInfo.phone) {
+      Taro.showToast({title: "已验证", icon: "success"});
+      return;
+    }
+    if(this.state.isLogin){
+      this.setState({phoneOpen: true})
+    }else{
+      Taro.showToast({title: "请登录后再操作", icon: "none"});
+      this.setState({loginOpen: true})
+    }
+  }
+
   render() {
     const {userInfo, locationConfig} = this.props
     const {avatar = logo, name = null} = userInfo;
@@ -338,6 +394,14 @@ class User extends Component<PageOwnProps, PageState> {
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
+          <Button onClick={this.onVerificationClick} className='list button-list'>
+            <View className='list_title'>
+              <AtIcon className='list-title-icon' value='iphone' size='18' color='#333'/>
+              验证手机号
+            </View>
+            {userInfo && userInfo.phone ? <AtIcon value='check-circle' size='18' color='#13CE66'/>
+              : <AtIcon value='alert-circle' size='18' color='#FFC82C'/>}
+          </Button>
           <Button open-type="share" className='list button-list'>
             <View className='list_title'>
               <AtIcon className='list-title-icon' value='share' size='18' color='#333'/>
@@ -355,11 +419,18 @@ class User extends Component<PageOwnProps, PageState> {
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
         </View>
-        <LoginModal isOpened={this.state.loginOpen}
-                    handleConfirm={this.onAuthSuccess}
-                    handleCancel={this.onAuthCancel}
-                    handleClose={this.onAuthClose}
-                    handleError={this.onAuthError}/>
+        <LoginModal
+          isOpened={this.state.loginOpen}
+          handleConfirm={this.onAuthSuccess}
+          handleCancel={this.onAuthCancel}
+          handleClose={this.onAuthClose}
+          handleError={this.onAuthError}/>
+        <PhoneModal
+          isOpened={this.state.phoneOpen}
+          handleConfirm={this.onPhoneSuccess}
+          handleCancel={this.onPhoneCancel}
+          handleClose={this.onPhoneClose}
+          handleError={this.onPhoneError}/>
         <ModalLocation
           isOpened={this.state.locationShow}
           handleConfirm={this.onLocationSuccess}

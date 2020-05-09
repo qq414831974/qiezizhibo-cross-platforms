@@ -95,13 +95,13 @@ class Search extends Component<PageOwnProps, PageState> {
       // searchAction.search_player({key: this.state.searchText, pageSize: 5, pageNum: 1})
       this.setState({isBeenSearch: true, loading: true})
       Promise.all([searchAction.search_league({
-        key: this.state.searchText,
+        name: this.state.searchText,
         pageSize: 5,
         pageNum: 1,
         province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null
       }),
         searchAction.search_match({
-          key: this.state.searchText,
+          name: this.state.searchText,
           pageSize: 5,
           pageNum: 1,
           province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null
