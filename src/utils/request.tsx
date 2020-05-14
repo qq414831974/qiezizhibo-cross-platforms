@@ -6,12 +6,25 @@ import {toLogin, getStorage, updateStorage} from "./utils";
 const CODE_SUCCESS = 200;
 const CODE_AUTH_EXPIRED = 401;
 const CODE_AUTH_FORBIDDEN = 403;
-
+let refreshing = false;
+let refreshingInterval = {};
 /**
  * 简易封装网络请求
  * // NOTE 需要注意 RN 不支持 *StorageSync，此处用 async/await 解决
  * @param {*} options
  */
+
+const updateRefreshing = (data = false) => {
+  refreshing = data;
+  // return Promise.all([
+  //   Taro.setStorage({key: 'isRefreshing', data: data})
+  // ]);
+};
+
+const isRefreshing = (): any => {
+  // return Taro.getStorage({key: 'isRefreshing'}).then(res => res.data).catch(() => false)
+  return refreshing
+};
 
 export default class Request {
   get(url: string, payload: any, showLoading?: boolean, autoLogin?: boolean) {
@@ -31,7 +44,7 @@ export default class Request {
   }
 }
 
-const refreshAuth = (refreshToken) => {
+const refreshAuth = async (refreshToken) => {
   return new Request().post(`${API_REFRESH_TOKEN}?client_id=wechat&refresh_token=${refreshToken}`, {}, true, false)
     .then((res: any) => {
       updateStorage(res);
@@ -65,8 +78,11 @@ const request = async (options) => {
           if (statusCode != CODE_SUCCESS || (data.data && code != CODE_SUCCESS)) {
             //token过期
             if ((statusCode == CODE_AUTH_EXPIRED || (data.data && code == CODE_AUTH_EXPIRED)) && autoLogin && refreshToken) {
+              if (!isRefreshing()) {
+                updateRefreshing(true);
               //刷新token
-              refreshAuth(refreshToken).then(() => {
+                refreshAuth(refreshToken).then(async () => {
+                  updateRefreshing(false);
                 delete options.autoLogin;
                 //重新请求
                 request(options).then((res: any) => {
@@ -76,6 +92,19 @@ const request = async (options) => {
                 await updateStorage({})
                 reject(error)
               });
+              } else {
+                const refreshingIntervalKey = options.url + "/" + options.method;
+                refreshingInterval[refreshingIntervalKey] = setInterval(() => {
+                  if (!isRefreshing()) {
+                    clearInterval(refreshingInterval[refreshingIntervalKey])
+                    delete options.autoLogin;
+                    //重新请求
+                    request(options).then((res: any) => {
+                      resolve(res)
+                    })
+                  }
+                }, 100)
+              }
             } else {
               //请求异常或无token
               const defaultMsg = (statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN) ? '登录失效' : '请求异常';
@@ -84,7 +113,7 @@ const request = async (options) => {
                   title: res && res.errorMsg || defaultMsg,
                   icon: 'none',
                   complete: () => {
-                    if(statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN){
+                    if (statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN) {
                     toLogin();
                   }
                   }

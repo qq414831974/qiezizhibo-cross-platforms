@@ -251,9 +251,9 @@ class User extends Component<PageOwnProps, PageState> {
       Taro.showToast({title: "已验证", icon: "success"});
       return;
     }
-    if (this.state.isLogin) {
+    if(this.state.isLogin){
       this.setState({phoneOpen: true})
-    } else {
+    }else{
       Taro.showToast({title: "请登录后再操作", icon: "none"});
       this.setState({loginOpen: true})
     }
