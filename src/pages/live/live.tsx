@@ -482,7 +482,12 @@ class Live extends Component<PageOwnProps, PageState> {
     } else {
       if (this.props.mediaList && this.props.mediaList.length > 0) {
         const index = this.state.currentMedia <= this.props.mediaList.length - 1 ? this.state.currentMedia : 0;
-        return "https:" + this.props.mediaList[index].playlistPath;
+        const mediaUrl = this.props.mediaList[index].url;
+        if (!mediaUrl.startsWith('http')) {
+          return "https://" + mediaUrl;
+        } else {
+          return mediaUrl;
+        }
       }
     }
     return match.playPath;
