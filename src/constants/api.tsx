@@ -58,7 +58,7 @@ export const API_PLAYER_BEST = `${football_service}/player/best`;
 export const API_PLAYER_MEDIA = `${football_service}/media/player`;
 
 //live
-export const API_ACTIVITY_MEDIA_LIST = (id) => `${live_service}/activity/${id}/media`;
+export const API_ACTIVITY_MEDIA_LIST = (id) => `${media_service}/media/activity?activityId=${id}`;
 export const API_ACTIVITY_PING = (id) => `${live_service}/activity/${id}/ping`;
 
 //media
