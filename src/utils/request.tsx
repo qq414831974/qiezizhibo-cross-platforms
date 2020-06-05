@@ -90,6 +90,7 @@ const request = async (options) => {
                 }).catch(async (error) => {
                   await updateStorage({})
                   reject(error)
+                  updateRefreshing(false);
                 });
               } else {
                 const refreshingIntervalKey = options.url + "/" + options.method;
