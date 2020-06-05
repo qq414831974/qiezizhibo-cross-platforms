@@ -51,7 +51,6 @@ const refreshAuth = async (refreshToken) => {
       return res;
     });
 }
-
 const request = async (options) => {
   const {url, payload, method = 'GET', showToast = true, autoLogin = true, showLoading = true} = options;
   const token = await getStorage('accessToken');
@@ -91,6 +90,7 @@ const request = async (options) => {
               }).catch(async (error) => {
                 await updateStorage({})
                 reject(error)
+                  updateRefreshing(false);
               });
               } else {
                 const refreshingIntervalKey = options.url + "/" + options.method;
