@@ -391,7 +391,7 @@ class Live extends Component<PageOwnProps, PageState> {
       this.getMatchStatus(id).then((status) => {
         this.setUpNooice(status);
       })
-    }, 15000)
+    }, 60000)
   }
   clearTimer_matchStatus = () => {
     if (this.timerID_matchStatus) {
@@ -410,7 +410,7 @@ class Live extends Component<PageOwnProps, PageState> {
           this.setState({liveLoaded: false, liveLoading: false})
         }
       });
-    }, 10000)
+    }, 60000)
   }
   clearTimer_liveInfo = () => {
     if (this.timerID_liveInfo) {

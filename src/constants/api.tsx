@@ -42,7 +42,7 @@ export const API_MATCH = (id) => `${football_service}/match/${id}`;
 export const API_MATCHES = `${football_service}/match`;
 export const API_MATCH_STATUS = `${football_service}/timeline/status`;
 export const API_MATCH_RECOMMEND = `${football_service}/recommend/matchs`;
-export const API_MATCH_NOOICE = `${football_service}/nooice`;
+export const API_MATCH_NOOICE = `${football_service}/match/nooice`;
 export const API_MATCH_COMMENT = `${chat_service}/comment`;
 export const API_MATCH_COMMENT_COUNT = `${chat_service}/comment/count`;
 export const API_MATCH_COMMENT_DANMU = `${chat_service}/comment/danmu`;
