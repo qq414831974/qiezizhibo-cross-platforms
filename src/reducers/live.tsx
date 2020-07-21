@@ -1,5 +1,5 @@
 import {
-  ACTIVITY_MEDIA_LIST, ACTIVITY_PING
+  ACTIVITY_MEDIA_LIST,ACTIVITY_MEDIA_LIST_CLEAR, ACTIVITY_PING
 } from '../constants/live'
 
 type PropsType = {
@@ -18,6 +18,9 @@ export default function live(state: PropsType = INITIAL_STATE, action) {
         ...state,
         mediaList: action.payload
       }
+    case ACTIVITY_MEDIA_LIST_CLEAR:
+      state.mediaList = {};
+      return state;
     case ACTIVITY_PING:
       return {
         ...state,

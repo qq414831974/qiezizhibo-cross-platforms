@@ -82,6 +82,7 @@ class Home extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子体育',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    disableScroll: true
   }
 
   constructor(props) {
@@ -103,6 +104,7 @@ class Home extends Component<PageOwnProps, PageState> {
     configAction.setVisit();
     configAction.getBulletinConfig({
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
+      scene: "home"
     }).then((data) => {
       if (data && data.length > 0) {
         this.setCurtain();
@@ -311,21 +313,26 @@ class Home extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-home-content'>
-        <View className='qz-home-content-bg'>
-          <Image className='qz-home-content-bg-img' src={defaultLogoHorizontal}/>
+        <View className='qz-home-top'>
+          {this.state.bulletin && this.state.bulletin.content ?
+            <View className='qz-home-notice-content' onClick={this.onNoticeBarClick.bind(this, this.state.bulletin)}>
+              <AtNoticebar className='qz-home-notice-content-bar' icon='volume-plus' marquee>
+                {this.state.bulletin.content}
+              </AtNoticebar>
+            </View> : null}
+          <NavigationBar
+            location={locationConfig}
+            onProvinceSelect={this.onProvinceSelect}
+            getLocation={this.getLocation}/>
         </View>
-        <View className='qz-home-content-bg-bottom'/>
-        {this.state.bulletin && this.state.bulletin.content ?
-          <View className='qz-home-notice-content' onClick={this.onNoticeBarClick.bind(this, this.state.bulletin)}>
-            <AtNoticebar className='qz-home-notice-content-bar' icon='volume-plus' marquee>
-              {this.state.bulletin.content}
-            </AtNoticebar>
-          </View> : null}
-        <NavigationBar
-          location={locationConfig}
-          onProvinceSelect={this.onProvinceSelect}
-          getLocation={this.getLocation}/>
-        <View className="qz-home-banner">
+        <View className='qz-home-bg'>
+          <View className='qz-home-content-bg'>
+            <Image className='qz-home-content-bg-img' src={defaultLogoHorizontal}/>
+          </View>
+          <View className='qz-home-content-bg-bottom'/>
+        </View>
+        <View
+          className={`qz-home-banner ${this.state.bulletin && this.state.bulletin.content ? "qz-home-banner__s_n" : "qz-home-banner_s"}`}>
           <Swiper
             className='qz-home-banner__swiper'
             indicatorColor='#999'

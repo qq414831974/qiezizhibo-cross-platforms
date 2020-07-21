@@ -31,6 +31,13 @@
         width: 100vw;
         height: 9 / 16 * 100vw;
       }
+      &-pay{
+        position: absolute;
+        left: 0;
+        width: 100vw;
+        top: 9 / 16 / 2 * 100vw;
+        font-size: $font-size-xl;
+      }
       &-text {
         position: absolute;
         top: 0;
@@ -165,6 +172,7 @@
           position: absolute;
           color: rgba(255, 255, 255, 0.7);
           pointer-events: auto;
+          z-index: $zindex-drawer;
         }
         &-arrow-left {
           left: 0;
@@ -173,7 +181,9 @@
           right: 0;
         }
         &-item-container {
-
+          position: absolute;
+          right: 48px;
+          z-index: $zindex-flot-layout;
         }
         &-item {
           width: 2 * ($font-size-base + $spacing-h-md);

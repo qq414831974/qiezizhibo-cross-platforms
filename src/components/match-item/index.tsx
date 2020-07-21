@@ -55,6 +55,12 @@ class MatchItem extends Component<PageOwnProps, PageState> {
       <View className={"qz-match-item " + className} onClick={this.onItemClick}>
         {matchInfo.hostteam != null && matchInfo.guestteam != null ?
           <View className="qz-match-item-content">
+            {(matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge) ?
+              <View className="qz-match-item__charge">
+                付费{matchInfo.payTimes? ` ${matchInfo.payTimes}人已观看`:""}
+              </View>
+              : null
+            }
             <View className='qz-match-item__team'>
               <View className="qz-match-item__team-avatar">
                 <AtAvatar circle

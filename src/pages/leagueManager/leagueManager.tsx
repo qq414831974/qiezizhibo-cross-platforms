@@ -74,7 +74,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   componentDidMount() {
-    this.$router.params && this.$router.params.id && this.getLeagueList(this.$router.params.id);
+    this.getParamId() && this.getLeagueList(this.getParamId());
     const query = Taro.createSelectorQuery();
     query.select('.qz-league-manager-tabs').boundingClientRect(rect => {
       this.tabsY = (rect as {
@@ -96,8 +96,18 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   componentDidHide() {
   }
 
-  onLeagueItemClick = () => {
-    console.log("onLeagueItemClick")
+  getParamId = () =>{
+    let id;
+    if(this.$router.params){
+      if(this.$router.params.id == null){
+        id = this.$router.params.scene
+      }else{
+        id = this.$router.params.id
+      }
+    }else{
+      return null;
+    }
+    return id;
   }
   getLeagueList = (id) => {
     this.setState({loading: true})

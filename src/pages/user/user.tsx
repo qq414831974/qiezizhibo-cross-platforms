@@ -16,8 +16,6 @@ import userAction from '../../actions/user'
 import * as global from '../../constants/global'
 import LoginModal from '../../components/modal-login/index';
 import PhoneModal from '../../components/modal-phone/index';
-import Request from "../../utils/request";
-import * as api from "../../constants/api";
 import * as error from "../../constants/error";
 import ModalLocation from "../../components/modal-location";
 import LocationSelecter from "./components/location-selecter";
@@ -79,6 +77,7 @@ class User extends Component<PageOwnProps, PageState> {
     this.state = {
       isLogin: false,
       loginOpen: false,
+      phoneOpen: false,
       locationShow: false,
       locationSelecterShow: false,
       collectNum: 0,
@@ -111,8 +110,8 @@ class User extends Component<PageOwnProps, PageState> {
             const userLocation = res && res.authSetting ? res.authSetting["scope.userLocation"] : null;
             if (userLocation == null || (userLocation != null && userLocation == true)) {
               Taro.getLocation({
-                success: (res) => {
-                  getLocation(res.latitude, res.longitude)
+                success: (location) => {
+                  getLocation(location.latitude, location.longitude)
                 }, fail: () => {
                   Taro.showToast({title: "获取位置信息失败", icon: "none"});
                 }
@@ -352,12 +351,20 @@ class User extends Component<PageOwnProps, PageState> {
       Taro.showToast({title: "已验证", icon: "success"});
       return;
     }
-    if(this.state.isLogin){
+    if (this.state.isLogin) {
       this.setState({phoneOpen: true})
-    }else{
+    } else {
       Taro.showToast({title: "请登录后再操作", icon: "none"});
       this.setState({loginOpen: true})
     }
+  }
+  onChargeMatchClick = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      this.setState({loginOpen: true})
+      return;
+    }
+    Taro.navigateTo({url: `../orders/orders`});
   }
 
   render() {
@@ -388,6 +395,15 @@ class User extends Component<PageOwnProps, PageState> {
               <View className='desc'>收藏</View>
             </View>
           </View>
+        </View>
+        <View className='qz-user-list-view'>
+          <Button onClick={this.onChargeMatchClick} className='list button-list'>
+            <View className='list_title'>
+              <AtIcon className='list-title-icon' value='shopping-cart' size='18' color='#333'/>
+              已购比赛
+            </View>
+            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
+          </Button>
         </View>
         <View className='qz-user-list-view'>
           <Button open-type="openSetting" className='list button-list'>

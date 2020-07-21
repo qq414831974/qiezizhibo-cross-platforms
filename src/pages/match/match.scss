@@ -2,18 +2,27 @@
 
 .qz-match-scroll-content {
   width: 100%;
-  height: 100vh;
+  position: relative;
 }
 
 .qz-match-content {
   width: 100%;
   height: 100%;
+
   &-search {
     width: 100%;
+    position: fixed;
+    height: 85px;
+    top: 0;
+    z-index: $zindex-drawer;
+    background-color: $color-bg-blue-main;
+
     &-bar {
       background-color: $color-bg-blue-main;
+
       .at-search-bar {
         background-color: $color-bg-blue-main;
+
         &__action {
           background-color: $color-bg-blue-main;
         }
@@ -24,6 +33,7 @@
 
 .qz-match-tabs {
   width: 100%;
+  padding-top: 185px
 }
 
 .qz-match__top-tabs__content {
@@ -33,7 +43,7 @@
 .qz-match__top-tabs__content--fixed {
   .at-tabs__header {
     position: fixed;
-    top: 0;
-    z-index: 800;
+    top: 85px;
+    z-index: $zindex-drawer;
   }
 }

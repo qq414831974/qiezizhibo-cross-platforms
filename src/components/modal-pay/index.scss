@@ -1,0 +1,40 @@
+@import '../../app.scss';
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mini-gray {
+  color: $color-grey-3;
+}
+
+.light-gray {
+  color: $color-grey-2;
+}
+
+.gray {
+  color: $color-grey-1;
+}
+
+.black{
+  color: $color-black-1 !important;
+}
+
+.qz-pay-modal-title {
+  font-weight: bold;
+  font-size: $font-size-lg;
+  margin-bottom: $spacing-v-sm;
+}
+
+.qz-pay-modal-content_text {
+  font-size: $font-size-base;
+  margin-top: $spacing-v-sm;
+}
+
+.qz-pay-modal-content_tip {
+  text-align: left;
+  padding: 0 $spacing-h-md;
+  font-size: $font-size-sm;
+}

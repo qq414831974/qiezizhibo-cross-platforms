@@ -8,17 +8,22 @@
 .qz-search-content {
   width: 100%;
   height: 100%;
+  position: relative;
 }
 
 .qz-search__top-search-bar__content {
   width: 100%;
+  height: 85px;
+  position: fixed;
+  top: 0;
+  z-index: $zindex-flot-layout;
 }
 
 .qz-search__top-tabs__content--fixed {
   .at-tabs__header {
     position: fixed;
-    top: 0;
-    z-index: 800;
+    top: 85px;
+    z-index: $zindex-flot-layout;
   }
 }
 
@@ -28,10 +33,16 @@
 
 .qz-search__top-search-bar {
   background-color: $color-bg-blue-main;
+
   .at-search-bar {
     background-color: $color-bg-blue-main;
+
     &__action {
       background-color: $color-bg-blue-main;
     }
   }
+}
+.qz-search-tabs {
+  width: 100%;
+  padding-top: 185px
 }

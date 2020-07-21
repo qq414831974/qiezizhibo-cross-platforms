@@ -53,3 +53,13 @@ export const MATCH_TYPE = {
   3: '名单',
   4: '聊天室',
 }
+export const ORDER_TYPE = {
+  "normal": 0,
+  "live": 1,
+  "record": 2,
+}
+export const ORDER_STAUTS = {
+  "notpaid": 0,
+  "close": 1,
+  "paid": 2,
+}

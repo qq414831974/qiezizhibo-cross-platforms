@@ -8,10 +8,12 @@
   margin: 0 !important;
   border-radius: 0 !important;
 }
+
 .qz-match-item-margin {
   margin: 1vw 0 0 0 !important;
   border-radius: 0 !important;
 }
+
 .qz-match-item {
   margin: 2vw 0;
   width: 90vw;
@@ -20,10 +22,24 @@
   border-radius: 10px;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
   padding: $spacing-v-md/2 0;
+
   &-content {
     height: $at-avatar-size-lg + $spacing-v-md + $spacing-v-xs + $font-size-sm * 2 * $line-height-en - $font-size-sm * ($line-height-en - 1) * 2;
     width: 100%;
+    position: relative;
   }
+
+  &__charge {
+    position: absolute;
+    top: 0;
+    left: 1.5vw;
+    font-size: $font-size-xs;
+    color: $color-white;
+    background-color: $color_warning;
+    border-radius: $border-radius-md;
+    padding: $spacing-v-xxs $spacing-v-xs;
+  }
+
   &__team {
     vertical-align: middle;
     display: inline-block;
@@ -32,11 +48,13 @@
     width: 30%;
     overflow: hidden;
     margin-top: $spacing-v-md/2;
+
     &-avatar {
       display: flex;
       justify-content: center;
       align-items: center;
     }
+
     &-name {
       display: flex !important;
       margin-top: $spacing-v-xs;
@@ -58,6 +76,7 @@
       -webkit-box-orient: vertical;
     }
   }
+
   &__vs {
     margin-top: -1 * $spacing-v-sm;
     vertical-align: middle;
@@ -73,6 +92,7 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
+
     &-content {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -80,6 +100,7 @@
       text-align: center;
       position: relative;
     }
+
     &-league-name {
       font-size: $font-size-xs;
       line-height: $line-height-base;
@@ -90,6 +111,7 @@
       width: 100%;
       text-align: center;
     }
+
     &-match-time {
       font-size: $font-size-sm;
       color: $color-text-placeholder;
@@ -102,6 +124,7 @@
       //position: absolute;
       //bottom: $spacing-v-xs;
     }
+
     &-match-round {
       font-size: $font-size-xs;
       color: $color-text-placeholder;
@@ -111,6 +134,7 @@
       justify-content: center;
       text-align: center;
     }
+
     &-match-name {
       font-size: $font-size-base;
       color: $color-text-title;
@@ -120,6 +144,7 @@
       display: flex;
       justify-content: center;
     }
+
     &-match-score {
       font-size: $font-size-xxl;
       color: $color-text-title;
@@ -130,9 +155,11 @@
       display: flex;
       justify-content: center;
     }
+
     &-match-score-small {
       font-size: $font-size-lg !important;
     }
+
     &-match-score-penalty {
       font-size: $font-size-xs;
       color: $color-text-placeholder;
@@ -142,21 +169,27 @@
       display: flex;
       justify-content: center;
     }
+
     &-match-status {
       display: flex;
       justify-content: center;
+
       .status-box {
         display: inline-block;
         font-size: $font-size-xs;
+
         .live {
           background-color: #63af2b;
         }
+
         .finish {
           background-color: #7ab8f4;
         }
+
         .unopen {
           background-color: #e27c77;
         }
+
         .background {
           padding: $font-size-xs * 0.2;
           height: $font-size-xs * 2;
@@ -165,17 +198,21 @@
           display: flex;
           align-items: center;
         }
+
         .none {
           display: none;
         }
+
         .text {
           color: $color-text-base-inverse;
           margin-left: $spacing-h-sm;
         }
+
         .text-disabled {
           color: $color-text-disabled;
           margin-left: 0;
         }
+
         .status-icon {
           border-radius: 50%;
           width: $font-size-xs * 1.6;
@@ -183,6 +220,7 @@
           margin-left: $font-size-xs * 0.1;
           background: #fff;
           position: relative;
+
           .icon {
             content: "";
             display: block;
@@ -200,9 +238,11 @@
       }
     }
   }
+
   &__vs-full {
     width: 100% !important;
     margin-top: 0 !important;
+
     .qz-match-item__vs-match-name {
       display: inline !important;
     }

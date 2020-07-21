@@ -1,5 +1,5 @@
 import Taro, {Component, Config} from '@tarojs/taro'
-import {View} from '@tarojs/components'
+import {View,ScrollView} from '@tarojs/components'
 import {AtActivityIndicator, AtList, AtListItem} from 'taro-ui'
 
 import './index.scss'
@@ -71,7 +71,7 @@ class LeaguePlayerTable extends Component<PageOwnProps | any, PageState> {
       </View>
     }
     return (
-      <View className='qz-league-player-table__result'>
+      <ScrollView scrollY className='qz-league-player-table__result'>
         <View className='qz-league-player-table__result-header'>
           <View>球员</View>
           <View>进球</View>
@@ -87,7 +87,7 @@ class LeaguePlayerTable extends Component<PageOwnProps | any, PageState> {
             />
           }))}
         </AtList>
-      </View>
+      </ScrollView>
     )
   }
 }

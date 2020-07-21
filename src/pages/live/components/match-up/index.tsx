@@ -71,7 +71,7 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                 <View className='qz-match-up-item__vs'>
                   {matchInfo.startTime && <View className='qz-match-up-item__vs-content'>
                     <Text className='qz-match-up-item__vs-match-time'>
-                      {`${onlytime ? formatMonthDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))} ${eventType[matchStatus.status ? matchStatus.status : -1].text}`}
+                      {`${onlytime ? formatMonthDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))} ${eventType[matchStatus.status != null ? matchStatus.status : -1].text}`}
                     </Text>
                     <Text
                       className={matchStatus.penaltyscore ? 'qz-match-up-item__vs-match-score qz-match-up-item__vs-match-score-small' : 'qz-match-up-item__vs-match-score'}>
@@ -114,7 +114,7 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                 <View className='qz-match-up-item__vs qz-match-up-item__vs-full'>
                   {matchInfo.startTime && <View className='qz-match-up-item__vs-content'>
                     <Text className='qz-match-up-item__vs-match-time'>
-                      {`${onlytime ? formatMonthDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))} ${eventType[matchStatus.status ? matchStatus.status : -1].text}`}
+                      {`${onlytime ? formatMonthDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))} ${eventType[matchStatus.status != null ? matchStatus.status : -1].text}`}
                     </Text>
                     <Text className='qz-match-up-item__vs-match-name'>
                       {matchInfo.name}

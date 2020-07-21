@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, Text, Image, Video, ScrollView} from '@tarojs/components'
-import {AtTabs, AtTabsPane, AtIcon} from "taro-ui"
+import {AtTabs, AtTabsPane, AtIcon, AtButton, AtCurtain} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import MatchUp from './components/match-up'
 import StatBar from './components/stat-bar'
@@ -12,7 +12,7 @@ import matchAction from "../../actions/match";
 import liveAction from "../../actions/live";
 import playerAction from "../../actions/player";
 import {getTimeDifference, getStorage, hasLogin, clearLoginToken} from '../../utils/utils'
-import {FootballEventType, MATCH_TYPE, LOADING_TEXT} from "../../constants/global";
+import {FootballEventType, MATCH_TYPE, LOADING_TEXT, ORDER_TYPE, ORDER_STAUTS} from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import supportLeft from '../../assets/live/support-left.png'
 import supportRight from '../../assets/live/support-right.png'
@@ -28,6 +28,7 @@ import LineUp from "./components/line-up";
 import ChattingRoom from "./components/chatting-room";
 import LoginModal from "../../components/modal-login";
 import PhoneModal from "../../components/modal-phone";
+import PayModal from "../../components/modal-pay";
 import * as error from "../../constants/error";
 import userAction from "../../actions/user";
 import goal from "../../assets/live/goal.png";
@@ -46,7 +47,13 @@ type Bulletin = {
   type: string,
   url: string
 }
-
+type MatchCharge = {
+  price: number,
+  secondPrice: number,
+  productId: number,
+  type: number,
+  matchId: number,
+}
 type PageStateProps = {
   match: any;
   mediaList: any;
@@ -56,7 +63,6 @@ type PageStateProps = {
   userInfo: any;
   commentList: any;
   danmuList: any;
-  bulletinConfig: Array<Bulletin>,
 }
 
 type PageDispatchProps = {}
@@ -79,6 +85,7 @@ type PageState = {
   commentIntoView: any;
   loginOpen: boolean;
   phoneOpen: boolean;
+  payOpen: boolean;
   currentMedia: number;
   isFullScreen: boolean;
   videoShowMore: boolean;
@@ -90,7 +97,11 @@ type PageState = {
   tryplayed: boolean;
   firstplay: boolean;
   danmuUnable: boolean;
+  needPay: boolean;
   comments: any;
+  curtain: Bulletin | null;
+  curtainShow: boolean,
+  charge: MatchCharge | null;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -165,6 +176,7 @@ class Live extends Component<PageOwnProps, PageState> {
       commentIntoView: null,
       loginOpen: false,
       phoneOpen: false,
+      payOpen: false,
       currentMedia: 0,
       isFullScreen: false,
       videoShowMore: true,
@@ -177,10 +189,14 @@ class Live extends Component<PageOwnProps, PageState> {
       firstplay: true,
       danmuUnable: false,
       comments: [],
+      charge: null,
+      needPay: false,
+      curtain: null,
+      curtainShow: false,
     }
   }
 
-  $setSharePath = () => `/pages/home/home?id=${this.props.match.id}&page=live`
+  $setSharePath = () => `/pages/live/live?id=${this.props.match.id}`
 
   $setShareTitle = () => this.props.match.name
 
@@ -188,12 +204,16 @@ class Live extends Component<PageOwnProps, PageState> {
 
   componentWillMount() {
     matchAction.getMatchInfo_clear()
+    liveAction.getLiveMediaList_clear()
   }
 
   // componentDidMount() {
   componentDidShow() {
+    matchAction.getMatchInfo_clear()
+    liveAction.getLiveMediaList_clear()
     Taro.showLoading({title: LOADING_TEXT})
-    this.$router.params && this.$router.params.id && this.getMatchInfo(this.$router.params.id).then((data) => {
+    this.getParamId() && this.initCurtain(this.getParamId());
+    this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
       if (data.activityId) {
         if (data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
@@ -219,6 +239,7 @@ class Live extends Component<PageOwnProps, PageState> {
         this.getCollection(data.id);
         this.initSocket(data.id);
         data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
+        this.getMatchPayInfo(data);
       }
       Taro.hideLoading();
     })
@@ -231,6 +252,8 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   componentWillUnmount() {
+    matchAction.getMatchInfo_clear()
+    liveAction.getLiveMediaList_clear()
     this.componentDidHide();
   }
 
@@ -254,7 +277,29 @@ class Live extends Component<PageOwnProps, PageState> {
   // componentDidHide() {
   //   // this.clearTimer_liveInfo();
   // }
-
+  getParamId = () => {
+    let id;
+    if (this.$router.params) {
+      if (this.$router.params.id == null) {
+        id = this.$router.params.scene
+      } else {
+        id = this.$router.params.id
+      }
+    } else {
+      return null;
+    }
+    return id;
+  }
+  initCurtain = (id) => {
+    new Request().get(`${api.API_CONFIG_BULLETIN_MATCH(id)}`, null).then((res: Array<any>) => {
+      if (res && res.length > 0) {
+        const curtain = res[0];
+        if (curtain.curtain) {
+          this.setState({curtain: curtain, curtainShow: true})
+        }
+      }
+    });
+  }
   initSocket = async (matchId) => {
     const context = this;
     const token = await getStorage('accessToken');
@@ -382,7 +427,7 @@ class Live extends Component<PageOwnProps, PageState> {
     this.clearTimer_matchStatus();
     this.timerID_matchStatus = setInterval(() => {
       const {match} = this.props;
-      this.$router.params && this.$router.params.id && this.getMatchInfo(this.$router.params.id).then((data) => {
+      this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
         if (match && match.status != FootballEventType.FINISH && data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
           this.getMatchDanmu(data.id, this.state.currentMedia);
@@ -632,8 +677,7 @@ class Live extends Component<PageOwnProps, PageState> {
     //   Taro.showToast({title: "点赞太快了,请稍后再试哦", icon: "none"})
     //   return
     // }
-    const token = await getStorage('accessToken');
-    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+    if (!await this.isUserLogin()) {
       this.showAuth();
       return;
     }
@@ -652,8 +696,7 @@ class Live extends Component<PageOwnProps, PageState> {
     //   Taro.showToast({title: "点赞太快了,请稍后再试哦", icon: "none"})
     //   return
     // }
-    const token = await getStorage('accessToken');
-    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+    if (!await this.isUserLogin()) {
       this.showAuth();
       return;
     }
@@ -668,8 +711,7 @@ class Live extends Component<PageOwnProps, PageState> {
     }, 1000);
   }
   onCollectClick = async () => {
-    const token = await getStorage('accessToken');
-    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+    if (!await this.isUserLogin()) {
       this.showAuth();
       return;
     }
@@ -742,7 +784,8 @@ class Live extends Component<PageOwnProps, PageState> {
 
   onAuthSuccess = () => {
     this.setState({loginOpen: false})
-    this.getUserInfo()
+    this.getUserInfo();
+    this.getParamId() && this.getMatchInfo(this.getParamId());
   }
 
   showPhone = async () => {
@@ -750,10 +793,9 @@ class Live extends Component<PageOwnProps, PageState> {
     if (userInfo && userInfo.phone) {
       return;
     }
-    const token = await getStorage('accessToken');
-    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+    if (!await this.isUserLogin()) {
       Taro.showToast({title: "请登录后再操作", icon: "none"});
-      this.setState({loginOpen: true})
+      this.showAuth();
     } else {
       this.setState({phoneOpen: true})
     }
@@ -797,6 +839,109 @@ class Live extends Component<PageOwnProps, PageState> {
     this.setState({phoneOpen: false})
     this.getUserInfo()
   }
+  showPay = async (charge: MatchCharge) => {
+    // const {userInfo} = this.props
+    // if (userInfo && userInfo.phone) {
+    //   return;
+    // }
+    if (!await this.isUserLogin()) {
+      Taro.showToast({title: "请登录后再操作", icon: "none"});
+      this.showAuth();
+    } else {
+      this.setState({payOpen: true, charge: charge})
+    }
+  }
+
+  onPayClose = () => {
+    this.setState({payOpen: false})
+  }
+
+  onPayCancel = () => {
+    this.setState({payOpen: false})
+  }
+
+  onPayError = (reason) => {
+    switch (reason) {
+      case error.ERROR_PAY_CANCEL: {
+        Taro.showToast({
+          title: "支付失败,用户取消支付",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_PAY_ERROR: {
+        Taro.showToast({
+          title: "支付失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
+
+  onPaySuccess = (orderId: string) => {
+    this.setState({payOpen: false})
+    this.getOrderStatus(orderId)
+  }
+  getOrderStatus = async (orderId: string) => {
+    new Request().post(api.API_ORDER_QUERY(orderId), {}).then((res) => {
+      if (res == ORDER_STAUTS.paid) {
+        Taro.showToast({
+          title: "支付成功",
+          icon: 'none',
+        });
+        this.setState({needPay: false})
+        this.getParamId() && this.getMatchInfo(this.getParamId());
+        this.getParamId() && this.getMatchStatus(this.getParamId());
+      }
+    });
+  }
+  getMatchPayInfo = async (data) => {
+    let needPayRecord = data.needPayRecord;
+    let needPayLive = data.needPayLive;
+    if (!await this.isUserLogin()) {
+      needPayRecord = true;
+      needPayLive = true;
+    }
+    if (data.status == FootballEventType.FINISH) {
+      if (data.isRecordCharge && needPayRecord) {
+        this.setState({needPay: true})
+        this.showPay(this.getCharge(data))
+      }
+    } else {
+      if (data.isLiveCharge && needPayLive) {
+        this.setState({needPay: true})
+        this.showPay(this.getCharge(data))
+      }
+    }
+  }
+  getCharge = (data): MatchCharge => {
+    if (data.status == FootballEventType.FINISH) {
+      return {
+        price: data.recordPrice,
+        productId: data.recordProductId,
+        type: ORDER_TYPE.record,
+        secondPrice: data.recordMonthPrice,
+        matchId: data.id,
+      }
+    } else {
+      return {
+        price: data.livePrice,
+        productId: data.liveProductId,
+        type: ORDER_TYPE.live,
+        secondPrice: data.liveMonthPrice,
+        matchId: data.id,
+      }
+    }
+  }
+  isUserLogin = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      return false;
+    } else {
+      return true;
+    }
+  }
   clearLoginState = () => {
     clearLoginToken();
     userAction.clearUserInfo();
@@ -831,8 +976,7 @@ class Live extends Component<PageOwnProps, PageState> {
   bindPlayStart = async () => {
     if (!this.state.firstplay) {
       if (this.state.tryplayed) {
-        const token = await getStorage('accessToken');
-        if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+        if (!await this.isUserLogin()) {
           this.showAuth();
           this.videoContext && this.videoContext.pause();
         }
@@ -846,8 +990,7 @@ class Live extends Component<PageOwnProps, PageState> {
     this.clearTimer_playCountDown();
     this.timeoutID_playCountDown = setTimeout(async () => {
       if (this.props.match && this.props.match.status == FootballEventType.FINISH) {
-        const token = await getStorage('accessToken');
-        if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+        if (!await this.isUserLogin()) {
           this.setState({tryplayed: true})
           Taro.showToast({
             title: "录播视频只提供10秒试看，登录后可观看完整视频。",
@@ -955,6 +1098,19 @@ class Live extends Component<PageOwnProps, PageState> {
     console.log("bindPlayError")
     console.log(e)
   }
+  onCurtainClose = () => {
+    this.setState({curtainShow: false})
+  }
+  handleCurtainClick = () => {
+    const curtain = this.state.curtain;
+    if (curtain) {
+      if (curtain.type == 'website') {
+        Taro.navigateTo({url: `../webview/webview?url=${encodeURIComponent(curtain.url)}`});
+      } else if (curtain.type == 'page') {
+        Taro.navigateTo({url: curtain.url});
+      }
+    }
+  }
 
   render() {
     const {match = null, matchStatus = null} = this.props;
@@ -969,14 +1125,14 @@ class Live extends Component<PageOwnProps, PageState> {
         tabs[item] = tabIndex;
       }
     })
-    const {bulletinConfig} = this.props
-    const weihu = bulletinConfig && bulletinConfig.length > 0 && bulletinConfig[0].content === "升级维护中";
 
     return (
       <View className='qz-live-content'>
         <View className='qz-live-match__content'>
-          {weihu ? <View className='qz-live-match__video'>
+          {this.state.needPay ? <View className='qz-live-match__video'>
             <Image src={match.poster} className="qz-live-match__video-poster-img"/>
+            {match && <AtButton onClick={this.getMatchPayInfo.bind(this, match)} type='primary'
+                                className="qz-live-match__video-poster-pay">支付并观看</AtButton>}
           </View> : <Video
             id="videoPlayer"
             className='qz-live-match__video'
@@ -1009,7 +1165,10 @@ class Live extends Component<PageOwnProps, PageState> {
                   <View className="qz-live-match__video-poster-text">
                     <View className='qz-live-match__video-poster-text__text'>
                       {liveStatus == LiveStatus.ONTIME ? <View>比赛还未开始请耐心等待...</View> : null}
-                      {liveStatus == LiveStatus.NOTPUSH ? <View>信号中断...</View> : null}
+                      {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status == 14) ?
+                        <View>中场休息中...</View> : null}
+                      {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status != 14) ?
+                        <View>信号中断...</View> : null}
                       {liveStatus == LiveStatus.LOADING ? <View>载入中...</View> : null}
                     </View>
                   </View>
@@ -1033,7 +1192,7 @@ class Live extends Component<PageOwnProps, PageState> {
                   </View>
                 ))}
                 <View
-                  className={`qz-live-match__video-controllers__right ${this.state.videoShowMore ? "qz-live-match__video-controllers__right-more" : ""}`}>
+                  className={`qz-live-match__video-controllers__right ${this.state.videoShowMore ? "qz-live-matc1h__video-controllers__right-more" : ""}`}>
                   <View
                     className={`qz-live-match__video-controllers__right-arrow ${this.state.videoShowMore ? "qz-live-match__video-controllers__right-arrow-right" : "qz-live-match__video-controllers__right-arrow-left"}`}
                     onClick={this.handleVideoArrowClick}>
@@ -1079,8 +1238,8 @@ class Live extends Component<PageOwnProps, PageState> {
                         <View className="qz-live-match-up__nooice-center">
                           <RoundButton
                             size={30}
-                            img={weihu ? supportLeft : playButton}
-                            text={this.props.matchStatus.online ? this.props.matchStatus.online : "0"}
+                            img={playButton}
+                            text={this.props.matchStatus.payTimes ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
                             onClick={() => {
                             }}/>
                           <RoundButton
@@ -1178,6 +1337,23 @@ class Live extends Component<PageOwnProps, PageState> {
           handleCancel={this.onPhoneCancel}
           handleClose={this.onPhoneClose}
           handleError={this.onPhoneError}/>
+        <PayModal
+          charge={this.state.charge}
+          isOpened={this.state.payOpen}
+          handleConfirm={this.onPaySuccess}
+          handleCancel={this.onPayCancel}
+          handleClose={this.onPayClose}
+          handleError={this.onPayError}/>
+        <AtCurtain
+          isOpened={this.state.curtainShow}
+          onClose={this.onCurtainClose}
+        >
+          <Image
+            style='width:100%;height:250px'
+            src={this.state.curtain ? this.state.curtain.content : ""}
+            onClick={this.handleCurtainClick}
+          />
+        </AtCurtain>
       </View>
     )
   }
@@ -1193,7 +1369,6 @@ const mapStateToProps = (state) => {
     userInfo: state.user.userInfo,
     commentList: state.match.comment,
     danmuList: state.match.danmu,
-    bulletinConfig: state.config ? state.config.bulletinConfig : null,
   }
 }
 export default connect(mapStateToProps)(Live)

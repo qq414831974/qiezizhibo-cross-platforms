@@ -51,7 +51,7 @@ class Series extends Component<PageOwnProps, PageState> {
   }
 
   componentDidMount() {
-    this.$router.params && this.$router.params.id && this.getLeagueList(this.$router.params.id);
+    this.getParamId() && this.getLeagueList(this.getParamId());
   }
 
   componentWillUnmount() {
@@ -63,7 +63,19 @@ class Series extends Component<PageOwnProps, PageState> {
 
   componentDidHide() {
   }
-
+  getParamId = () =>{
+    let id;
+    if(this.$router.params){
+      if(this.$router.params.id == null){
+        id = this.$router.params.scene
+      }else{
+        id = this.$router.params.id
+      }
+    }else{
+      return null;
+    }
+    return id;
+  }
   onLeagueItemClick = (item) => {
     if (item.isparent) {
       Taro.navigateTo({url: `../series/series?id=${item.id}`});

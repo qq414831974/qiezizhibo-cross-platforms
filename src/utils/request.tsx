@@ -49,6 +49,8 @@ const refreshAuth = async (refreshToken) => {
     .then((res: any) => {
       updateStorage(res);
       return res;
+    }).catch(async (error) => {
+      await updateStorage({})
     });
 }
 const request = async (options) => {
@@ -107,13 +109,16 @@ const request = async (options) => {
               }
             } else {
               //请求异常或无token
-              const defaultMsg = (statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN) ? '登录失效' : '请求异常';
+              let defaultMsg = (statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN) ? '登录失效' : '请求异常';
+              if (url.includes("refresh_token")) {
+                defaultMsg = "登录失效，请重新登录"
+              }
               if (showToast) {
                 Taro.showToast({
                   title: res && res.errorMsg || defaultMsg,
                   icon: 'none',
                   complete: () => {
-                    if (statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN) {
+                    if (statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN || url.includes("refresh_token")) {
                       toLogin();
                     }
                   }

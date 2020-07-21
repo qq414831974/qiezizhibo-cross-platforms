@@ -1,6 +1,6 @@
 export const protocol_http = "https://";
 export const protocol_ws = "wss://";
-export const gateway_client_service  = "www.qiezizhibo.com";
+export const gateway_client_service = "www.qiezizhibo.com";
 export const gateway_admin_service = `${protocol_http}${gateway_client_service}/gateway-admin`
 export const auth_service = `${protocol_http}${gateway_client_service}/service-auth`
 export const user_service = `${protocol_http}${gateway_client_service}/service-user`
@@ -9,6 +9,7 @@ export const football_service = `${protocol_http}${gateway_client_service}/servi
 export const media_service = `${protocol_http}${gateway_client_service}/service-media`
 export const chat_service = `${protocol_http}${gateway_client_service}/service-chat`
 export const live_service = `${protocol_http}${gateway_client_service}/service-live`
+export const pay_service = `${protocol_http}${gateway_client_service}/service-pay`
 export const websocket_service = `${protocol_ws}${gateway_client_service}/service-websocket`
 // export const host = "http://192.168.3.102:8080";
 
@@ -18,6 +19,7 @@ export const websocket = (id) => `${websocket_service}/websocket/${id}`;
 //config
 export const API_CONFIG_BANNER = `${system_service}/system/config/banner`;
 export const API_CONFIG_BULLETIN = `${system_service}/system/config/bulletin`;
+export const API_CONFIG_BULLETIN_MATCH = (id) =>`${system_service}/system/config/bulletin/match/${id}`;
 export const API_SYSTEM_SECURITY_CHECK = `${system_service}/system/wxa_security_check`;
 export const API_VISIT = `${user_service}/user/visit`;
 
@@ -71,3 +73,9 @@ export const API_SEARCH = `${football_service}/search`;
 
 //area
 export const API_AREA = `${system_service}/system/config/area`;
+
+//pay
+export const API_ORDER_CREATE = `${pay_service}/pay/jsapi`;
+export const API_ORDER_IS_NEED_BUY = `${pay_service}/order/isUserNeedByMatch`;
+export const API_ORDER_QUERY = (id) => `${pay_service}/pay/${id}/query`;
+export const API_ORDER_USER = `${pay_service}/order/user`;

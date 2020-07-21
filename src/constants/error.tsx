@@ -6,3 +6,8 @@ export const ERROR_WX_UPDATE_USER = 'error_wx_update_user';
 export const ERROR_LOGIN = 'error_login';
 //获取位置权限失败
 export const ERROR_LOCATION_FAILED = 'error_location_failed';
+
+//支付失败，用户取消
+export const ERROR_PAY_CANCEL = 'error_pay_cancel';
+//支付失败
+export const ERROR_PAY_ERROR = 'error_pay';

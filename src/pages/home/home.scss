@@ -4,20 +4,31 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
   width: 100vw;
+  height: 100vh;
   //background-color: $color-bg-grey;
 }
 
-.qz-home-content-bg {
+.qz-home-top {
+  position: fixed;
+  z-index: $zindex-modal;
+}
+
+.qz-home-bg {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+.qz-home-content-bg {
   width: 100vw;
   height: 40vw;
   background-color: $color-bg-blue-main;
   display: flex;
   justify-content: center;
+
   &-img {
     position: absolute;
     bottom: 0;
@@ -27,9 +38,6 @@
 }
 
 .qz-home-content-bg-bottom {
-  position: absolute;
-  top: 40vw;
-  left: 0;
   background-color: $color-bg-blue-main;
   width: 100vw;
   height: 10vw;
@@ -38,16 +46,24 @@
 
 .qz-home-notice-content {
   width: 100vw;
+
   &-bar {
   }
 }
 
 .qz-home-banner {
-  margin: 2vw 0 0 0;
   height: 40vw;
   width: 100vw;
   background: transparent;
-  overflow: hidden;
+  //overflow: hidden;
+}
+
+.qz-home-banner__s_n {
+  padding-top: calc(164px + 2vw);
+}
+
+.qz-home-banner_s {
+  padding-top: calc(104px + 2vw);
 }
 
 .qz-home-banner__swiper {
@@ -57,15 +73,18 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
+
     &-button {
       padding: 0;
       border-radius: 0;
       border: none;
       background: transparent;
     }
+
     &-button:after {
       border: none;
     }
+
     &-img {
       width: 90vw;
       height: 36vw;
@@ -77,8 +96,10 @@
 
 .qz-home-navigation-bar__right-search-bar {
   background-color: $color-bg-blue-main;
+
   .at-search-bar {
     background-color: $color-bg-blue-main;
+
     &__action {
       background-color: $color-bg-blue-main;
     }
@@ -86,14 +107,19 @@
 }
 
 .qz-home-league {
-  background-color: transparent;
+  //background-color: transparent;
   width: 100vw;
-  padding: 0 0 $spacing-v-md 0;
+  padding: $spacing-v-md 0;
+  z-index: $zindex-search-bar;
+  background-color: #ffffff;
+
   &-title {
     padding: 0vw 5% 2vw 5%;
+
     &-desc {
       font-size: $font-size-lg;
     }
+
     &-count {
       font-size: $font-size-base;
       color: $color-text-base-inverse;
@@ -101,6 +127,7 @@
       padding: 0 $spacing-h-sm;
       margin-left: $spacing-h-lg;
     }
+
     &-more {
       margin-top: $spacing-v-xs;
       font-size: $font-size-base;
@@ -108,10 +135,12 @@
       float: right;
     }
   }
+
   &-content {
     width: 100%;
     display: flex;
     justify-content: center;
+
     &__inner {
       height: $at-avatar-size-lg + $spacing-v-md + $spacing-v-xs + $font-size-sm * 2 * $line-height-en;
       overflow-y: hidden;
@@ -121,6 +150,7 @@
       background-color: transparent;
       width: 100%;
     }
+
     &__inner:before,
     &__inner:after /* :after 可以不需要 */
     {
@@ -129,12 +159,14 @@
       content: '';
       height: 100%;
     }
+
     &__inner-center {
       display: flex;
       justify-content: center;
       align-items: center;
     }
   }
+
   &-item {
     vertical-align: middle;
     display: inline-block;
@@ -144,6 +176,7 @@
     overflow: hidden;
     position: relative;
     margin-top: $spacing-v-xs;
+
     &-icon {
       position: absolute;
       left: $spacing-h-sm;
@@ -151,11 +184,13 @@
       height: $font-size-sm;
       width: $font-size-sm * 2;
     }
+
     &-avatar {
       display: flex;
       justify-content: center;
       align-items: center;
     }
+
     &-name {
       margin-top: $spacing-v-xs;
       font-size: $font-size-sm;
@@ -164,8 +199,9 @@
       max-width: $at-avatar-size-lg+$spacing-v-md*4;
       height: $font-size-sm * 2 * $line-height-en !important;
       text-align: center;
-      display: -webkit-box;
-      justify-content: center;
+      //display: -webkit-box;
+      display: block;
+      margin: 0 auto;      justify-content: center;
       align-items: center;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -179,7 +215,9 @@
 }
 
 .qz-home-league-detail {
-  margin-bottom: $spacing-v-md;
+  padding-bottom: $spacing-v-md;
+  z-index: $zindex-search-bar;
+  background-color: #ffffff;
   //padding: 0 5%;
   &-title {
     padding: 1vw 5% 1vw 5%;
@@ -194,6 +232,7 @@
       align-items: center;
       text-align: left;
     }
+
     &-count {
       font-size: $font-size-base;
       color: $color-text-base-inverse;
@@ -201,6 +240,7 @@
       padding: 0 $spacing-h-sm;
       margin-left: $spacing-h-lg;
     }
+
     &-more {
       margin-top: $spacing-v-xs;
       font-size: $font-size-base;
@@ -208,6 +248,7 @@
       float: right;
     }
   }
+
   &-content {
     width: 100%;
     //background-color: #fff;
@@ -224,6 +265,7 @@
       -webkit-overflow-scrolling: touch;
     }
   }
+
   &-bottom {
     //display: none;
     //background-color: #fff;
@@ -239,6 +281,7 @@
       font-size: $font-size-base;
       color: $color-link-disabled;
     }
+
     &-arrow {
       color: $color-link-disabled;
     }

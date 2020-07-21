@@ -62,6 +62,7 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
                 if (user.user && user.user.openId) {
                   userVo.wechatOpenid = user.user.openId;
                   await updateStorage({wechatOpenid: user.user.openId});
+                  await updateStorage({userNo: user.user.userNo});
                   new Request().put(api.API_USER, userVo).then(() => {
                     handleConfirm();
                   });

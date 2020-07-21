@@ -127,6 +127,11 @@ export const updateStorage = (data = {}) => {
       Taro.setStorage({key: 'wechatOpenid', data: data['wechatOpenid'] || null})
     ]);
   }
+  if (data['userNo']) {
+    return Promise.all([
+      Taro.setStorage({key: 'userNo', data: data['userNo'] || null})
+    ]);
+  }
   if (data['accessToken'] && data['refreshToken']) {
     return Promise.all([Taro.setStorage({key: 'accessToken', data: data['accessToken'] || null}),
       Taro.setStorage({key: 'refreshToken', data: data['refreshToken'] || null}),
@@ -134,7 +139,8 @@ export const updateStorage = (data = {}) => {
   }
   return Promise.all([Taro.setStorage({key: 'accessToken', data: data['accessToken'] || null}),
     Taro.setStorage({key: 'refreshToken', data: data['refreshToken'] || null}),
-    Taro.setStorage({key: 'wechatOpenid', data: data['wechatOpenid'] || null})
+    Taro.setStorage({key: 'wechatOpenid', data: data['wechatOpenid'] || null}),
+    Taro.setStorage({key: 'userNo', data: data['userNo'] || null})
   ]);
 };
 
@@ -146,6 +152,7 @@ export const clearLoginToken = () => {
     Taro.setStorage({key: 'accessToken', data: null}),
     Taro.setStorage({key: 'refreshToken', data: null}),
     Taro.setStorage({key: 'wechatOpenid', data: null}),
+    Taro.setStorage({key: 'userNo', data: null}),
   ])
 };
 export const hasLogin = async () => {
@@ -178,4 +185,8 @@ export const getCityData = (cityArray: Array<any>): any => {
     cityData.push({title: key, key: key, items: cityMap[key]})
   }
   return cityData
+}
+
+export const getYuan = (fen: number): number => {
+  return fen / 100;
 }

@@ -1,0 +1,13 @@
+@import '../../app.scss';
+
+.qz-orders-content {
+  width: 100%;
+  height: 100%;
+}
+
+.qz-orders-loading {
+  width: 100vw;
+  height: 10vw;
+  position: relative;
+  margin-top: $spacing-v-md;
+}

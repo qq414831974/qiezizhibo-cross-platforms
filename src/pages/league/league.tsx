@@ -43,6 +43,7 @@ class League extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子体育',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    enablePullDownRefresh: true
   }
 
   componentWillMount() {
@@ -114,18 +115,19 @@ class League extends Component<PageOwnProps, PageState> {
   onReachBottom() {
     this.nextPage();
   }
-
+  onPullDownRefresh() {
+    Taro.showLoading({title: global.LOADING_TEXT})
+    this.getLeagueList();
+    Taro.stopPullDownRefresh();
+  }
   render() {
     const {leagueList} = this.props
 
-    if (this.state.loading) {
-      return <View className="qz-league-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
-    }
     if (leagueList && (leagueList.total <= 0 || leagueList.total == null)) {
       return <AtLoadMore status="noMore" noMoreText={this.state.loading ? "加载中..." : "搜一下"}/>
     }
     let loadingmoreStatus: any = "more";
-    if (this.state.loadingmore) {
+    if (this.state.loadingmore||this.state.loading) {
       loadingmoreStatus = "loading";
     } else if (leagueList.records && (leagueList.total <= leagueList.records.length)) {
       loadingmoreStatus = "noMore"

@@ -26,6 +26,7 @@ type PageOwnProps = {
 type PageState = {
   textInput: string;
   scrolling: boolean;
+  messageSending: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -45,9 +46,14 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
     return value
   }
   handleSendMessage = () => {
+    if(this.state.textInput == null || this.state.textInput.trim() == ''){
+      return;
+    }
+    this.setState({messageSending: true})
     this.props.sendMessage(this.state.textInput).then(() => {
       this.setState({
-        textInput: ''
+        textInput: '',
+        messageSending: false
       })
     })
   }
@@ -131,6 +137,7 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
             name="chatInput"
             clear
             type='text'
+            disabled={this.state.messageSending}
             value={this.state.textInput}
             onChange={this.handleChatInputChange}
             onConfirm={this.handleSendMessage}
@@ -140,7 +147,7 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
             className='qz-input-no-padding'
           >
             <View className="qz-chatting-room__chat-bottom-bar-button">
-              <AtButton type="primary" size="small" onClick={this.handleSendMessage}>发送</AtButton>
+              <AtButton type="primary" size="small" loading={this.state.messageSending} onClick={this.handleSendMessage}>发送</AtButton>
             </View>
           </AtInput>
         </View>

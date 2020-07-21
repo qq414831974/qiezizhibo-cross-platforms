@@ -158,20 +158,20 @@ class Search extends Component<PageOwnProps, PageState> {
     this.nextPage(this.state.currentTab);
   }
 
-  onScroll = (e) => {
-    if (this.scrollTop - e.detail.scrollTop <= 0) {
-      if (this.tabsY - e.detail.scrollTop < 0) {
-        this.setState({tabsClass: "qz-search__top-tabs__content--fixed"});
-        Taro.setNavigationBarTitle({title: this.state.searchText})
-      }
-    } else {
-      if (this.tabsY - e.detail.scrollTop >= 0) {
-        this.setState({tabsClass: ""});
-        Taro.setNavigationBarTitle({title: "搜索"})
-      }
-    }
-    this.scrollTop = e.detail.scrollTop;
-  }
+  // onScroll = (e) => {
+  //   if (this.scrollTop - e.detail.scrollTop <= 0) {
+  //     if (this.tabsY - e.detail.scrollTop < 0) {
+  //       this.setState({tabsClass: "qz-search__top-tabs__content--fixed"});
+  //       Taro.setNavigationBarTitle({title: this.state.searchText})
+  //     }
+  //   } else {
+  //     if (this.tabsY - e.detail.scrollTop >= 0) {
+  //       this.setState({tabsClass: ""});
+  //       Taro.setNavigationBarTitle({title: "搜索"})
+  //     }
+  //   }
+  //   this.scrollTop = e.detail.scrollTop;
+  // }
 
   render() {
     const {league, match, player} = this.props
@@ -179,7 +179,7 @@ class Search extends Component<PageOwnProps, PageState> {
     const timestamp = new Date().getTime();
 
     return (
-      <ScrollView scrollY onScroll={this.onScroll} onScrollToLower={this.onReachBottom}
+      <ScrollView scrollY onScrollToLower={this.onReachBottom}
                   className='qz-search-scroll-content'>
         <View className='qz-search-content'>
           <View className='qz-search__top-search-bar__content'>
@@ -195,7 +195,7 @@ class Search extends Component<PageOwnProps, PageState> {
           <View className='qz-search-tabs'>
             <AtTabs
               swipeable={false}
-              className={`qz-search__top-tabs__content qz-custom-tabs ${this.state.tabsClass}`}
+              className="qz-search__top-tabs__content qz-custom-tabs qz-search__top-tabs__content--fixed"
               current={this.state.currentTab}
               tabList={tabList}
               onClick={this.switchTab}>
