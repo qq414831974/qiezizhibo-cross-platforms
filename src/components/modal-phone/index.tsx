@@ -3,7 +3,7 @@ import Taro, {Component} from '@tarojs/taro'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button} from '@tarojs/components'
 import Request from '../../utils/request'
-import {updateStorage, getStorage} from '../../utils/utils'
+import {getStorage} from '../../utils/utils'
 import * as api from '../../constants/api'
 import * as error from '../../constants/error'
 import defaultLogo from '../../assets/default-logo.png'
@@ -58,7 +58,7 @@ class ModalPhone extends Component<PageOwnProps, PageState> {
         if (res) {
           handleConfirm();
           Taro.hideLoading();
-        }else{
+        } else {
           handleError(error.ERROR_WX_UPDATE_USER);
           Taro.hideLoading();
         }
@@ -89,7 +89,7 @@ class ModalPhone extends Component<PageOwnProps, PageState> {
             • 茄子体育将获得您的手机号
           </View>
           <View className="light-gray qz-phone-modal-content_tip">
-            • 验证手机号后才可评论
+            • 请验证手机号
           </View>
         </AtModalContent>
         <AtModalAction>

@@ -110,6 +110,18 @@ class Home extends Component<PageOwnProps, PageState> {
         this.setCurtain();
         this.setBulletin(this.bulletinIndex);
         this.startTimer_bulletin();
+        Taro.getSystemInfo().then(systemData => {
+          if (systemData.platform == 'android') {
+            //android
+          } else {
+            const weihu = data && data.length > 0 && data[0].content === "升级维护中";
+            if (weihu) {
+              configAction.setPayEnabled(false);
+            } else {
+              configAction.setPayEnabled(true);
+            }
+          }
+        })
       }
     });
     if (this.$router.params.id && this.$router.params.page) {
@@ -192,8 +204,6 @@ class Home extends Component<PageOwnProps, PageState> {
   refresh = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getBannerConfig().then(() => {
-      const {bulletinConfig} = this.props
-      const weihu = bulletinConfig && bulletinConfig.length > 0 && bulletinConfig[0].content === "升级维护中";
       leagueAction.getLeagueList_clear();
       leagueAction.getLeagueList({
         pageSize: 10,
@@ -203,7 +213,7 @@ class Home extends Component<PageOwnProps, PageState> {
         sortOrder: "desc",
         country: "中国",
         province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
-        matchnum: weihu ? null : 2,
+        matchnum: 2,
       }).then(() => {
         Taro.hideLoading();
       }).catch(() => {

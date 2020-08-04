@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View} from '@tarojs/components'
-import {AtSearchBar, AtLoadMore, AtActivityIndicator} from "taro-ui"
+import {AtSearchBar, AtLoadMore} from "taro-ui"
 import {connect} from '@tarojs/redux'
 
 import './league.scss'

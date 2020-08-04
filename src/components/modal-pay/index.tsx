@@ -3,7 +3,7 @@ import Taro, {Component} from '@tarojs/taro'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button} from '@tarojs/components'
 import Request from '../../utils/request'
-import {getStorage, getYuan} from '../../utils/utils'
+import {getStorage, getYuan, toLogin} from '../../utils/utils'
 import * as api from '../../constants/api'
 import * as error from '../../constants/error'
 import defaultLogo from '../../assets/default-logo.png'
@@ -45,6 +45,7 @@ type PageDispatchProps = {
   handleClose: (event?: any) => any,
   handleError: (event?: any) => any
   charge: MatchCharge | any,
+  payEnabled: boolean,
 }
 
 type PageOwnProps = {}
@@ -74,6 +75,16 @@ class ModalPay extends Component<PageOwnProps, PageState> {
 
     const openId = await getStorage('wechatOpenid')
     const userNo = await getStorage('userNo')
+    if (userNo == null || openId == null) {
+      Taro.showToast({
+        title: "登录失效，请重新登录",
+        icon: 'none',
+        complete: () => {
+          toLogin();
+        }
+      })
+      return;
+    }
     new Request().post(api.API_ORDER_CREATE, {
       openId: openId,
       userNo: userNo,
@@ -116,7 +127,22 @@ class ModalPay extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {isOpened = false, handleCancel, charge} = this.props;
+    const {isOpened = false, handleCancel, charge, payEnabled} = this.props;
+    if (!payEnabled) {
+      return (<AtModal isOpened={isOpened} onClose={handleCancel}>
+        <AtModalContent>
+          <View className="center">
+            <AtAvatar circle image={defaultLogo}/>
+          </View>
+          <Text className="center gray qz-pay-modal-content_text">
+            iOS端暂不提供观看
+          </Text>
+        </AtModalContent>
+        <AtModalAction>
+          <Button className="black" onClick={handleCancel}>取消</Button>
+        </AtModalAction>
+      </AtModal>)
+    }
     return (
       <AtModal isOpened={isOpened} onClose={handleCancel}>
         <AtModalContent>
@@ -148,4 +174,5 @@ class ModalPay extends Component<PageOwnProps, PageState> {
     )
   }
 }
+
 export default ModalPay

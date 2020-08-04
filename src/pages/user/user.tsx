@@ -29,6 +29,7 @@ type PageStateProps = {
     phone: string,
   },
   locationConfig: any,
+  payEnabled: boolean,
 }
 
 type PageDispatchProps = {}
@@ -211,8 +212,12 @@ class User extends Component<PageOwnProps, PageState> {
   }
 
   onAuthSuccess = () => {
+    const {userInfo} = this.props
     this.setState({loginOpen: false, isLogin: true})
     this.getUserInfo()
+    if (userInfo != null && userInfo.phone == null) {
+      this.setState({phoneOpen: true})
+    }
   }
 
   onPhoneClose = () => {
@@ -368,7 +373,7 @@ class User extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {userInfo, locationConfig} = this.props
+    const {userInfo, locationConfig, payEnabled} = this.props
     const {avatar = logo, name = null} = userInfo;
     return (
       <View className='qz-user-content'>
@@ -400,7 +405,7 @@ class User extends Component<PageOwnProps, PageState> {
           <Button onClick={this.onChargeMatchClick} className='list button-list'>
             <View className='list_title'>
               <AtIcon className='list-title-icon' value='shopping-cart' size='18' color='#333'/>
-              已购比赛
+              {payEnabled ? "已购比赛" : "订单查看"}
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
@@ -471,6 +476,7 @@ const mapStateToProps = (state) => {
   return {
     userInfo: state.user.userInfo,
     locationConfig: state.config ? state.config.locationConfig : null,
+    payEnabled: state.config ? state.config.payEnabled : null,
   }
 }
 export default connect(mapStateToProps)(User)

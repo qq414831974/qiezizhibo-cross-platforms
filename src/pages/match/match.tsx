@@ -11,17 +11,8 @@ import * as global from "../../constants/global";
 import {API_MATCHES} from "../../constants/api";
 import Request from '../../utils/request'
 
-
-type Bulletin = {
-  id: number,
-  content: string,
-  type: string,
-  url: string
-}
-
 type PageStateProps = {
   locationConfig: { city: string, province: string }
-  bulletinConfig: Array<Bulletin>,
 }
 
 type PageDispatchProps = {}
@@ -55,6 +46,7 @@ class Match extends Component<PageOwnProps, PageState> {
     navigationBarTextStyle: 'white',
     enablePullDownRefresh: true
   }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -66,6 +58,7 @@ class Match extends Component<PageOwnProps, PageState> {
       matchList: {},
     }
   }
+
   componentWillMount() {
   }
 
@@ -119,11 +112,9 @@ class Match extends Component<PageOwnProps, PageState> {
   getMatchList = () => {
     let status = "unfinish"
     let orderby = "desc"
-    const {bulletinConfig} = this.props
-    const weihu = bulletinConfig && bulletinConfig.length > 0 && bulletinConfig[0].content === "升级维护中";
     switch (this.state.currentTab) {
       case 0:
-        status = weihu ? "finish" : "unfinish";
+        status = "unfinish";
         orderby = "asc";
         break;
       case 1:
@@ -150,11 +141,9 @@ class Match extends Component<PageOwnProps, PageState> {
     }
     let status = "unfinish"
     let orderby = "desc"
-    const {bulletinConfig} = this.props
-    const weihu = bulletinConfig && bulletinConfig.length > 0 && bulletinConfig[0].content === "升级维护中";
     switch (tab) {
       case 0:
-        status = weihu ? "finish" : "unfinish";
+        status = "unfinish";
         orderby = "asc";
         break;
       case 1:
@@ -198,14 +187,9 @@ class Match extends Component<PageOwnProps, PageState> {
   // }
 
   render() {
-    const {bulletinConfig} = this.props
     const {matchList} = this.state
     let tabList = [{title: '比赛中'}, {title: '完赛'}]
-    const weihu = bulletinConfig && bulletinConfig.length > 0 && bulletinConfig[0].content === "升级维护中";
-    if (weihu) {
-      tabList = [{title: '完赛'}]
-    }
-    console.log(matchList)
+
     return (
       <View className='qz-match-scroll-content'>
         <View className='qz-match-content'>
@@ -222,20 +206,20 @@ class Match extends Component<PageOwnProps, PageState> {
                     className="qz-match__top-tabs__content qz-custom-tabs qz-match__top-tabs__content--fixed"
                     tabList={tabList}
                     onClick={this.switchTab.bind(this)}>
-              {!weihu && <AtTabsPane current={this.state.currentTab} index={0}>
+              <AtTabsPane current={this.state.currentTab} index={0}>
                 <MatchList
                   matchList={matchList}
                   loading={this.state.loading}
                   loadingmore={this.state.loadingmore}
                   visible={this.state.currentTab == 0}
                   nextPage={this.nextPage}/>
-              </AtTabsPane>}
-              <AtTabsPane current={this.state.currentTab} index={weihu ? 0 : 1}>
+              </AtTabsPane>
+              <AtTabsPane current={this.state.currentTab} index={1}>
                 <MatchList
                   matchList={matchList}
                   loading={this.state.loading}
                   loadingmore={this.state.loadingmore}
-                  visible={this.state.currentTab == (weihu ? 0 : 1)}
+                  visible={this.state.currentTab == 1}
                   nextPage={this.nextPage}/>
               </AtTabsPane>
             </AtTabs>
@@ -253,7 +237,6 @@ interface Match {
 const mapStateToProps = (state) => {
   return {
     locationConfig: state.config.locationConfig,
-    bulletinConfig: state.config ? state.config.bulletinConfig : null,
   }
 }
 export default connect(mapStateToProps)(Match)

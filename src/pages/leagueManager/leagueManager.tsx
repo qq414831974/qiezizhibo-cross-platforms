@@ -50,7 +50,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
   config: Config = {
-    navigationBarTitleText: '联赛',
+    navigationBarTitleText: '茄子体育',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
   }

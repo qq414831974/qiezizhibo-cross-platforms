@@ -3,7 +3,7 @@ import {bindActionCreators} from 'redux'
 import * as config from '../constants/config'
 import * as api from '../constants/api'
 import store from '../store'
-import {createApiAction} from './index'
+import {createAction, createApiAction} from './index'
 import Request from '../utils/request'
 import {getStorage} from "../utils/utils";
 
@@ -15,11 +15,13 @@ export const setLocationConfig: any = createApiAction(config.CONFIG_LOCATION_SET
   data: data
 }))
 export const setVisit: any = createApiAction(config.VISIT, () => new Request().post(api.API_VISIT, {}))
+export const setPayEnabled: any = createAction(config.CONFIG_PAY_ENABLED)
 
 export default bindActionCreators({
   getBannerConfig,
   getBulletinConfig,
   getLocationConfig,
   setLocationConfig,
-  setVisit
+  setVisit,
+  setPayEnabled
 }, store.dispatch)

@@ -1,6 +1,7 @@
 import "taro-ui/dist/style/components/article.scss";
 import Taro, {Component} from '@tarojs/taro'
 import {AtAvatar} from "taro-ui"
+import {connect} from '@tarojs/redux'
 import {View, Text} from '@tarojs/components'
 import defaultLogo from '../../assets/default-logo.png'
 import './index.scss'
@@ -17,7 +18,9 @@ eventType[15] = {text: "下半场", color: "live"};
 eventType[16] = {text: "暂停", color: "live"};
 eventType[21] = {text: "比赛结束", color: "finish"};
 
-type PageStateProps = {}
+type PageStateProps = {
+  payEnabled?: boolean;
+}
 
 type PageDispatchProps = {}
 
@@ -34,10 +37,10 @@ type PageState = {}
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface MatchItem {
-  props: IProps;
+  props: IProps | any;
 }
 
-class MatchItem extends Component<PageOwnProps, PageState> {
+class MatchItem extends Component<PageOwnProps | any, PageState> {
   static defaultProps = {}
 
   onItemClick = () => {
@@ -47,7 +50,7 @@ class MatchItem extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {matchInfo, className = "", onlytime = false, showRound = true} = this.props
+    const {matchInfo, className = "", onlytime = false, showRound = true, payEnabled} = this.props
     if (matchInfo == null) {
       return <View/>
     }
@@ -55,9 +58,9 @@ class MatchItem extends Component<PageOwnProps, PageState> {
       <View className={"qz-match-item " + className} onClick={this.onItemClick}>
         {matchInfo.hostteam != null && matchInfo.guestteam != null ?
           <View className="qz-match-item-content">
-            {(matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge) ?
+            {((matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge)) && payEnabled ?
               <View className="qz-match-item__charge">
-                付费{matchInfo.payTimes? ` ${matchInfo.payTimes}人已观看`:""}
+                付费{matchInfo.payTimes ? ` ${matchInfo.payTimes}人已观看` : ""}
               </View>
               : null
             }
@@ -164,4 +167,9 @@ class MatchItem extends Component<PageOwnProps, PageState> {
   }
 }
 
-export default MatchItem
+const mapStateToProps = (state) => {
+  return {
+    payEnabled: state.config ? state.config.payEnabled : null,
+  }
+}
+export default connect(mapStateToProps)(MatchItem)

@@ -54,13 +54,14 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
       userVo.city = userInfo.city;
       userVo.country = userInfo.country;
       userVo.name = userInfo.nickName;
-      Taro.login().then(value => {
-        if (value && value.errMsg === "login:ok") {
-          new Request().post(`${api.API_LOGIN}?code=${value.code}&type=1`, {}).then(res => {
+      Taro.login().then(loginValue => {
+        if (loginValue && loginValue.errMsg === "login:ok") {
+          new Request().post(`${api.API_LOGIN}?code=${loginValue.code}&type=1`, {}).then((res: any) => {
             if (res.accessToken) {
-              new Request().post(api.API_AUTH_USER, {}).then(async (user) => {
+              new Request().post(api.API_AUTH_USER, {}).then(async (user: any) => {
                 if (user.user && user.user.openId) {
                   userVo.wechatOpenid = user.user.openId;
+                  userVo.wechatType = 1;
                   await updateStorage({wechatOpenid: user.user.openId});
                   await updateStorage({userNo: user.user.userNo});
                   new Request().put(api.API_USER, userVo).then(() => {

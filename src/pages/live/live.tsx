@@ -63,6 +63,7 @@ type PageStateProps = {
   userInfo: any;
   commentList: any;
   danmuList: any;
+  payEnabled: boolean;
 }
 
 type PageDispatchProps = {}
@@ -263,7 +264,7 @@ class Live extends Component<PageOwnProps, PageState> {
     this.clearTimer_CountDown();
     this.clearTimer_HeartBeat();
     this.clearTimer_Danmu();
-    this.socketTask.close({})
+    this.socketTask && this.socketTask.close({})
     this.socketTask = null;
     this.videoContext && this.videoContext.pause();
     this.videoContext = null;
@@ -301,6 +302,7 @@ class Live extends Component<PageOwnProps, PageState> {
     });
   }
   initSocket = async (matchId) => {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const context = this;
     const token = await getStorage('accessToken');
     const header = token ? {'Authorization': `Bearer ${token}`} : {};
@@ -368,7 +370,7 @@ class Live extends Component<PageOwnProps, PageState> {
       }
       new Request().post(`${api.API_SYSTEM_SECURITY_CHECK}`, message).then(res => {
         if (res == true) {
-          this.socketTask.send({
+          this.socketTask && this.socketTask.send({
             data: JSON.stringify(params),
             success: () => {
               resolve();
@@ -404,7 +406,7 @@ class Live extends Component<PageOwnProps, PageState> {
   startTimer_HeartBeat = () => {
     this.clearTimer_HeartBeat();
     this.timerID_socketHeartBeat = setInterval(() => {
-      this.socketTask.send({data: "success"});
+      this.socketTask && this.socketTask.send({data: "success"});
     }, 5000)
   }
   clearTimer_HeartBeat = () => {
@@ -511,7 +513,7 @@ class Live extends Component<PageOwnProps, PageState> {
       });
     }
   }
-  getTeamPlayer = (matchId, teamId) => {
+  getTeamPlayer = (_matchId, teamId) => {
     this.setState({playerLoading: true})
     playerAction.getPlayerList({pageNum: 1, pageSize: 100, teamId: teamId}).then(() => {
       this.setState({playerLoading: false})
@@ -553,7 +555,7 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   getLiveStatus = () => {
     const {match = null} = this.props;
-    let status = LiveStatus.LOADING;
+    let status = LiveStatus.ENABLED;
     if (match) {
       if (match.status == FootballEventType.FINISH) {
         status = LiveStatus.FINISH;
@@ -783,9 +785,13 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   onAuthSuccess = () => {
+    const {userInfo} = this.props
     this.setState({loginOpen: false})
     this.getUserInfo();
     this.getParamId() && this.getMatchInfo(this.getParamId());
+    if (userInfo != null && userInfo.phone == null) {
+      this.setState({phoneOpen: true})
+    }
   }
 
   showPhone = async () => {
@@ -1113,7 +1119,7 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {match = null, matchStatus = null} = this.props;
+    const {match = null, matchStatus = null, payEnabled} = this.props;
     const {diffDayTime = {diffDay: "", diffTime: "00:00"}, liveStatus, leftNooice = 0, rightNooice = 0} = this.state;
     let tabList = [{title: '赛况'}]
     const tabs: Array<any> = [];
@@ -1132,7 +1138,7 @@ class Live extends Component<PageOwnProps, PageState> {
           {this.state.needPay ? <View className='qz-live-match__video'>
             <Image src={match.poster} className="qz-live-match__video-poster-img"/>
             {match && <AtButton onClick={this.getMatchPayInfo.bind(this, match)} type='primary'
-                                className="qz-live-match__video-poster-pay">支付并观看</AtButton>}
+                                className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
           </View> : <Video
             id="videoPlayer"
             className='qz-live-match__video'
@@ -1239,7 +1245,7 @@ class Live extends Component<PageOwnProps, PageState> {
                           <RoundButton
                             size={30}
                             img={playButton}
-                            text={this.props.matchStatus.payTimes ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
+                            text={this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
                             onClick={() => {
                             }}/>
                           <RoundButton
@@ -1343,7 +1349,8 @@ class Live extends Component<PageOwnProps, PageState> {
           handleConfirm={this.onPaySuccess}
           handleCancel={this.onPayCancel}
           handleClose={this.onPayClose}
-          handleError={this.onPayError}/>
+          handleError={this.onPayError}
+          payEnabled={payEnabled}/>
         <AtCurtain
           isOpened={this.state.curtainShow}
           onClose={this.onCurtainClose}
@@ -1369,6 +1376,7 @@ const mapStateToProps = (state) => {
     userInfo: state.user.userInfo,
     commentList: state.match.comment,
     danmuList: state.match.danmu,
+    payEnabled: state.config ? state.config.payEnabled : null,
   }
 }
 export default connect(mapStateToProps)(Live)

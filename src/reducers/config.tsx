@@ -1,5 +1,5 @@
 import {
-  CONFIG, CONFIG_BANNER, CONFIG_BULLETIN, CONFIG_LOCATION, CONFIG_WECHAT,
+  CONFIG, CONFIG_BANNER, CONFIG_BULLETIN, CONFIG_LOCATION, CONFIG_WECHAT,CONFIG_PAY_ENABLED
 } from '../constants/config'
 
 const INITIAL_STATE = {
@@ -8,6 +8,7 @@ const INITIAL_STATE = {
   bulletinConfig: [],
   wechatConfig: {},
   locationConfig: {},
+  payEnabled: true,
 }
 
 export default function config(state = INITIAL_STATE, action) {
@@ -36,6 +37,11 @@ export default function config(state = INITIAL_STATE, action) {
       return {
         ...state,
         locationConfig: action.payload
+      }
+    case CONFIG_PAY_ENABLED:
+      return {
+        ...state,
+        payEnabled: action.payload
       }
     default:
       return state
