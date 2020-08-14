@@ -6,6 +6,7 @@
   display: flex;
   justify-content: center;
   background: $color-bg;
+
   &__inner {
     display: flex;
     justify-content: space-between;
@@ -40,10 +41,12 @@
   //border-radius: 10px;
   //box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
   padding: $spacing-v-md/2 0;
+
   &-content {
     height: $at-avatar-size-lg + $spacing-v-md + $spacing-v-xs + $font-size-sm * 2 * $line-height-en - $font-size-sm * ($line-height-en - 1) * 2;
     width: 100%;
   }
+
   &__team {
     vertical-align: middle;
     display: inline-block;
@@ -52,11 +55,13 @@
     width: 30%;
     overflow: hidden;
     margin-top: $spacing-v-md/2;
+
     &-avatar {
       display: flex;
       justify-content: center;
       align-items: center;
     }
+
     &-name {
       display: flex !important;
       margin-top: $spacing-v-xs;
@@ -78,6 +83,7 @@
       -webkit-box-orient: vertical;
     }
   }
+
   &__vs {
     margin-top: -1 * $spacing-v-sm;
     vertical-align: middle;
@@ -93,6 +99,7 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
+
     &-content {
       width: 100%;
       overflow: hidden;
@@ -101,6 +108,7 @@
       text-align: center;
       position: relative;
     }
+
     &-league-name {
       font-size: $font-size-xs;
       line-height: $line-height-base;
@@ -111,6 +119,7 @@
       width: 100%;
       text-align: center;
     }
+
     &-match-time {
       font-size: $font-size-xs;
       color: $color-grey-2;
@@ -126,6 +135,7 @@
         margin-left: $spacing-h-sm;
       }
     }
+
     &-match-place {
       font-size: $font-size-xs;
       color: $color-grey-2;
@@ -136,13 +146,70 @@
       text-align: center;
       margin-top: $spacing-v-xs/2;
       margin-left: -$font-size-sm/2;
+
       .icon {
 
       }
+
       .text {
 
       }
     }
+
+    &-match-monopoly__container {
+      .title {
+        font-size: $font-size-xs;
+        color: $color-text-paragraph;
+        width: 100%;
+        line-height: $line-height-en;
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        margin-top: $spacing-v-xs/2;
+      }
+    }
+
+    &-match-monopoly {
+      color: #fff;
+      font-size: $font-size-base;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: calc(0.5 * (1.5 * 24px + 2 * 4px));
+      padding: 4px $spacing-h-sm;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-wrap: break-word;
+      word-break: break-all;
+      max-width: fit-content;
+      //max-width: 100%;
+      margin: auto;
+
+      .avatar {
+        display: inline-block;
+        height: $font-size-base * 1.5;
+        min-height: $font-size-base * 1.5;
+        width: $font-size-base * 1.5;
+        min-width: $font-size-base * 1.5;
+        border-radius: 50%;
+      }
+
+      .text {
+        display: inline-block;
+        font-size: $font-size-base;
+        line-height: $line-height-zh;
+        white-space: nowrap;
+        height: $font-size-base * 1.5;
+        margin-left: $spacing-h-sm;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+        word-break: break-all;
+      }
+    }
+
     &-match-round {
       font-size: $font-size-xs;
       color: $color-grey-2;
@@ -152,6 +219,7 @@
       justify-content: center;
       text-align: center;
     }
+
     &-match-name {
       font-size: $font-size-base;
       color: $color-text-title;
@@ -161,6 +229,7 @@
       display: flex;
       justify-content: center;
     }
+
     &-match-score {
       font-size: $font-size-xxxl;
       color: $color-text-title;
@@ -172,9 +241,11 @@
       display: flex;
       justify-content: center;
     }
+
     &-match-score-small {
       font-size: $font-size-lg !important;
     }
+
     &-match-score-penalty {
       font-size: $font-size-xs;
       color: $color-grey-2;
@@ -186,9 +257,11 @@
       justify-content: center;
     }
   }
+
   &__vs-full {
     width: 100% !important;
     margin-top: 0 !important;
+
     .qz-match-up-item__vs-match-name {
       display: inline !important;
     }

@@ -30,6 +30,7 @@ type PageOwnProps = {
   className?: string | null;
   onlytime?: boolean | null;
   showRound?: boolean;
+  showCharge?: boolean;
 }
 
 type PageState = {}
@@ -50,7 +51,7 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
   }
 
   render() {
-    const {matchInfo, className = "", onlytime = false, showRound = true, payEnabled} = this.props
+    const {matchInfo, className = "", onlytime = false, showRound = true, showCharge = true, payEnabled} = this.props
     if (matchInfo == null) {
       return <View/>
     }
@@ -58,7 +59,7 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
       <View className={"qz-match-item " + className} onClick={this.onItemClick}>
         {matchInfo.hostteam != null && matchInfo.guestteam != null ?
           <View className="qz-match-item-content">
-            {((matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge)) && payEnabled ?
+            {((matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
               <View className="qz-match-item__charge">
                 付费{matchInfo.payTimes ? ` ${matchInfo.payTimes}人已观看` : ""}
               </View>

@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, Text, Image, Video, ScrollView} from '@tarojs/components'
-import {AtTabs, AtTabsPane, AtIcon, AtButton, AtCurtain} from "taro-ui"
+import {AtTabs, AtTabsPane, AtIcon, AtButton, AtCurtain, AtToast, AtMessage} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import MatchUp from './components/match-up'
 import StatBar from './components/stat-bar'
@@ -19,6 +19,7 @@ import supportRight from '../../assets/live/support-right.png'
 import star from '../../assets/live/star.png'
 import starActive from '../../assets/live/star-active.png'
 import share from '../../assets/live/share.png'
+import moment from '../../assets/live/moment.png'
 import headphones from '../../assets/live/headphones.png'
 import playButton from '../../assets/live/play-button-disabled.png'
 import withShare from "../../utils/withShare";
@@ -40,6 +41,7 @@ import substitutionLeft from "../../assets/live/substitution_arrow.png";
 import substitutionRight from "../../assets/live/substitution_arrow_right.png";
 import owngoal from "../../assets/live/owngoal.png";
 import Request from "../../utils/request";
+import ModalAlbum from "../../components/modal-album";
 
 type Bulletin = {
   id: number,
@@ -53,6 +55,9 @@ type MatchCharge = {
   productId: number,
   type: number,
   matchId: number,
+  isMonopolyCharge: boolean,
+  monopolyPrice: number,
+  monopolyProductId: number,
 }
 type PageStateProps = {
   match: any;
@@ -103,6 +108,8 @@ type PageState = {
   curtain: Bulletin | null;
   curtainShow: boolean,
   charge: MatchCharge | null;
+  downLoading: boolean;
+  permissionShow: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -194,6 +201,8 @@ class Live extends Component<PageOwnProps, PageState> {
       needPay: false,
       curtain: null,
       curtainShow: false,
+      downLoading: false,
+      permissionShow: false,
     }
   }
 
@@ -465,13 +474,16 @@ class Live extends Component<PageOwnProps, PageState> {
     }
   }
 
-  async getUserInfo() {
+  async getUserInfo(onSuccess?: Function | null) {
     if (await hasLogin()) {
       const openid = await getStorage('wechatOpenid');
       userAction.getUserInfo({openId: openid}, {
-        success: () => {
+        success: (res) => {
           Taro.hideLoading()
           Taro.stopPullDownRefresh()
+          if (onSuccess) {
+            onSuccess(res);
+          }
         }, failed: () => {
           this.clearLoginState();
           Taro.hideLoading()
@@ -785,13 +797,14 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   onAuthSuccess = () => {
-    const {userInfo} = this.props
     this.setState({loginOpen: false})
-    this.getUserInfo();
+    this.getUserInfo((res) => {
+      const {phone} = res.payload
+      if (res.payload != null && phone == null) {
+        this.setState({phoneOpen: true})
+      }
+    })
     this.getParamId() && this.getMatchInfo(this.getParamId());
-    if (userInfo != null && userInfo.phone == null) {
-      this.setState({phoneOpen: true})
-    }
   }
 
   showPhone = async () => {
@@ -929,6 +942,9 @@ class Live extends Component<PageOwnProps, PageState> {
         type: ORDER_TYPE.record,
         secondPrice: data.recordMonthPrice,
         matchId: data.id,
+        isMonopolyCharge: data.isMonopolyCharge,
+        monopolyPrice: data.monopolyPrice,
+        monopolyProductId: data.monopolyProductId,
       }
     } else {
       return {
@@ -937,6 +953,9 @@ class Live extends Component<PageOwnProps, PageState> {
         type: ORDER_TYPE.live,
         secondPrice: data.liveMonthPrice,
         matchId: data.id,
+        isMonopolyCharge: data.isMonopolyCharge,
+        monopolyPrice: data.monopolyPrice,
+        monopolyProductId: data.monopolyProductId,
       }
     }
   }
@@ -1117,6 +1136,47 @@ class Live extends Component<PageOwnProps, PageState> {
       }
     }
   }
+  onPremissionClose = () => {
+    this.setState({permissionShow: false})
+  }
+  onPremissionCancel = () => {
+    this.setState({permissionShow: false})
+  }
+  onPremissionSuccess = () => {
+    this.setState({permissionShow: false})
+  }
+  onShareMoment = () => {
+    const {match = null} = this.props;
+    this.setState({downLoading: true})
+    new Request().get(api.API_GET_WXACODE, {id: match.id}).then((imageUrl: string) => {
+      if (imageUrl == null) {
+        Taro.showToast({title: "获取图片失败", icon: "none"});
+        this.setState({downLoading: false})
+        return;
+      }
+      Taro.downloadFile({
+        url: imageUrl,
+        success: (res) => {
+          if (res.statusCode === 200) {
+            Taro.saveImageToPhotosAlbum({filePath: res.tempFilePath}).then(saveres => {
+              console.log(saveres)
+              this.showMessage("图片保存到相册成功，快去发朋友圈吧", "success")
+              this.setState({downLoading: false})
+            }, () => {
+              this.showMessage("图片保存到相册失败", "error")
+              this.setState({downLoading: false, permissionShow: true})
+            })
+          }
+        }
+      });
+    })
+  }
+  showMessage = (title, type) => {
+    Taro.atMessage({
+      'message': title,
+      'type': type,
+    })
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
@@ -1267,6 +1327,11 @@ class Live extends Component<PageOwnProps, PageState> {
                             openType="contact"
                             onClick={() => {
                             }}/>
+                          <RoundButton
+                            size={30}
+                            img={moment}
+                            text="朋友圈"
+                            onClick={this.onShareMoment}/>
                         </View>
                         <View className="qz-live-match-up__nooice-right">
                           <Image src={supportRight}
@@ -1361,6 +1426,13 @@ class Live extends Component<PageOwnProps, PageState> {
             onClick={this.handleCurtainClick}
           />
         </AtCurtain>
+        <AtToast isOpened={this.state.downLoading} text="生成中..." status="loading"/>
+        <AtMessage/>
+        <ModalAlbum
+          isOpened={this.state.permissionShow}
+          handleConfirm={this.onPremissionSuccess}
+          handleCancel={this.onPremissionCancel}
+          handleClose={this.onPremissionClose}/>
       </View>
     )
   }

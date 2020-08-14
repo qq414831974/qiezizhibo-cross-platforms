@@ -57,6 +57,7 @@ export const ORDER_TYPE = {
   "normal": 0,
   "live": 1,
   "record": 2,
+  "monopoly": 3,
 }
 export const ORDER_STAUTS = {
   "notpaid": 0,

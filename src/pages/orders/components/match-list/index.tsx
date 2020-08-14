@@ -103,8 +103,13 @@ class MatchList extends Component<PageOwnProps, PageState> {
         return <View key={item.id}>
           <View className='qz-match-list-content'>
             <View className='qz-match-list-content__inner'>
-              <MatchItem matchInfo={item.match}
-                         onClick={this.onItemClick.bind(this, item.id)}/>
+              {item.mpo && item.mpo.type == 3 ? <View className="qz-match-list-content__charge">
+                买断
+              </View> : null}
+              <MatchItem
+                matchInfo={item.match}
+                showCharge={false}
+                onClick={this.onItemClick.bind(this, item.id)}/>
             </View>
           </View>
           {item.mpo && this.state.orderlist[item.id] ? <View className='qz-match-list-order'>

@@ -135,16 +135,19 @@ class User extends Component<PageOwnProps, PageState> {
     this.initLocation();
   }
 
-  async getUserInfo() {
+  async getUserInfo(onSuccess?: Function | null) {
     if (await hasLogin()) {
       const openid = await getStorage('wechatOpenid');
       userAction.getUserInfo({openId: openid}, {
-        success: () => {
+        success: (res) => {
           this.setState({
             isLogin: true
           })
           Taro.hideLoading()
           Taro.stopPullDownRefresh()
+          if (onSuccess) {
+            onSuccess(res);
+          }
         }, failed: () => {
           this.clearLoginState();
           Taro.hideLoading()
@@ -212,12 +215,13 @@ class User extends Component<PageOwnProps, PageState> {
   }
 
   onAuthSuccess = () => {
-    const {userInfo} = this.props
     this.setState({loginOpen: false, isLogin: true})
-    this.getUserInfo()
-    if (userInfo != null && userInfo.phone == null) {
-      this.setState({phoneOpen: true})
-    }
+    this.getUserInfo((res) => {
+      const {phone} = res.payload
+      if (res.payload != null && phone == null) {
+        this.setState({phoneOpen: true})
+      }
+    })
   }
 
   onPhoneClose = () => {

@@ -1,6 +1,6 @@
 import "taro-ui/dist/style/components/article.scss";
 import Taro, {Component} from '@tarojs/taro'
-import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
+import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider, AtActionSheet, AtActionSheetItem} from "taro-ui"
 import {View, Text, Button} from '@tarojs/components'
 import Request from '../../utils/request'
 import {getStorage, getYuan, toLogin} from '../../utils/utils'
@@ -17,6 +17,9 @@ type MatchCharge = {
   productId: number,
   type: number,
   matchId: number,
+  isMonopolyCharge: boolean,
+  monopolyPrice: number,
+  monopolyProductId: number,
 }
 type UnifiedJSAPIOrderResult = {
   appId: string,
@@ -50,7 +53,10 @@ type PageDispatchProps = {
 
 type PageOwnProps = {}
 
-type PageState = {}
+type PageState = {
+  isChargeOpen: boolean,
+  isMonopolyOpen: boolean,
+}
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
@@ -69,7 +75,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
     handleError: () => {
     },
   }
-  handleConfirm = async (isMonth: boolean) => {
+  handleConfirm = async ({isMonth, isMonopoly, anonymous}) => {
     Taro.showLoading({title: global.LOADING_TEXT})
     const {handleConfirm, handleError, charge} = this.props;
 
@@ -85,13 +91,33 @@ class ModalPay extends Component<PageOwnProps, PageState> {
       })
       return;
     }
+    let desc;
+    let products = [{productId: charge.productId, isSecond: isMonth}];
+    let type = charge.type;
+    let attach = JSON.stringify({matchId: charge.matchId, type: charge.type});
+    if (charge.type == global.ORDER_TYPE.live) {
+      desc = `茄子体育-直播-${charge.matchId}`;
+    } else if (charge.type == global.ORDER_TYPE.record) {
+      desc = `茄子体育-录播-${charge.matchId}`;
+    }
+    if (isMonopoly) {
+      desc = `茄子体育-买断-${charge.matchId}`;
+      products = [{productId: charge.monopolyProductId, isSecond: false}];
+      type = global.ORDER_TYPE.monopoly;
+      attach = JSON.stringify({
+        matchId: charge.matchId,
+        type: global.ORDER_TYPE.monopoly,
+        anonymous: anonymous
+      });
+    }
+
     new Request().post(api.API_ORDER_CREATE, {
       openId: openId,
       userNo: userNo,
-      type: charge.type,
-      description: `茄子体育-${charge.type == global.ORDER_TYPE.live ? "直播" : "录播"}-${charge.matchId}`,
-      products: [{productId: charge.productId, isSecond: isMonth}],
-      attach: JSON.stringify({matchId: charge.matchId, type: charge.type})
+      type: type,
+      description: desc,
+      products: products,
+      attach: attach
     }).then((unifiedResult: UnifiedJSAPIOrderResult) => {
       if (unifiedResult) {
         Taro.requestPayment(
@@ -104,6 +130,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
             success: function (res) {
               if (res.errMsg == "requestPayment:ok") {
                 handleConfirm(unifiedResult.orderId);
+                this.setState({isMonopolyOpen: false})
               }
             },
             fail: function (res) {
@@ -112,6 +139,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
               } else {
                 handleError(error.ERROR_PAY_ERROR);
               }
+              this.setState({isMonopolyOpen: false})
             },
           })
         Taro.hideLoading();
@@ -125,9 +153,22 @@ class ModalPay extends Component<PageOwnProps, PageState> {
       Taro.hideLoading();
     })
   }
+  handleChargeOpen = () => {
+    this.setState({isChargeOpen: true})
+  }
+  handleChargeClose = () => {
+    this.setState({isChargeOpen: false})
+  }
+  handleMonopolyOpen = () => {
+    this.setState({isMonopolyOpen: true})
+  }
+  handleMonopolyClose = () => {
+    this.setState({isMonopolyOpen: false})
+  }
 
   render() {
     const {isOpened = false, handleCancel, charge, payEnabled} = this.props;
+    const {isChargeOpen = false, isMonopolyOpen = false} = this.state;
     if (!payEnabled) {
       return (<AtModal isOpened={isOpened} onClose={handleCancel}>
         <AtModalContent>
@@ -144,33 +185,75 @@ class ModalPay extends Component<PageOwnProps, PageState> {
       </AtModal>)
     }
     return (
-      <AtModal isOpened={isOpened} onClose={handleCancel}>
-        <AtModalContent>
-          <View className="center">
-            <AtAvatar circle image={defaultLogo}/>
-          </View>
-          <Text className="center gray qz-pay-modal-content_text">
-            付费观看
-          </Text>
-          <AtDivider height={48} lineColor="#E5E5E5"/>
-          <View className="gray qz-pay-modal-content_tip">
-            • 本场比赛需要付费观看
-          </View>
-          <View className="gray qz-pay-modal-content_tip">
-            • 本场比赛限时观看一个月 价格{charge ? getYuan(charge.secondPrice) : 0}（元）
-          </View>
-          <View className="gray qz-pay-modal-content_tip">
-            • 本场比赛永久观看 价格{charge ? getYuan(charge.price) : 0}（元）
-          </View>
-          <View className="light-gray qz-pay-modal-content_tip">
-            • 购买永久后，本场比赛可无限次数观看，并可联系客服获取录像下载地址
-          </View>
-        </AtModalContent>
-        <AtModalAction>
-          <Button className="black" onClick={this.handleConfirm.bind(this, true)}>购买一个月(本场)</Button>
-          <Button className="black" onClick={this.handleConfirm.bind(this, false)}>购买永久(本场)</Button>
-        </AtModalAction>
-      </AtModal>
+      <View>
+        <AtModal isOpened={isOpened} onClose={handleCancel}>
+          <AtModalContent>
+            <View className="center">
+              <AtAvatar circle image={defaultLogo}/>
+            </View>
+            <Text className="center gray qz-pay-modal-content_text">
+              付费观看
+            </Text>
+            <AtDivider height={48} lineColor="#E5E5E5"/>
+            <View className="gray qz-pay-modal-content_tip">
+              • 本场比赛需要付费观看
+            </View>
+            <View className="gray qz-pay-modal-content_tip">
+              • 本场比赛限时观看一个月 价格{charge ? getYuan(charge.secondPrice) : 0}（元）
+            </View>
+            <View className="gray qz-pay-modal-content_tip">
+              • 本场比赛永久观看 价格{charge ? getYuan(charge.price) : 0}（元）
+            </View>
+            {charge && charge.isMonopolyCharge ? <View className="gray qz-pay-modal-content_tip">
+              • 本场比赛买断 价格{charge ? getYuan(charge.monopolyPrice) : 0}（元）
+            </View> : null}
+            <View className="light-gray qz-pay-modal-content_tip">
+              • 购买永久后，本场比赛可无限次数观看，并可联系客服获取录像下载地址
+            </View>
+            {charge && charge.isMonopolyCharge ? <View className="light-gray qz-pay-modal-content_tip">
+              • 本场比赛买断后，所有观众都可免费观看本场比赛
+            </View> : null}
+          </AtModalContent>
+          {charge && charge.isMonopolyCharge ? <AtModalAction>
+              <Button className="black" onClick={this.handleChargeOpen}>购买(本场)</Button>
+              <Button className="black" onClick={this.handleMonopolyOpen}>买断(本场)</Button>
+            </AtModalAction> :
+            <AtModalAction>
+              <Button className="black" onClick={this.handleConfirm.bind(this, true)}>购买一个月(本场)</Button>
+              <Button className="black" onClick={this.handleConfirm.bind(this, false)}>购买永久(本场)</Button>
+            </AtModalAction>}
+        </AtModal>
+        <AtActionSheet
+          title={`本场比赛需要付费观看\n本场比赛限时观看一个月 价格${charge ? getYuan(charge.secondPrice) : 0}（元）\n本场比赛永久观看 价格${charge ? getYuan(charge.price) : 0}（元）\n购买永久后，本场比赛可无限次数观看，并可联系客服获取录像下载地址`}
+          cancelText='取消'
+          isOpened={isChargeOpen}
+          onCancel={this.handleChargeClose}
+          onClose={this.handleChargeClose}>
+          <AtActionSheetItem
+            onClick={this.handleConfirm.bind(this, {isMonth: true, isMonopoly: false, anonymous: false})}>
+            购买一个月(本场)
+          </AtActionSheetItem>
+          <AtActionSheetItem
+            onClick={this.handleConfirm.bind(this, {isMonth: false, isMonopoly: false, anonymous: false})}>
+            购买永久(本场)
+          </AtActionSheetItem>
+        </AtActionSheet>
+        <AtActionSheet
+          title="本场比赛买断后，所有观众都可免费观看本场比赛"
+          cancelText='取消'
+          isOpened={isMonopolyOpen}
+          onCancel={this.handleMonopolyClose}
+          onClose={this.handleMonopolyClose}>
+          <AtActionSheetItem
+            onClick={this.handleConfirm.bind(this, {isMonth: false, isMonopoly: true, anonymous: true})}>
+            匿名买断(本场)
+          </AtActionSheetItem>
+          <AtActionSheetItem
+            onClick={this.handleConfirm.bind(this, {isMonth: false, isMonopoly: true, anonymous: false})}>
+            实名买断(本场)
+          </AtActionSheetItem>
+        </AtActionSheet>
+      </View>
     )
   }
 }

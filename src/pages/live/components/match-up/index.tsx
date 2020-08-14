@@ -1,6 +1,6 @@
 import Taro, {Component} from '@tarojs/taro'
 import {AtAvatar, AtIcon} from "taro-ui"
-import {View, Text} from '@tarojs/components'
+import {View, Text, Image} from '@tarojs/components'
 
 import defaultLogo from '../../../../assets/default-logo.png'
 import './index.scss'
@@ -95,6 +95,21 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                       </View>
                       : null
                     }
+                    {matchInfo.isMonopoly && matchInfo.monopolyUser ?
+                      <View className='qz-match-up-item__vs-match-monopoly__container'>
+                        <Text className='title'>
+                          感谢买断用户
+                        </Text>
+                        <View className='qz-match-up-item__vs-match-monopoly'>
+                          <Image className='avatar'
+                                 src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
+                          <Text className='text'>
+                            {matchInfo.monopolyUser.name}
+                          </Text>
+                        </View>
+                      </View>
+                      : null
+                    }
                   </View>}
                 </View>
                 <View className='qz-match-up-item__team'>
@@ -129,6 +144,21 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                         <Text className='text'>
                           {matchInfo.place}
                         </Text>
+                      </View>
+                      : null
+                    }
+                    {matchInfo.isMonopoly && matchInfo.monopolyUser ?
+                      <View className='qz-match-up-item__vs-match-monopoly__container'>
+                        <Text className='title'>
+                          感谢买断用户
+                        </Text>
+                        <View className='qz-match-up-item__vs-match-monopoly'>
+                          <Image className='avatar'
+                                 src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
+                          <Text className='text'>
+                            {matchInfo.monopolyUser.name}
+                          </Text>
+                        </View>
                       </View>
                       : null
                     }

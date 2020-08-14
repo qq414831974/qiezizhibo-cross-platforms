@@ -255,13 +255,13 @@
   }
   &__nooice {
     width: 100%;
-    height: $at-avatar-size-sm / 2;
+    //height: $at-avatar-size-sm / 2;
     position: relative;
     background-color: $color-bg;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-top: $spacing-v-lg;
+    //padding-top: $spacing-v-lg;
     //clear: both;
     //overflow: hidden;
     &-img {
@@ -294,7 +294,8 @@
       //bottom: 0;
       display: flex;
       align-items: center;
-      padding-bottom: $spacing-h-sm;
+      //padding-bottom: $spacing-h-sm;
+      margin: auto;
     }
   }
   &__stat-bar {
@@ -313,7 +314,9 @@
     }
     &-image {
       height: 50px;
+      min-height: 50px;
       width: 50px;
+      min-width: 50px;
       border-radius: 25px;
     }
     &-text {

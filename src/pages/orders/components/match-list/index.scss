@@ -9,6 +9,7 @@
     margin-top: $spacing-v-md;
   }
   &-content {
+    position: relative;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -22,6 +23,16 @@
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
       padding: 0 5%;
+    }
+    &__charge {
+      position: absolute;
+      top: $spacing-v-md;
+      left: 5%;
+      font-size: $font-size-xs;
+      color: $color-white;
+      background-color: $color_warning;
+      border-radius: $border-radius-md;
+      padding: $spacing-v-xxs $spacing-v-xs;
     }
   }
   &-time{
