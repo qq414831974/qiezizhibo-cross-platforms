@@ -76,7 +76,6 @@ class ModalPay extends Component<PageOwnProps, PageState> {
     },
   }
   handleConfirm = async ({isMonth, isMonopoly, anonymous}) => {
-    Taro.showLoading({title: global.LOADING_TEXT})
     const {handleConfirm, handleError, charge} = this.props;
 
     const openId = await getStorage('wechatOpenid')
@@ -110,7 +109,8 @@ class ModalPay extends Component<PageOwnProps, PageState> {
         anonymous: anonymous
       });
     }
-
+    Taro.showLoading({title: global.LOADING_TEXT})
+    this.setState({isMonopolyOpen: false, isChargeOpen: false})
     new Request().post(api.API_ORDER_CREATE, {
       openId: openId,
       userNo: userNo,
@@ -130,7 +130,6 @@ class ModalPay extends Component<PageOwnProps, PageState> {
             success: function (res) {
               if (res.errMsg == "requestPayment:ok") {
                 handleConfirm(unifiedResult.orderId);
-                this.setState({isMonopolyOpen: false})
               }
             },
             fail: function (res) {
@@ -139,7 +138,6 @@ class ModalPay extends Component<PageOwnProps, PageState> {
               } else {
                 handleError(error.ERROR_PAY_ERROR);
               }
-              this.setState({isMonopolyOpen: false})
             },
           })
         Taro.hideLoading();
