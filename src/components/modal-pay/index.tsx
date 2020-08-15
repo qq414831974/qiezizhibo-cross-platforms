@@ -208,10 +208,10 @@ class ModalPay extends Component<PageOwnProps, PageState> {
               • 本场比赛买断 价格{charge ? getYuan(charge.monopolyPrice) : 0}（元）
             </View> : null}
             <View className="light-gray qz-pay-modal-content_tip">
-              • 购买永久后，本场比赛可无限次数观看，并可联系客服获取录像下载地址
+              • 购买永久后，本场比赛可无限次数观看
             </View>
             {charge && charge.isMonopolyCharge ? <View className="light-gray qz-pay-modal-content_tip">
-              • 本场比赛买断后，所有观众都可免费观看本场比赛
+              • 本场比赛买断后，可联系客服获取录像下载地址，且所有观众都可免费观看本场比赛
             </View> : null}
           </AtModalContent>
           {charge && charge.isMonopolyCharge ? <AtModalAction>
@@ -224,7 +224,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
             </AtModalAction>}
         </AtModal>
         <AtActionSheet
-          title={`本场比赛需要付费观看\n本场比赛限时观看一个月 价格${charge ? getYuan(charge.secondPrice) : 0}（元）\n本场比赛永久观看 价格${charge ? getYuan(charge.price) : 0}（元）\n购买永久后，本场比赛可无限次数观看，并可联系客服获取录像下载地址`}
+          title={`本场比赛需要付费观看\n本场比赛限时观看一个月 价格${charge ? getYuan(charge.secondPrice) : 0}（元）\n本场比赛永久观看 价格${charge ? getYuan(charge.price) : 0}（元）\n购买永久后，本场比赛可无限次数观看`}
           cancelText='取消'
           isOpened={isChargeOpen}
           onCancel={this.handleChargeClose}
@@ -239,7 +239,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
           </AtActionSheetItem>
         </AtActionSheet>
         <AtActionSheet
-          title="本场比赛买断后，所有观众都可免费观看本场比赛"
+          title="本场比赛买断后，可联系客服获取录像下载地址，且所有观众都可免费观看本场比赛"
           cancelText='取消'
           isOpened={isMonopolyOpen}
           onCancel={this.handleMonopolyClose}

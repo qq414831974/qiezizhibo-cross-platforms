@@ -64,11 +64,10 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
                 {matchInfo.isMonopoly ?
                   (matchInfo.monopolyUser ?
                       <View className="qz-match-item__charge-user">
-                        本场已被用户
                         <Image className='avatar'
                                src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
                         {matchInfo.monopolyUser.name}
-                        买断
+                        已买断本场比赛
                       </View>
                       : "本场已被匿名用户买断"
                   ) : (matchInfo.payTimes ? `付费 ${matchInfo.payTimes}人已观看` : "付费")}

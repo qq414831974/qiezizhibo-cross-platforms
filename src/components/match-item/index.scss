@@ -40,12 +40,13 @@
     padding: $spacing-v-xxs $spacing-v-xs;
     &-user{
       display: flex;
+      align-items: center;
       .avatar{
         display: inline-block;
-        height: $font-size-base;
-        min-height: $font-size-base;
-        width: $font-size-base;
-        min-width: $font-size-base;
+        height: $font-size-lg;
+        min-height: $font-size-lg;
+        width: $font-size-lg;
+        min-width: $font-size-lg;
         border-radius: 50%;
       }
     }
