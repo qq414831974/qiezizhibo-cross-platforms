@@ -190,3 +190,8 @@ export const getCityData = (cityArray: Array<any>): any => {
 export const getYuan = (fen: number): number => {
   return fen / 100;
 }
+
+
+export const random = (lower, upper) => {
+  return Math.floor(Math.random() * (upper - lower + 1)) + lower;
+}

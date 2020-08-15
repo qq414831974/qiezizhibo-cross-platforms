@@ -11,8 +11,15 @@ import './live.scss'
 import matchAction from "../../actions/match";
 import liveAction from "../../actions/live";
 import playerAction from "../../actions/player";
-import {getTimeDifference, getStorage, hasLogin, clearLoginToken} from '../../utils/utils'
-import {FootballEventType, MATCH_TYPE, LOADING_TEXT, ORDER_TYPE, ORDER_STAUTS} from "../../constants/global";
+import {getTimeDifference, getStorage, hasLogin, clearLoginToken, random} from '../../utils/utils'
+import {
+  FootballEventType,
+  MATCH_TYPE,
+  LOADING_TEXT,
+  ORDER_TYPE,
+  ORDER_STAUTS,
+  REPOST_TEXT
+} from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import supportLeft from '../../assets/live/support-left.png'
 import supportRight from '../../assets/live/support-right.png'
@@ -208,7 +215,7 @@ class Live extends Component<PageOwnProps, PageState> {
 
   $setSharePath = () => `/pages/live/live?id=${this.props.match.id}`
 
-  $setShareTitle = () => this.props.match.name
+  $setShareTitle = () => REPOST_TEXT[random(0, REPOST_TEXT.length)]
 
   // $setShareImageUrl = () => '可设置分享图片路径(优先级最高)'
 
@@ -1315,11 +1322,9 @@ class Live extends Component<PageOwnProps, PageState> {
                             onClick={this.onCollectClick}/>
                           <RoundButton
                             size={30}
-                            img={share}
-                            text="分享"
-                            openType="share"
-                            onClick={() => {
-                            }}/>
+                            img={moment}
+                            text="朋友圈"
+                            onClick={this.onShareMoment}/>
                           <RoundButton
                             size={30}
                             img={headphones}
@@ -1329,9 +1334,11 @@ class Live extends Component<PageOwnProps, PageState> {
                             }}/>
                           <RoundButton
                             size={30}
-                            img={moment}
-                            text="朋友圈"
-                            onClick={this.onShareMoment}/>
+                            img={share}
+                            text="分享"
+                            openType="share"
+                            onClick={() => {
+                            }}/>
                         </View>
                         <View className="qz-live-match-up__nooice-right">
                           <Image src={supportRight}

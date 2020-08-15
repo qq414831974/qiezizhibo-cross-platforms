@@ -2,7 +2,7 @@ import "taro-ui/dist/style/components/article.scss";
 import Taro, {Component} from '@tarojs/taro'
 import {AtAvatar} from "taro-ui"
 import {connect} from '@tarojs/redux'
-import {View, Text} from '@tarojs/components'
+import {View, Text, Image} from '@tarojs/components'
 import defaultLogo from '../../assets/default-logo.png'
 import './index.scss'
 import {formatTime, formatDayTime} from "../../utils/utils";
@@ -61,7 +61,17 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
           <View className="qz-match-item-content">
             {((matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
               <View className="qz-match-item__charge">
-                付费{matchInfo.payTimes ? ` ${matchInfo.payTimes}人已观看` : ""}
+                {matchInfo.isMonopoly ?
+                  (matchInfo.monopolyUser ?
+                      <View className="qz-match-item__charge-user">
+                        本场已被用户
+                        <Image className='avatar'
+                               src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
+                        {matchInfo.monopolyUser.name}
+                        买断
+                      </View>
+                      : "本场已被匿名用户买断"
+                  ) : (matchInfo.payTimes ? `付费 ${matchInfo.payTimes}人已观看` : "付费")}
               </View>
               : null
             }

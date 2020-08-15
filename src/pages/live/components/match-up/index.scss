@@ -198,11 +198,21 @@
 
       .text {
         display: inline-block;
-        font-size: $font-size-base;
-        line-height: $line-height-zh;
+        font-size: $font-size-sm;
+        line-height: $line-height-en;
         white-space: nowrap;
-        height: $font-size-base * 1.5;
-        margin-left: $spacing-h-sm;
+        margin-left: $spacing-v-xs;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+        word-break: break-all;
+      }
+      .text-small {
+        display: inline-block;
+        font-size: $font-size-xs;
+        line-height: $line-height-en;
+        white-space: nowrap;
+        margin-left: $spacing-v-xs;
         overflow: hidden;
         text-overflow: ellipsis;
         word-wrap: break-word;

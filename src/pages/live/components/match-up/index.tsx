@@ -103,7 +103,7 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                         <View className='qz-match-up-item__vs-match-monopoly'>
                           <Image className='avatar'
                                  src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
-                          <Text className='text'>
+                          <Text className={matchInfo.monopolyUser.name.length >= 7 ? 'text-small' : "text"}>
                             {matchInfo.monopolyUser.name}
                           </Text>
                         </View>
@@ -155,7 +155,7 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                         <View className='qz-match-up-item__vs-match-monopoly'>
                           <Image className='avatar'
                                  src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
-                          <Text className='text'>
+                          <Text className={matchInfo.monopolyUser.name.length >= 7 ? 'text-small' : "text"}>
                             {matchInfo.monopolyUser.name}
                           </Text>
                         </View>

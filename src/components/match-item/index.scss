@@ -38,6 +38,17 @@
     background-color: $color_warning;
     border-radius: $border-radius-md;
     padding: $spacing-v-xxs $spacing-v-xs;
+    &-user{
+      display: flex;
+      .avatar{
+        display: inline-block;
+        height: $font-size-base;
+        min-height: $font-size-base;
+        width: $font-size-base;
+        min-width: $font-size-base;
+        border-radius: 50%;
+      }
+    }
   }
 
   &__team {
