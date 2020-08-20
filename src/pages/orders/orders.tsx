@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View} from '@tarojs/components'
-import {AtActivityIndicator, AtLoadMore} from "taro-ui"
+import {AtLoadMore} from "taro-ui"
 import {connect} from '@tarojs/redux'
 
 import './orders.scss'
@@ -94,6 +94,7 @@ class Orders extends Component<PageOwnProps, PageState> {
       }
     })
   }
+
   // 小程序上拉加载
   onReachBottom() {
     this.nextPage();

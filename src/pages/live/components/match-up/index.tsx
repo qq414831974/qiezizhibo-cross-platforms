@@ -3,6 +3,7 @@ import {AtAvatar, AtIcon} from "taro-ui"
 import {View, Text, Image} from '@tarojs/components'
 
 import defaultLogo from '../../../../assets/default-logo.png'
+import noUser from '../../../../assets/no-user.png'
 import './index.scss'
 import {formatTime, formatMonthDayTime} from "../../../../utils/utils";
 
@@ -27,6 +28,7 @@ type PageOwnProps = {
   onClick?: any | null;
   className?: string | null;
   onlytime?: boolean | null;
+  onMonopolyClick: any;
 }
 
 type PageState = {}
@@ -44,6 +46,9 @@ class MatchUp extends Component<PageOwnProps, PageState> {
     if (this.props.matchInfo.activityid) {
       this.props.onClick();
     }
+  }
+  onMonopolyClick = () => {
+    this.props.onMonopolyClick();
   }
 
   render() {
@@ -98,7 +103,7 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                     {matchInfo.isMonopoly && matchInfo.monopolyUser ?
                       <View className='qz-match-up-item__vs-match-monopoly__container'>
                         <Text className='title'>
-                          感谢买断用户
+                          感谢金主爸爸
                         </Text>
                         <View className='qz-match-up-item__vs-match-monopoly'>
                           <Image className='avatar'
@@ -108,7 +113,22 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                           </Text>
                         </View>
                       </View>
-                      : null
+                      : matchInfo.isMonopolyCharge
+                        ?
+                        <View className='qz-match-up-item__vs-match-monopoly__container'
+                              onClick={this.onMonopolyClick}>
+                          <Text className='title'>
+                            感谢金主爸爸
+                          </Text>
+                          <View className='qz-match-up-item__vs-match-monopoly'>
+                            <Image className='avatar'
+                                   src={noUser}/>
+                            <Text className="text-small">
+                              暂无金主支持
+                            </Text>
+                          </View>
+                        </View>
+                        : null
                     }
                   </View>}
                 </View>
@@ -150,7 +170,7 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                     {matchInfo.isMonopoly && matchInfo.monopolyUser ?
                       <View className='qz-match-up-item__vs-match-monopoly__container'>
                         <Text className='title'>
-                          感谢买断用户
+                          感谢金主爸爸
                         </Text>
                         <View className='qz-match-up-item__vs-match-monopoly'>
                           <Image className='avatar'
@@ -160,7 +180,21 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                           </Text>
                         </View>
                       </View>
-                      : null
+                      : matchInfo.isMonopolyCharge
+                        ? <View className='qz-match-up-item__vs-match-monopoly__container'
+                                onClick={this.props.onMonopolyClick}>
+                          <Text className='title'>
+                            感谢金主爸爸
+                          </Text>
+                          <View className='qz-match-up-item__vs-match-monopoly'>
+                            <Image className='avatar'
+                                   src={noUser}/>
+                            <Text className="text-small">
+                              暂无金主支持
+                            </Text>
+                          </View>
+                        </View>
+                        : null
                     }
                   </View>}
                 </View>

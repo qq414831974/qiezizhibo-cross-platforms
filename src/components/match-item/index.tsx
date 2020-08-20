@@ -67,9 +67,9 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
                         <Image className='avatar'
                                src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
                         {matchInfo.monopolyUser.name}
-                        已买断本场比赛
+                        请大家围观
                       </View>
-                      : "本场已被匿名用户买断"
+                      : "匿名用户请大家围观"
                   ) : (matchInfo.payTimes ? `付费 ${matchInfo.payTimes}人已观看` : "付费")}
               </View>
               : null

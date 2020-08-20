@@ -12,12 +12,14 @@ import LeaguePlayerTable from "./components/league-player-table";
 import LeagueRegulations from "./components/league-regulations";
 import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
+import { random_weight} from "../../utils/utils";
 
 type PageStateProps = {
   leagueTeams: any;
   leaguePlayers: any;
   league: any;
   locationConfig: { city: string, province: string }
+  shareSentence: any;
 }
 
 type PageDispatchProps = {}
@@ -68,7 +70,15 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
   $setSharePath = () => `/pages/home/home?id=${this.props.league.id}&page=leagueManager`
 
-  $setShareTitle = () => this.props.league.name
+  $setShareTitle = () => {
+    const shareSentence = random_weight(this.props.shareSentence.filter(value => value.type == global.SHARE_SENTENCE_TYPE.league).map(value => {
+      return {...value, weight: value.weight + "%"}
+    }));
+    if (shareSentence == null) {
+      return this.props.league.name
+    }
+    return shareSentence.sentence;
+  }
 
   componentWillMount() {
   }
@@ -211,7 +221,8 @@ const mapStateToProps = (state) => {
     leaguePlayers: state.league.leaguePlayers,
     leagueTeams: state.league.leagueTeams,
     league: state.league.league,
-    locationConfig: state.config.locationConfig
+    locationConfig: state.config.locationConfig,
+    shareSentence: state.config ? state.config.shareSentence : [],
   }
 }
 export default connect(mapStateToProps)(LeagueManager)

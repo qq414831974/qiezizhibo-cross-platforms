@@ -104,7 +104,7 @@ class MatchList extends Component<PageOwnProps, PageState> {
           <View className='qz-match-list-content'>
             <View className='qz-match-list-content__inner'>
               {item.mpo && item.mpo.type == 3 ? <View className="qz-match-list-content__charge">
-                买断
+                请大家围观
               </View> : null}
               <MatchItem
                 matchInfo={item.match}

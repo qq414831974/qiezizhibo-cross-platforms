@@ -102,6 +102,7 @@ class Home extends Component<PageOwnProps, PageState> {
     this.qqmapsdk = new qqmapjs({key: "ROVBZ-JKXH6-BJUS4-MY6WU-QXI7T-QRBPL"});
     this.getAreas();
     configAction.setVisit();
+    configAction.getShareSentence();
     configAction.getBulletinConfig({
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
       scene: "home"
@@ -451,6 +452,7 @@ const mapStateToProps = (state) => {
     bulletinConfig: state.config ? state.config.bulletinConfig : null,
     leagueList: state.league ? state.league.leagueList : {},
     areaList: state.area ? state.area.areas : {},
+    shareSentence: state.config ? state.config.shareSentence : [],
   }
 }
 export default connect(mapStateToProps)(Home)

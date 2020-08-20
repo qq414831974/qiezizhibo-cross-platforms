@@ -64,6 +64,10 @@ export const ORDER_STAUTS = {
   "close": 1,
   "paid": 2,
 }
+export const SHARE_SENTENCE_TYPE = {
+  "match": 1,
+  "league": 2,
+}
 export const REPOST_TEXT = [
   "人气落后啦，快进来帮我球队打call！",
   "两队打得相当激烈，还不进来为我们加油！",

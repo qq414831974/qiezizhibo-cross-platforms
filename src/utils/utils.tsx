@@ -195,3 +195,91 @@ export const getYuan = (fen: number): number => {
 export const random = (lower, upper) => {
   return Math.floor(Math.random() * (upper - lower + 1)) + lower;
 }
+/**
+ * js数组实现权重概率分配，支持数字比模式(支持2位小数)和百分比模式(不支持小数，最后一个元素多退少补)
+ * @param  Array  arr  js数组，参数类型[Object,Object,Object……]
+ * @return  Array      返回一个随机元素，概率为其weight/所有weight之和，参数类型Object
+ */
+export const random_weight = (arr: Array<any>) => {
+  //参数arr元素必须含有weight属性，参考如下所示
+  //var arr=[{name:'1',weight:1.5},{name:'2',weight:2.5},{name:'3',weight:3.5}];
+  //var arr=[{name:'1',weight:'15%'},{name:'2',weight:'25%'},{name:'3',weight:'35%'}];
+  //求出最大公约数以计算缩小倍数，perMode为百分比模式
+  if (arr == null || arr.length == 0) {
+    return null;
+  }
+  let per;
+  let maxNum = 0;
+  let perMode = false;
+  //自定义Math求最小公约数方法
+  let gcd = function (a, b) {
+    let min = Math.min(a, b);
+    let max = Math.max(a, b);
+    let result = 1;
+    if (a === 0 || b === 0) {
+      return max;
+    }
+    for (let i = min; i >= 1; i--) {
+      if (min % i === 0 && max % i === 0) {
+        result = i;
+        break;
+      }
+    }
+    return result;
+  };
+
+  //使用clone元素对象拷贝仍然会造成浪费，但是使用权重数组对应关系更省内存
+  let weight_arr: Array<any> = [];
+  for (let i = 0; i < arr.length; i++) {
+    if ('undefined' != typeof (arr[i].weight)) {
+      if (arr[i].weight.toString().indexOf('%') !== -1) {
+        per = Math.floor(arr[i].weight.toString().replace('%', ''));
+        perMode = true;
+      } else {
+        per = Math.floor(arr[i].weight * 100);
+      }
+    } else {
+      per = 0;
+    }
+    weight_arr[i] = per;
+    maxNum = gcd(maxNum, per);
+  }
+  //数字比模式，3:5:7，其组成[0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2]
+  //百分比模式，元素所占百分比为15%，25%，35%
+  let index: Array<any> = [];
+  let total = 0;
+  let len = 0;
+  if (perMode) {
+    for (let i = 0; i < arr.length; i++) {
+      //len表示存储arr下标的数据块长度，已优化至最小整数形式减小索引数组的长度
+      len = weight_arr[i];
+      for (let j = 0; j < len; j++) {
+        //超过100%跳出，后面的舍弃
+        if (total >= 100) {
+          break;
+        }
+        index.push(i);
+        total++;
+      }
+    }
+    //使用最后一个元素补齐100%
+    while (total < 100) {
+      index.push(arr.length - 1);
+      total++;
+    }
+  } else {
+    for (let i = 0; i < arr.length; i++) {
+      //len表示存储arr下标的数据块长度，已优化至最小整数形式减小索引数组的长度
+      len = weight_arr[i] / maxNum;
+      for (let j = 0; j < len; j++) {
+        index.push(i);
+      }
+      total += len;
+    }
+  }
+  //随机数值，其值为0-11的整数，数据块根据权重分块
+  let rand = Math.floor(Math.random() * total);
+  // console.log(index);
+  // console.log(rand);
+  return arr[index[rand]];
+}

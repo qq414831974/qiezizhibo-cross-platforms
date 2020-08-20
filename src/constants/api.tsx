@@ -23,6 +23,7 @@ export const API_CONFIG_BULLETIN_MATCH = (id) =>`${system_service}/system/config
 export const API_SYSTEM_SECURITY_CHECK = `${system_service}/system/wxa_security_check`;
 export const API_VISIT = `${user_service}/user/visit`;
 export const API_GET_WXACODE = `${system_service}/system/getWxacode`;
+export const API_GET_SHARE_SENTENCE = `${system_service}/system/share/sentence`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth/wechat`;

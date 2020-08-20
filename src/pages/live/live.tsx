@@ -11,14 +11,15 @@ import './live.scss'
 import matchAction from "../../actions/match";
 import liveAction from "../../actions/live";
 import playerAction from "../../actions/player";
-import {getTimeDifference, getStorage, hasLogin, clearLoginToken, random} from '../../utils/utils'
+import {getTimeDifference, getStorage, hasLogin, clearLoginToken, random, random_weight} from '../../utils/utils'
 import {
   FootballEventType,
   MATCH_TYPE,
   LOADING_TEXT,
   ORDER_TYPE,
   ORDER_STAUTS,
-  REPOST_TEXT
+  REPOST_TEXT,
+  SHARE_SENTENCE_TYPE,
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import supportLeft from '../../assets/live/support-left.png'
@@ -65,6 +66,7 @@ type MatchCharge = {
   isMonopolyCharge: boolean,
   monopolyPrice: number,
   monopolyProductId: number,
+  monopolyOnly: boolean,
 }
 type PageStateProps = {
   match: any;
@@ -76,6 +78,7 @@ type PageStateProps = {
   commentList: any;
   danmuList: any;
   payEnabled: boolean;
+  shareSentence: any;
 }
 
 type PageDispatchProps = {}
@@ -215,7 +218,15 @@ class Live extends Component<PageOwnProps, PageState> {
 
   $setSharePath = () => `/pages/live/live?id=${this.props.match.id}`
 
-  $setShareTitle = () => REPOST_TEXT[random(0, REPOST_TEXT.length)]
+  $setShareTitle = () => {
+    const shareSentence = random_weight(this.props.shareSentence.filter(value => value.type == SHARE_SENTENCE_TYPE.match).map(value => {
+      return {...value, weight: value.weight + "%"}
+    }));
+    if (shareSentence == null) {
+      return REPOST_TEXT[random(0, REPOST_TEXT.length)]
+    }
+    return shareSentence.sentence;
+  }
 
   // $setShareImageUrl = () => '可设置分享图片路径(优先级最高)'
 
@@ -256,7 +267,7 @@ class Live extends Component<PageOwnProps, PageState> {
         this.getCollection(data.id);
         this.initSocket(data.id);
         data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
-        this.getMatchPayInfo(data);
+        this.getMatchPayInfo(data, false);
       }
       Taro.hideLoading();
     })
@@ -922,7 +933,7 @@ class Live extends Component<PageOwnProps, PageState> {
       }
     });
   }
-  getMatchPayInfo = async (data) => {
+  getMatchPayInfo = async (data, monopolyOnly) => {
     let needPayRecord = data.needPayRecord;
     let needPayLive = data.needPayLive;
     if (!await this.isUserLogin()) {
@@ -932,16 +943,16 @@ class Live extends Component<PageOwnProps, PageState> {
     if (data.status == FootballEventType.FINISH) {
       if (data.isRecordCharge && needPayRecord) {
         this.setState({needPay: true})
-        this.showPay(this.getCharge(data))
+        this.showPay(this.getCharge(data, monopolyOnly))
       }
     } else {
       if (data.isLiveCharge && needPayLive) {
         this.setState({needPay: true})
-        this.showPay(this.getCharge(data))
+        this.showPay(this.getCharge(data, monopolyOnly))
       }
     }
   }
-  getCharge = (data): MatchCharge => {
+  getCharge = (data, monopolyOnly): MatchCharge => {
     if (data.status == FootballEventType.FINISH) {
       return {
         price: data.recordPrice,
@@ -952,6 +963,7 @@ class Live extends Component<PageOwnProps, PageState> {
         isMonopolyCharge: data.isMonopolyCharge,
         monopolyPrice: data.monopolyPrice,
         monopolyProductId: data.monopolyProductId,
+        monopolyOnly: monopolyOnly
       }
     } else {
       return {
@@ -963,6 +975,7 @@ class Live extends Component<PageOwnProps, PageState> {
         isMonopolyCharge: data.isMonopolyCharge,
         monopolyPrice: data.monopolyPrice,
         monopolyProductId: data.monopolyProductId,
+        monopolyOnly: monopolyOnly
       }
     }
   }
@@ -1184,6 +1197,14 @@ class Live extends Component<PageOwnProps, PageState> {
       'type': type,
     })
   }
+  onPayClick = () => {
+    const {match = null} = this.props;
+    this.getMatchPayInfo(match, false);
+  }
+  onMonopolyClick = () => {
+    const {match = null} = this.props;
+    this.getMatchPayInfo(match, true);
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
@@ -1204,7 +1225,7 @@ class Live extends Component<PageOwnProps, PageState> {
         <View className='qz-live-match__content'>
           {this.state.needPay ? <View className='qz-live-match__video'>
             <Image src={match.poster} className="qz-live-match__video-poster-img"/>
-            {match && <AtButton onClick={this.getMatchPayInfo.bind(this, match)} type='primary'
+            {match && <AtButton onClick={this.onPayClick} type='primary'
                                 className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
           </View> : <Video
             id="videoPlayer"
@@ -1300,7 +1321,8 @@ class Live extends Component<PageOwnProps, PageState> {
                   <View className="qz-live-match-up__content">
                     <MatchUp className="qz-live-match-up__match-up" matchInfo={match}
                              matchStatus={matchStatus}
-                             onlytime={this.isThisYear(new Date(match.startTime))}/>
+                             onlytime={this.isThisYear(new Date(match.startTime))}
+                             onMonopolyClick={this.onMonopolyClick}/>
                     {match && match.hostteam && match.guestteam ?
                       <View className="qz-live-match-up__nooice">
                         <View className="qz-live-match-up__nooice-left">
@@ -1456,6 +1478,7 @@ const mapStateToProps = (state) => {
     commentList: state.match.comment,
     danmuList: state.match.danmu,
     payEnabled: state.config ? state.config.payEnabled : null,
+    shareSentence: state.config ? state.config.shareSentence : [],
   }
 }
 export default connect(mapStateToProps)(Live)

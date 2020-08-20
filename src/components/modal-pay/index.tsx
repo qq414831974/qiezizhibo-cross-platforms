@@ -20,6 +20,7 @@ type MatchCharge = {
   isMonopolyCharge: boolean,
   monopolyPrice: number,
   monopolyProductId: number,
+  monopolyOnly: boolean,
 }
 type UnifiedJSAPIOrderResult = {
   appId: string,
@@ -196,30 +197,44 @@ class ModalPay extends Component<PageOwnProps, PageState> {
             <View className="gray qz-pay-modal-content_tip">
               • 本场比赛需要付费观看
             </View>
-            <View className="gray qz-pay-modal-content_tip">
-              • 本场比赛限时观看一个月 价格{charge ? getYuan(charge.secondPrice) : 0}（元）
-            </View>
-            <View className="gray qz-pay-modal-content_tip">
-              • 本场比赛永久观看 价格{charge ? getYuan(charge.price) : 0}（元）
-            </View>
+            {charge && charge.monopolyOnly ? null : <View>
+              <View className="gray qz-pay-modal-content_tip">
+                • 本场比赛限时观看一个月 价格{charge ? getYuan(charge.secondPrice) : 0}（元）
+              </View>
+              <View className="gray qz-pay-modal-content_tip">
+                • 本场比赛永久观看 价格{charge ? getYuan(charge.price) : 0}（元）
+              </View>
+            </View>}
             {charge && charge.isMonopolyCharge ? <View className="gray qz-pay-modal-content_tip">
-              • 本场比赛买断 价格{charge ? getYuan(charge.monopolyPrice) : 0}（元）
+              • 本场比赛请大家围观 价格{charge ? getYuan(charge.monopolyPrice) : 0}（元）
             </View> : null}
-            <View className="light-gray qz-pay-modal-content_tip">
+            {charge && charge.monopolyOnly ? null : <View className="light-gray qz-pay-modal-content_tip">
               • 购买永久后，本场比赛可无限次数观看
-            </View>
+            </View>}
             {charge && charge.isMonopolyCharge ? <View className="light-gray qz-pay-modal-content_tip">
-              • 本场比赛买断后，可联系客服获取录像下载地址，且所有观众都可免费观看本场比赛
+              • 购买<Text className="bold">“请大家围观”</Text>后，您的<Text className="bold">头像及昵称</Text>会在直播间<Text className="bold">永久展示</Text>，且所有观众都可免费观看本场比赛，同时可联系客服获取录像下载地址。
             </View> : null}
           </AtModalContent>
-          {charge && charge.isMonopolyCharge ? <AtModalAction>
-              <Button className="black" onClick={this.handleChargeOpen}>购买(本场)</Button>
-              <Button className="black" onClick={this.handleMonopolyOpen}>买断(本场)</Button>
+          {charge && charge.monopolyOnly && charge.isMonopolyCharge ? <AtModalAction>
+              <Button className="black" onClick={this.handleMonopolyOpen}>请大家围观(本场)</Button>
             </AtModalAction> :
-            <AtModalAction>
-              <Button className="black" onClick={this.handleConfirm.bind(this, true)}>购买一个月(本场)</Button>
-              <Button className="black" onClick={this.handleConfirm.bind(this, false)}>购买永久(本场)</Button>
-            </AtModalAction>}
+            (charge && charge.isMonopolyCharge ? <AtModalAction>
+                <Button className="black" onClick={this.handleChargeOpen}>购买(本场)</Button>
+                <Button className="black" onClick={this.handleMonopolyOpen}>请大家围观(本场)</Button>
+              </AtModalAction> :
+              <AtModalAction>
+                <Button className="black" onClick={this.handleConfirm.bind(this, {
+                  isMonth: true,
+                  isMonopoly: false,
+                  anonymous: false
+                })}>购买一个月(本场)</Button>
+                <Button className="black" onClick={this.handleConfirm.bind(this, {
+                  isMonth: false,
+                  isMonopoly: false,
+                  anonymous: false
+                })}>购买永久(本场)</Button>
+              </AtModalAction>)
+          }
         </AtModal>
         <AtActionSheet
           title={`本场比赛需要付费观看\n本场比赛限时观看一个月 价格${charge ? getYuan(charge.secondPrice) : 0}（元）\n本场比赛永久观看 价格${charge ? getYuan(charge.price) : 0}（元）\n购买永久后，本场比赛可无限次数观看`}
@@ -237,18 +252,18 @@ class ModalPay extends Component<PageOwnProps, PageState> {
           </AtActionSheetItem>
         </AtActionSheet>
         <AtActionSheet
-          title="本场比赛买断后，可联系客服获取录像下载地址，且所有观众都可免费观看本场比赛"
+          title="购买“请大家围观”后，您的头像及昵称会在直播间永久展示，且所有观众都可免费观看本场比赛，同时可联系客服获取录像下载地址。"
           cancelText='取消'
           isOpened={isMonopolyOpen}
           onCancel={this.handleMonopolyClose}
           onClose={this.handleMonopolyClose}>
-          <AtActionSheetItem
-            onClick={this.handleConfirm.bind(this, {isMonth: false, isMonopoly: true, anonymous: true})}>
-            匿名买断(本场)
-          </AtActionSheetItem>
+          {/*<AtActionSheetItem*/}
+          {/*  onClick={this.handleConfirm.bind(this, {isMonth: false, isMonopoly: true, anonymous: true})}>*/}
+          {/*  匿名请大家围观(本场)*/}
+          {/*</AtActionSheetItem>*/}
           <AtActionSheetItem
             onClick={this.handleConfirm.bind(this, {isMonth: false, isMonopoly: true, anonymous: false})}>
-            实名买断(本场)
+            确定购买
           </AtActionSheetItem>
         </AtActionSheet>
       </View>
