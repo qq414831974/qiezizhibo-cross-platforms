@@ -11,6 +11,7 @@ export const chat_service = `${protocol_http}${gateway_client_service}/service-c
 export const live_service = `${protocol_http}${gateway_client_service}/service-live`
 export const pay_service = `${protocol_http}${gateway_client_service}/service-pay`
 export const websocket_service = `${protocol_ws}${gateway_client_service}/service-websocket`
+// export const websocket_service = `ws://172.20.10.5:8080`
 // export const host = "http://192.168.3.102:8080";
 
 //websocket
@@ -24,6 +25,7 @@ export const API_SYSTEM_SECURITY_CHECK = `${system_service}/system/wxa_security_
 export const API_VISIT = `${user_service}/user/visit`;
 export const API_GET_WXACODE = `${system_service}/system/getWxacode`;
 export const API_GET_SHARE_SENTENCE = `${system_service}/system/share/sentence`;
+export const API_GET_SHARE_PICTURE = `${system_service}/system/share/picture`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth/wechat`;

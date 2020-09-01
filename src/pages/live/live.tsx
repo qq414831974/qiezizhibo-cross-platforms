@@ -120,6 +120,7 @@ type PageState = {
   charge: MatchCharge | null;
   downLoading: boolean;
   permissionShow: boolean;
+  sharePictureUrl: string | null;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -213,6 +214,7 @@ class Live extends Component<PageOwnProps, PageState> {
       curtainShow: false,
       downLoading: false,
       permissionShow: false,
+      sharePictureUrl: null,
     }
   }
 
@@ -228,7 +230,7 @@ class Live extends Component<PageOwnProps, PageState> {
     return shareSentence.sentence;
   }
 
-  // $setShareImageUrl = () => '可设置分享图片路径(优先级最高)'
+  $setShareImageUrl = () => this.state.sharePictureUrl ? this.state.sharePictureUrl : null
 
   componentWillMount() {
     matchAction.getMatchInfo_clear()
@@ -268,6 +270,7 @@ class Live extends Component<PageOwnProps, PageState> {
         this.initSocket(data.id);
         data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
         this.getMatchPayInfo(data, false);
+        this.getSharePicture(data);
       }
       Taro.hideLoading();
     })
@@ -941,12 +944,12 @@ class Live extends Component<PageOwnProps, PageState> {
       needPayLive = true;
     }
     if (data.status == FootballEventType.FINISH) {
-      if (data.isRecordCharge && needPayRecord) {
+      if ((data.isRecordCharge && needPayRecord) || monopolyOnly) {
         this.setState({needPay: true})
         this.showPay(this.getCharge(data, monopolyOnly))
       }
     } else {
-      if (data.isLiveCharge && needPayLive) {
+      if ((data.isLiveCharge && needPayLive) || monopolyOnly) {
         this.setState({needPay: true})
         this.showPay(this.getCharge(data, monopolyOnly))
       }
@@ -1191,6 +1194,14 @@ class Live extends Component<PageOwnProps, PageState> {
       });
     })
   }
+  getSharePicture = (data) => {
+    new Request().get(api.API_GET_SHARE_PICTURE, {id: data.id}).then((imageUrl: string) => {
+      if (imageUrl == null) {
+        return;
+      }
+      this.setState({sharePictureUrl: imageUrl})
+    })
+  }
   showMessage = (title, type) => {
     Taro.atMessage({
       'message': title,
@@ -1203,7 +1214,9 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   onMonopolyClick = () => {
     const {match = null} = this.props;
-    this.getMatchPayInfo(match, true);
+    if (!match.isMonopoly) {
+      this.getMatchPayInfo(match, true);
+    }
   }
 
   render() {

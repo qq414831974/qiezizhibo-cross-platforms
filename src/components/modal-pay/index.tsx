@@ -57,6 +57,7 @@ type PageOwnProps = {}
 type PageState = {
   isChargeOpen: boolean,
   isMonopolyOpen: boolean,
+  isPaying: boolean,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -111,7 +112,10 @@ class ModalPay extends Component<PageOwnProps, PageState> {
       });
     }
     Taro.showLoading({title: global.LOADING_TEXT})
-    this.setState({isMonopolyOpen: false, isChargeOpen: false})
+    if (this.state.isPaying) {
+      return;
+    }
+    this.setState({isMonopolyOpen: false, isChargeOpen: false, isPaying: true})
     new Request().post(api.API_ORDER_CREATE, {
       openId: openId,
       userNo: userNo,
@@ -120,6 +124,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
       products: products,
       attach: attach
     }).then((unifiedResult: UnifiedJSAPIOrderResult) => {
+      this.setState({isPaying: false})
       if (unifiedResult) {
         Taro.requestPayment(
           {
@@ -147,6 +152,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
         Taro.hideLoading();
       }
     }).catch(reason => {
+      this.setState({isPaying: false})
       console.log(reason);
       handleError(error.ERROR_PAY_ERROR);
       Taro.hideLoading();
@@ -212,7 +218,8 @@ class ModalPay extends Component<PageOwnProps, PageState> {
               • 购买永久后，本场比赛可无限次数观看
             </View>}
             {charge && charge.isMonopolyCharge ? <View className="light-gray qz-pay-modal-content_tip">
-              • 购买<Text className="bold">“请大家围观”</Text>后，您的<Text className="bold">头像及昵称</Text>会在直播间<Text className="bold">永久展示</Text>，且所有观众都可免费观看本场比赛，同时可联系客服获取录像下载地址。
+              • 购买<Text className="bold">“请大家围观”</Text>后，您的<Text className="bold">头像及昵称</Text>会在直播间<Text
+              className="bold">永久展示</Text>，且所有观众都可免费观看本场比赛，同时可联系客服获取录像下载地址。
             </View> : null}
           </AtModalContent>
           {charge && charge.monopolyOnly && charge.isMonopolyCharge ? <AtModalAction>
