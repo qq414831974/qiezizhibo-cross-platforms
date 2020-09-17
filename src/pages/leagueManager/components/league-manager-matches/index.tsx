@@ -1,11 +1,12 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, ScrollView} from '@tarojs/components'
 import {AtActivityIndicator, AtTabs, AtTabsPane} from 'taro-ui'
-import MatchList from '../match-list'
 import {connect} from '@tarojs/redux'
+import MatchList from '../match-list'
 
 import './index.scss'
 import matchAction from "../../../../actions/match";
+import * as global from "../../../../constants/global";
 
 type PageStateProps = {
   matchList?: any;
@@ -100,7 +101,10 @@ class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
     return res;
   }
   nextPage = (tab) => {
-    if (typeof(tab) != 'number') {
+    if (!global.CacheManager.getInstance().CACHE_ENABLED) {
+      return;
+    }
+    if (typeof (tab) != 'number') {
       tab = this.state.currentTab
     }
     let orderby = "asc"

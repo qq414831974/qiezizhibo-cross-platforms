@@ -1,6 +1,7 @@
 export const protocol_http = "https://";
 export const protocol_ws = "wss://";
-export const gateway_client_service  = "www.qiezizhibo.com";
+export const gateway_client_service = "www.qiezizhibo.com";
+export const cached_service = `${protocol_http}qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/cached/qsn`;
 export const gateway_admin_service = `${protocol_http}${gateway_client_service}/gateway-admin`
 export const auth_service = `${protocol_http}${gateway_client_service}/service-auth`
 export const user_service = `${protocol_http}${gateway_client_service}/service-user`
@@ -71,3 +72,16 @@ export const API_SEARCH = `${football_service}/search`;
 
 //area
 export const API_AREA = `${system_service}/system/config/area`;
+
+//cached
+export const API_CACHED_CONTROLLER = `${cached_service}/controller.json`;
+export const API_CACHED_BANNER = `${cached_service}/banner.json`;
+export const API_CACHED_BULLETIN = `${cached_service}/bulletin.json`;
+
+export const API_CACHED_LEAGUES = `${cached_service}/leagues.json`;
+export const API_CACHED_LEAGUE = (leagueId) => `${cached_service}/league/${leagueId}.json`;
+export const API_CACHED_SERIES = `${cached_service}/series.json`;
+export const API_CACHED_MATCHES = (leagueId, round) => `${cached_service}/league/match/${leagueId}/${round}.json`;
+export const API_CACHED_PLAYERS = (teamId) => `${cached_service}/team/player/${teamId}.json`;
+export const API_CACHED_MATCH = (id) =>  `${cached_service}/match/${id}.json`;
+export const API_CACHED_LIVE_MANUAL = (id) =>  `${cached_service}/live/${id}.json`;

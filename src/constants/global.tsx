@@ -47,9 +47,22 @@ export class FootballEventType {
 
   static TEXT = 1000;//1000:文字描述
 }
+
 export const MATCH_TYPE = {
   1: '时间轴',
   2: '统计',
   3: '名单',
   4: '聊天室',
+}
+
+export class CacheManager {
+  static instance: CacheManager;
+  CACHE_ENABLED: boolean;
+
+  static getInstance() {
+    if (!CacheManager.instance) {
+      CacheManager.instance = new CacheManager();
+    }
+    return CacheManager.instance;
+  }
 }

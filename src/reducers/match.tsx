@@ -31,7 +31,7 @@ const INITIAL_STATE = {
   nooice: {},
   recommend: {},
   status: {},
-  danmu: {},
+  danmu: [],
 }
 
 export default function match(state: PropsType = INITIAL_STATE, action) {

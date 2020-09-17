@@ -56,9 +56,9 @@ const request = async (options) => {
   const token = await getStorage('accessToken');
   const refreshToken = await getStorage('refreshToken');
   const header = (token && !url.includes(`${API_REFRESH_TOKEN}`)) ? {'Authorization': `Bearer ${token}`} : {};
-  if (method == 'POST' || method == 'PUT') {
-    header['content-type'] = 'application/json'
-  }
+  // if (method == 'POST' || method == 'PUT') {
+  header['Content-Type'] = 'application/json'
+  // }
   showLoading && Taro.showNavigationBarLoading();
   for (let payloadKey in payload) {
     if (payload[payloadKey] == null) {

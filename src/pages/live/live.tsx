@@ -12,7 +12,7 @@ import matchAction from "../../actions/match";
 import liveAction from "../../actions/live";
 import playerAction from "../../actions/player";
 import {getTimeDifference, getStorage, hasLogin, clearLoginToken} from '../../utils/utils'
-import {FootballEventType, MATCH_TYPE, LOADING_TEXT} from "../../constants/global";
+import {FootballEventType, MATCH_TYPE, LOADING_TEXT, CacheManager, default as global} from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import supportLeft from '../../assets/live/support-left.png'
 import supportRight from '../../assets/live/support-right.png'
@@ -197,7 +197,9 @@ class Live extends Component<PageOwnProps, PageState> {
       if (data.activityId) {
         if (data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
-          this.getMatchDanmu(data.id, this.state.currentMedia);
+          if (data.type.indexOf(4) >= 0) {
+            this.getMatchDanmu(data.id, this.state.currentMedia);
+          }
         }
         const activityId = data.activityId;
         this.setState({liveLoading: true})
@@ -217,7 +219,9 @@ class Live extends Component<PageOwnProps, PageState> {
         this.startTimer_CountDown();
         this.startTimer_Danmu();
         this.getCollection(data.id);
-        this.initSocket(data.id);
+        if (data.type.indexOf(4) >= 0) {
+          this.initSocket(data.id);
+        }
         data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
       }
       Taro.hideLoading();
@@ -240,7 +244,7 @@ class Live extends Component<PageOwnProps, PageState> {
     this.clearTimer_CountDown();
     this.clearTimer_HeartBeat();
     this.clearTimer_Danmu();
-    this.socketTask.close({})
+    this.socketTask && this.socketTask.close({})
     this.socketTask = null;
     this.videoContext && this.videoContext.pause();
     this.videoContext = null;
@@ -323,16 +327,16 @@ class Live extends Component<PageOwnProps, PageState> {
       }
       new Request().post(`${api.API_SYSTEM_SECURITY_CHECK}`, message).then(res => {
         if (res == true) {
-      this.socketTask.send({
-        data: JSON.stringify(params),
-        success: () => {
-          resolve();
-        },
-        fail: () => {
-          reject();
-          Taro.showToast({title: "发送失败", icon: "none"});
-        }
-      })
+          this.socketTask.send({
+            data: JSON.stringify(params),
+            success: () => {
+              resolve();
+            },
+            fail: () => {
+              reject();
+              Taro.showToast({title: "发送失败", icon: "none"});
+            }
+          })
         } else {
           reject();
           Taro.showToast({title: "内容含有违法违规内容", icon: "none"});
@@ -380,6 +384,10 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   startTimer_matchStatus = (id) => {
     this.clearTimer_matchStatus();
+    let timeout = 60000;
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      timeout = 300000;
+    }
     this.timerID_matchStatus = setInterval(() => {
       const {match} = this.props;
       this.$router.params && this.$router.params.id && this.getMatchInfo(this.$router.params.id).then((data) => {
@@ -391,7 +399,7 @@ class Live extends Component<PageOwnProps, PageState> {
       this.getMatchStatus(id).then((status) => {
         this.setUpNooice(status);
       })
-    }, 60000)
+    }, timeout)
   }
   clearTimer_matchStatus = () => {
     if (this.timerID_matchStatus) {
@@ -439,7 +447,9 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   getMatchDanmu = (id, index) => {
-    matchAction.getMatchDanmu({matchId: id, index: index});
+    if (this.props.match && this.props.match.type.indexOf(4) >= 0) {
+      matchAction.getMatchDanmu({matchId: id, index: index});
+    }
   }
 
   getMatchInfo = (id) => {
@@ -452,7 +462,14 @@ class Live extends Component<PageOwnProps, PageState> {
     return liveAction.getLiveMediaList(id)
   }
   getLiveInfo = (id) => {
-    return liveAction.livePing(id)
+    return new Request().get(api.API_CACHED_LIVE_MANUAL(id), null).then((data: any) => {
+      if (data.available) {
+        return liveAction.livePingManual(id)
+      }else{
+        return liveAction.livePing(id)
+      }
+    })
+    // return liveAction.livePing(id)
   }
   getCollection = async (id) => {
     const collectMatch = await getStorage('collectMatch')
@@ -829,6 +846,9 @@ class Live extends Component<PageOwnProps, PageState> {
     }
   }
   bindPlayStart = async () => {
+    if (CacheManager.getInstance().CACHE_ENABLED) {
+      return;
+    }
     if (!this.state.firstplay) {
       if (this.state.tryplayed) {
         const token = await getStorage('accessToken');

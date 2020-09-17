@@ -13,9 +13,10 @@ import defaultLogo from "../../assets/default-logo.png";
 import MatchItem from "../../components/match-item";
 import withLogin from "../../utils/withLogin";
 import * as global from '../../constants/global'
-import * as config from "../../constants/config";
 import withShare from "../../utils/withShare";
 import LeagueItem from "../../components/league-item";
+import Request from "../../utils/request";
+import * as api from "../../constants/api";
 
 // import {getStorage, hasLogin} from "../../utils/utils";
 
@@ -92,6 +93,29 @@ class Home extends Component<PageOwnProps, PageState> {
   }
 
   componentDidMount() {
+    new Request().get(api.API_CACHED_CONTROLLER, null).then((data: any) => {
+      if (data.available) {
+        global.CacheManager.getInstance().CACHE_ENABLED = true;
+      } else {
+        global.CacheManager.getInstance().CACHE_ENABLED = false;
+      }
+      this.init();
+      this.refresh();
+      Taro.switchTab({url: "/pages/league/league"});
+    })
+  }
+
+  componentWillUnmount() {
+    this.clearTimer_bulletin();
+  }
+
+  componentDidShow() {
+  }
+
+  componentDidHide() {
+  }
+
+  init = () => {
     configAction.setVisit();
     configAction.getBulletinConfig({areatype: 2}).then((data) => {
       if (data && data.length > 0) {
@@ -106,18 +130,6 @@ class Home extends Component<PageOwnProps, PageState> {
       })
     }
   }
-
-  componentWillUnmount() {
-    this.clearTimer_bulletin();
-  }
-
-  componentDidShow() {
-    this.refresh();
-  }
-
-  componentDidHide() {
-  }
-
   startTimer_bulletin = () => {
     this.clearTimer_bulletin();
     this.timerID_bulletin = setInterval(() => {
@@ -212,7 +224,7 @@ class Home extends Component<PageOwnProps, PageState> {
 
   render() {
     const {leagueList = {}} = this.props
-    
+
     return (
       <View className='qz-home-content'>
         <View className='qz-home-content-bg'>

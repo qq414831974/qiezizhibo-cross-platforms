@@ -29,6 +29,7 @@ type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 interface League {
   props: IProps;
 }
+
 @withShare({})
 class League extends Component<PageOwnProps, PageState> {
 
@@ -112,7 +113,9 @@ class League extends Component<PageOwnProps, PageState> {
 
   // 小程序上拉加载
   onReachBottom() {
-    this.nextPage();
+    if (!global.CacheManager.getInstance().CACHE_ENABLED) {
+      this.nextPage();
+    }
   }
 
   render() {

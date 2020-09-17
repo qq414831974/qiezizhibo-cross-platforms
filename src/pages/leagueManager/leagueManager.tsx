@@ -102,15 +102,26 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   getLeagueList = (id) => {
     this.setState({loading: true})
     Taro.showLoading({title: global.LOADING_TEXT})
-    Promise.all([
-      leagueAction.getLeagueInfo({id: id, detailRound: true}),
-      leagueAction.getLeagueTeam({leagueId: id}),
-      leagueAction.getLeaguePlayer({leagueId: id, goal: true}),
-      leagueAction.getLeagueReport(id),
-    ]).then(() => {
-      this.setState({loading: false})
-      Taro.hideLoading();
-    });
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      leagueAction.getLeagueInfo({id: id, detailRound: true}).then(() => {
+        this.setState({loading: false})
+        Taro.hideLoading();
+      });
+
+      leagueAction.getLeagueTeam({leagueId: id});
+      leagueAction.getLeaguePlayer({leagueId: id, goal: true});
+      leagueAction.getLeagueReport(id);
+    } else {
+      Promise.all([
+        leagueAction.getLeagueInfo({id: id, detailRound: true}),
+        leagueAction.getLeagueTeam({leagueId: id}),
+        leagueAction.getLeaguePlayer({leagueId: id, goal: true}),
+        leagueAction.getLeagueReport(id),
+      ]).then(() => {
+        this.setState({loading: false})
+        Taro.hideLoading();
+      });
+    }
   }
   switchTab = (tab) => {
     // const onSearch = this.onSearch;
