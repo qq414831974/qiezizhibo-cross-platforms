@@ -44,7 +44,6 @@ class ModalEncryption extends Component<PageOwnProps, PageState> {
           </Text>
           <AtInput name="passwordInput"
                    type="password"
-                   placeholder='请输入密码'
                    value={this.state.password}
                    onChange={this.handlePasswordChange}/>
         </AtModalContent>
