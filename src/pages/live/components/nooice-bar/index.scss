@@ -1,0 +1,135 @@
+@import '../../../../app';
+@import '../../live';
+
+.qz-nooice-bar-container{
+
+}
+
+.qz-nooice-bar {
+  display: flex;
+  align-items: center;
+  background-color: $color-bg;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.3);
+
+  &__nooice {
+    width: 100%;
+    //position: relative;
+    background-color: $color-bg;
+    //display: flex;
+    //align-items: center;
+    //justify-content: center;
+    clear: both;
+    overflow: hidden;
+    height: 45px;
+    padding-bottom: $spacing-v-xs;
+
+    &-img {
+      width: 45px;
+      height: 45px;
+    }
+    &-left {
+      float: left;
+      //position: absolute;
+      margin-left: $spacing-h-lg;
+      //top: -$at-progress-height * 1.5 * 2;
+    }
+    &-left:hover {
+      animation: shake 1s;
+      pointer-events: none;
+    }
+
+    &-right {
+      float: right;
+      margin-right: $spacing-h-lg;
+      //top: -$at-progress-height * 1.5 * 2;
+    }
+
+    &-right:hover {
+      animation: shake 1s;
+      pointer-events: none;
+    }
+  }
+
+  &__outer {
+    flex: 1 1 100%;
+
+    &-inner {
+      width: 100%;
+      background-color: $color-bg;
+      vertical-align: middle;
+      clear: both;
+      //overflow: hidden;
+
+      &-background {
+        display: inline-block;
+        position: relative;
+        height: $at-progress-height * 1.5;
+        background-color: $at-progress-bar-bg-color;
+        transition: all 0.3s $ease-in-out-quad;
+      }
+
+      &-text {
+        color: $color-text-base-inverse;
+        font-size: $font-size-sm;
+        line-height: 1;
+        padding: 0 $spacing-h-lg;
+      }
+
+      &-text-add {
+        transform: translateY(100%);
+        opacity: 0;
+        font-size: $font-size-sm;
+      }
+
+      &-nooice-img {
+        width: $at-avatar-size-sm / 2;
+        height: $at-avatar-size-sm / 2;
+      }
+
+      &-left {
+        float: left;
+      }
+
+      &-right {
+        float: right;
+      }
+    }
+  }
+}
+
+@keyframes move {
+  0% {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-300%);
+  }
+}
+
+.move {
+  animation: move 1s linear 0s forwards;
+}
+
+@keyframes shake {
+  20% {
+    transform: scale(0.9) rotate(15deg);
+  }
+
+  40% {
+    transform: scale(1) rotate(-10deg);
+  }
+
+  60% {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  80% {
+    transform: scale(1) rotate(-5deg);
+  }
+
+  100% {
+    transform: scale(0.9) rotate(0deg);
+  }
+}

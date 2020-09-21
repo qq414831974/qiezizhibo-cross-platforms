@@ -83,3 +83,13 @@ export const API_ORDER_CREATE = `${pay_service}/pay/jsapi`;
 export const API_ORDER_IS_NEED_BUY = `${pay_service}/order/isUserNeedByMatch`;
 export const API_ORDER_QUERY = (id) => `${pay_service}/pay/${id}/query`;
 export const API_ORDER_USER = `${pay_service}/order/user`;
+
+export const API_GIFT_LIST = `${pay_service}/gift/list`;
+export const API_GIFT_SEND_FREE = `${pay_service}/gift/sendFree`;
+export const API_GIFT_SEND_FREE_LIMIT = `${pay_service}/gift/freeLimit`;
+export const API_GIFT_ORDER_MATCH = (id) => `${pay_service}/gift/rank/match/${id}`;
+
+//heat
+export const API_MATCH_HEAT = `${football_service}/heat/match`;
+export const API_MATCH_TEAM_HEAT = `${football_service}/heat/match/team`;
+export const API_MATCH_PLAYER_HEAT = `${football_service}/heat/match/player`;

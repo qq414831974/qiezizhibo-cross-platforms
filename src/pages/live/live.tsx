@@ -1,9 +1,9 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, Text, Image, Video, ScrollView} from '@tarojs/components'
-import {AtTabs, AtTabsPane, AtIcon, AtButton, AtCurtain, AtToast, AtMessage} from "taro-ui"
+import {AtTabs, AtTabsPane, AtIcon, AtButton, AtCurtain, AtToast, AtMessage, AtFab, AtFloatLayout} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import MatchUp from './components/match-up'
-import StatBar from './components/stat-bar'
+import NooiceBar from './components/nooice-bar'
 import RoundButton from '../../components/round-button'
 import * as api from '../../constants/api'
 
@@ -11,10 +11,20 @@ import './live.scss'
 import matchAction from "../../actions/match";
 import liveAction from "../../actions/live";
 import playerAction from "../../actions/player";
-import {getTimeDifference, getStorage, hasLogin, clearLoginToken, random, random_weight} from '../../utils/utils'
+import payAction from "../../actions/pay";
+import {
+  getTimeDifference,
+  getStorage,
+  hasLogin,
+  clearLoginToken,
+  random,
+  random_weight,
+  formatTimeSecond
+} from '../../utils/utils'
 import {
   FootballEventType,
   MATCH_TYPE,
+  TABS_TYPE,
   LOADING_TEXT,
   ORDER_TYPE,
   ORDER_STAUTS,
@@ -22,8 +32,6 @@ import {
   SHARE_SENTENCE_TYPE,
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
-import supportLeft from '../../assets/live/support-left.png'
-import supportRight from '../../assets/live/support-right.png'
 import star from '../../assets/live/star.png'
 import starActive from '../../assets/live/star-active.png'
 import share from '../../assets/live/share.png'
@@ -50,6 +58,7 @@ import substitutionRight from "../../assets/live/substitution_arrow_right.png";
 import owngoal from "../../assets/live/owngoal.png";
 import Request from "../../utils/request";
 import ModalAlbum from "../../components/modal-album";
+import GiftPanel from "./components/gift-panel";
 
 type Bulletin = {
   id: number,
@@ -79,6 +88,7 @@ type PageStateProps = {
   danmuList: any;
   payEnabled: boolean;
   shareSentence: any;
+  giftList: any;
 }
 
 type PageDispatchProps = {}
@@ -90,8 +100,8 @@ type PageState = {
   diffDayTime: any;
   liveStatus: LiveStatus;
   currentTab: number;
-  leftMoveClass: string;
-  rightMoveClass: string;
+  nooiceLeftMoveClass: string;
+  nooiceRightMoveClass: string;
   leftNooice: number;
   rightNooice: number;
   nooiceEnabled: boolean;
@@ -121,6 +131,9 @@ type PageState = {
   downLoading: boolean;
   permissionShow: boolean;
   sharePictureUrl: string | null;
+  isIphoneX: boolean;
+  heatType: number | null;
+  giftOpen: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -169,6 +182,7 @@ class Live extends Component<PageOwnProps, PageState> {
   animElemIds: any = {};
   danmuRow: any = [[], [], [], [], []];
   isupdating: boolean = false;
+  enterTime: any;
 
   config: Config = {
     navigationBarTitleText: '茄子体育',
@@ -184,8 +198,8 @@ class Live extends Component<PageOwnProps, PageState> {
       diffDayTime: diff,
       liveStatus: LiveStatus.LOADING,
       currentTab: 0,
-      leftMoveClass: '',
-      rightMoveClass: '',
+      nooiceLeftMoveClass: '',
+      nooiceRightMoveClass: '',
       leftNooice: 0,
       rightNooice: 0,
       nooiceEnabled: true,
@@ -215,6 +229,9 @@ class Live extends Component<PageOwnProps, PageState> {
       downLoading: false,
       permissionShow: false,
       sharePictureUrl: null,
+      isIphoneX: false,
+      heatType: null,
+      giftOpen: false,
     }
   }
 
@@ -239,6 +256,7 @@ class Live extends Component<PageOwnProps, PageState> {
 
   // componentDidMount() {
   componentDidShow() {
+    this.iphoneXAdjust();
     matchAction.getMatchInfo_clear()
     liveAction.getLiveMediaList_clear()
     Taro.showLoading({title: LOADING_TEXT})
@@ -271,6 +289,10 @@ class Live extends Component<PageOwnProps, PageState> {
         data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
         this.getMatchPayInfo(data, false);
         this.getSharePicture(data);
+        this.enterTime = formatTimeSecond(new Date());
+
+        // this.getCommentList(this.props.match.id);
+        this.initHeatCompetition(data.id);
       }
       Taro.hideLoading();
     })
@@ -308,18 +330,32 @@ class Live extends Component<PageOwnProps, PageState> {
   // componentDidHide() {
   //   // this.clearTimer_liveInfo();
   // }
-  getParamId = () => {
-    let id;
-    if (this.$router.params) {
-      if (this.$router.params.id == null) {
-        id = this.$router.params.scene
-      } else {
-        id = this.$router.params.id
+  iphoneXAdjust = () => {
+    let screenHeight = Taro.getSystemInfoSync().screenHeight
+    let bottom = Taro.getSystemInfoSync().safeArea.bottom
+    this.setState({isIphoneX: screenHeight != bottom})
+  }
+  initHeatCompetition = (id) => {
+    new Request().get(api.API_MATCH_HEAT, {matchId: id}).then((data: any) => {
+      if (data.available) {
+        payAction.getGiftList({matchId: id});
+        this.setState({heatType: data.type})
+
       }
-    } else {
-      return null;
-    }
-    return id;
+    })
+  }
+  getParamId = () => {
+    // let id;
+    // if (this.$router.params) {
+    //   if (this.$router.params.id == null) {
+    //     id = this.$router.params.scene
+    //   } else {
+    //     id = this.$router.params.id
+    //   }
+    // } else {
+    //   return null;
+    // }
+    return 3147;
   }
   initCurtain = (id) => {
     new Request().get(`${api.API_CONFIG_BULLETIN_MATCH(id)}`, null).then((res: Array<any>) => {
@@ -610,7 +646,7 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   getCommentList = (matchId) => {
     this.setState({chatLoading: true})
-    matchAction.getMatchComment({pageNum: 1, pageSize: 10, matchId: matchId}).then(() => {
+    matchAction.getMatchComment({pageNum: 1, pageSize: 10, matchId: matchId, startTime: this.enterTime}).then(() => {
       // this.setState({commentIntoView: `message-${this.props.commentList.list.length}`})
       const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
       // setTimeout(() => {
@@ -636,7 +672,8 @@ class Live extends Component<PageOwnProps, PageState> {
       matchAction.getMatchComment_add({
         pageNum: this.props.commentList.current ? this.props.commentList.current + 1 : 1,
         pageSize: 10,
-        matchId: this.props.match.id
+        matchId: this.props.match.id,
+        startTime: this.enterTime
       }).then(() => {
         const commentList_next: Array<any> = this.getCommentsList(this.props.commentList.records);
         let index = commentList_next.indexOf(commentList[0]) - 1;
@@ -680,21 +717,17 @@ class Live extends Component<PageOwnProps, PageState> {
     return false;
   }
   switchTab = (tab) => {
-    const {match = null} = this.props;
-    const tabs: Array<any> = [];
-    let tabIndex = 0;
-    match && match.type.map(item => {
-      if (item != 1) {
-        tabIndex = tabIndex + 1;
-        tabs[item] = tabIndex;
-      }
-    })
+    // const {match = null} = this.props;
+    // const tabs: Array<any> = [];
+    // let tabIndex = 0;
+    // match && match.type.map(item => {
+    //   if (item != 1) {
+    //     tabIndex = tabIndex + 1;
+    //     tabs[item] = tabIndex;
+    //   }
+    // })
     this.setState({
       currentTab: tab
-    }, () => {
-      if (tabs[4] && this.state.currentTab == tabs[4]) {
-        this.getCommentList(this.props.match.id);
-      }
     })
   }
   onLeagueClick = (item) => {
@@ -716,10 +749,10 @@ class Live extends Component<PageOwnProps, PageState> {
       this.showAuth();
       return;
     }
-    this.setState({leftMoveClass: 'move', nooiceEnabled: false});
+    this.setState({nooiceLeftMoveClass: 'move', nooiceEnabled: false});
     setTimeout(() => {
       this.setState({
-        leftMoveClass: '',
+        nooiceLeftMoveClass: '',
         leftNooice: this.state.leftNooice + 1,
         nooiceEnabled: true
       });
@@ -735,10 +768,10 @@ class Live extends Component<PageOwnProps, PageState> {
       this.showAuth();
       return;
     }
-    this.setState({rightMoveClass: 'move', nooiceEnabled: false});
+    this.setState({nooiceRightMoveClass: 'move', nooiceEnabled: false});
     setTimeout(() => {
       this.setState({
-        rightMoveClass: '',
+        nooiceRightMoveClass: '',
         rightNooice: this.state.rightNooice + 1,
         nooiceEnabled: true
       });
@@ -1218,25 +1251,62 @@ class Live extends Component<PageOwnProps, PageState> {
       this.getMatchPayInfo(match, true);
     }
   }
+  getTabsList = (match) => {
+    let tabList: any = []
+    const tabs: any = {};
+    let tabIndex = 0;
+    //球员热度比拼
+    if (this.state.heatType == 1) {
+      tabList.push({title: '人气榜'})
+      tabs[TABS_TYPE.heatPlayer] = tabIndex;
+      tabIndex = tabIndex + 1;
+    }
+    tabList.push({title: '赛况'})
+    tabs[TABS_TYPE.matchUp] = tabIndex;
+    tabIndex = tabIndex + 1;
+    //开启热度比拼
+    if (this.state.heatType == 0 || this.state.heatType == 1) {
+      tabList.push({title: '奖励'})
+      tabs[TABS_TYPE.heatReward] = tabIndex;
+      tabIndex = tabIndex + 1;
+    }
+    //开启打赏榜
+    if (this.state.heatType == 0 || this.state.heatType == 1) {
+      tabList.push({title: '打赏榜'})
+      tabs[TABS_TYPE.giftRank] = tabIndex;
+      tabIndex = tabIndex + 1;
+    }
+    //开启统计
+    if (match && match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1) {
+      tabList.push({title: '统计'})
+      tabs[TABS_TYPE.statistics] = tabIndex;
+      tabIndex = tabIndex + 1;
+    }
+    //开启名单
+    if (match && match.type && match.type.indexOf(MATCH_TYPE.lineUp) != -1) {
+      tabList.push({title: '名单'})
+      tabs[TABS_TYPE.lineUp] = tabIndex;
+      tabIndex = tabIndex + 1;
+    }
+    return {tabList, tabs};
+  }
+
+  showGiftPanel = () => {
+    this.setState({giftOpen: true})
+  }
+  hideGiftPanel = () => {
+    this.setState({giftOpen: false})
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
     const {diffDayTime = {diffDay: "", diffTime: "00:00"}, liveStatus, leftNooice = 0, rightNooice = 0} = this.state;
-    let tabList = [{title: '赛况'}]
-    const tabs: Array<any> = [];
-    let tabIndex = 0;
-    match && match.type && match.type.map(item => {
-      if (item != 1 && item != 5) {
-        tabList.push({title: MATCH_TYPE[item]})
-        tabIndex = tabIndex + 1;
-        tabs[item] = tabIndex;
-      }
-    })
+    let {tabList, tabs} = this.getTabsList(match);
 
     return (
       <View className='qz-live-content'>
         <View className='qz-live-match__content'>
-          {this.state.needPay ? <View className='qz-live-match__video'>
+          {!this.state.needPay ? <View className='qz-live-match__video'>
             <Image src={match.poster} className="qz-live-match__video-poster-img"/>
             {match && <AtButton onClick={this.onPayClick} type='primary'
                                 className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
@@ -1329,111 +1399,100 @@ class Live extends Component<PageOwnProps, PageState> {
                     className="qz-live__top-tabs__content"
                     tabList={tabList}
                     onClick={this.switchTab.bind(this)}>
-              <AtTabsPane current={this.state.currentTab} index={0}>
-                <ScrollView scrollY className="qz-live-match-up__scroll-content">
+              {this.state.heatType == 1 ?
+                <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
+
+                </AtTabsPane>
+                : null}
+              <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.matchUp]}>
+                <ScrollView className="qz-live-match-up__scroll-content">
                   <View className="qz-live-match-up__content">
                     <MatchUp className="qz-live-match-up__match-up" matchInfo={match}
                              matchStatus={matchStatus}
                              onlytime={this.isThisYear(new Date(match.startTime))}
                              onMonopolyClick={this.onMonopolyClick}/>
-                    {match && match.hostteam && match.guestteam ?
-                      <View className="qz-live-match-up__nooice">
-                        <View className="qz-live-match-up__nooice-left">
-                          <Image src={supportLeft}
-                                 className="qz-live-match-up__nooice-img"
-                                 onClick={this.handleLeftNooice}/>
-                        </View>
-                        <View className="qz-live-match-up__nooice-center">
-                          <RoundButton
-                            size={30}
-                            img={playButton}
-                            text={this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
-                            onClick={() => {
-                            }}/>
-                          <RoundButton
-                            size={30}
-                            img={this.state.isCollect ? starActive : star}
-                            text={this.state.isCollect ? "已收藏" : "收藏"}
-                            onClick={this.onCollectClick}/>
-                          <RoundButton
-                            size={30}
-                            img={moment}
-                            text="朋友圈"
-                            onClick={this.onShareMoment}/>
-                          <RoundButton
-                            size={30}
-                            img={headphones}
-                            text="客服"
-                            openType="contact"
-                            onClick={() => {
-                            }}/>
-                          <RoundButton
-                            size={30}
-                            img={share}
-                            text="分享"
-                            openType="share"
-                            onClick={() => {
-                            }}/>
-                        </View>
-                        <View className="qz-live-match-up__nooice-right">
-                          <Image src={supportRight}
-                                 className="qz-live-match-up__nooice-img"
-                                 onClick={this.handleRightNooice}/>
-                        </View>
-                      </View>
-                      : null}
-                    {match.hostteam && match.guestteam ? <StatBar
-                      className="qz-live-match-up__stat-bar"
+                    <View className="qz-live-match-up__function-bar">
+                      <RoundButton
+                        size={30}
+                        img={playButton}
+                        text={this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
+                        onClick={() => {
+                        }}/>
+                      <RoundButton
+                        size={30}
+                        img={this.state.isCollect ? starActive : star}
+                        text={this.state.isCollect ? "已收藏" : "收藏"}
+                        onClick={this.showGiftPanel}/>
+                      <RoundButton
+                        size={30}
+                        img={moment}
+                        text="朋友圈"
+                        onClick={this.onShareMoment}/>
+                      <RoundButton
+                        size={30}
+                        img={headphones}
+                        text="客服"
+                        openType="contact"
+                        onClick={() => {
+                        }}/>
+                      <RoundButton
+                        size={30}
+                        img={share}
+                        text="分享"
+                        openType="share"
+                        onClick={() => {
+                        }}/>
+                    </View>
+                    {match.hostteam && match.guestteam ? <NooiceBar
                       percent={leftNooice == 0 && rightNooice == 0 ? 50 : (leftNooice * 100 / (leftNooice + rightNooice))}
                       leftText={`${leftNooice}`}
                       rightText={`${rightNooice}`}
-                      leftMoveClass={this.state.leftMoveClass}
-                      rightMoveClass={this.state.rightMoveClass}
+                      leftMoveClass={this.state.nooiceLeftMoveClass}
+                      rightMoveClass={this.state.nooiceRightMoveClass}
+                      handleLeftNooice={this.handleLeftNooice}
+                      handleRightNooice={this.handleRightNooice}
                     /> : null}
-                    {match.league ?
-                      <View className="qz-live-match-up__league"
-                            onClick={this.onLeagueClick.bind(this, match.league)}>
-                        <View className="qz-live-match-up__league-content">
-                          <Image className="qz-live-match-up__league-image"
-                                 src={match.league && match.league.headImg ? match.league.headImg : defaultLogo}
-                          />
-                          <Text className="qz-live-match-up__league-text">
-                            {match.league ? match.league.name : ""}
-                          </Text>
-                          <AtIcon value="chevron-right" size="22" color="#CCC"
-                                  className="qz-live-match-up__league-arrow"/>
-                        </View>
-                      </View>
-                      : null
-                    }
-                    {match.type && match.type.indexOf(1) != -1 && this.props.matchStatus.timeLines && this.props.matchStatus.timeLines.length > 0 ?
-                      <TimeLine
-                        timeline={this.props.matchStatus.timeLines.filter(ele => eventType[ele.eventType] != null)}
-                        matchInfo={this.props.match}/> : null}
+                    {match.type && match.type.indexOf(MATCH_TYPE.chattingRoom) != -1 &&
+                    <ChattingRoom
+                      isIphoneX={this.state.isIphoneX}
+                      matchInfo={this.props.match}
+                      userInfo={this.props.userInfo}
+                      nextPage={this.getCommentList_next}
+                      loading={this.state.chatLoading}
+                      intoView={this.state.commentIntoView}
+                      sendMessage={this.sendMessage}
+                      comments={this.state.comments}
+                    />}
                   </View>
                 </ScrollView>
               </AtTabsPane>
-              {match.type && match.type.indexOf(2) != -1 && <AtTabsPane current={this.state.currentTab} index={tabs[2]}>
+              {this.state.heatType == 0 || this.state.heatType == 1 ?
+                <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatReward]}>
+
+                </AtTabsPane>
+                : null}
+              {this.state.heatType == 0 || this.state.heatType == 1 ?
+                <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.giftRank]}>
+
+                </AtTabsPane>
+                : null}
+              {match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1 &&
+              <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.statistics]}>
                 <ScrollView scrollY className="qz-live-statistics">
+                  {this.props.matchStatus.timeLines && this.props.matchStatus.timeLines.length > 0 ?
+                    <TimeLine
+                      timeline={this.props.matchStatus.timeLines.filter(ele => eventType[ele.eventType] != null)}
+                      matchInfo={this.props.match}/>
+                    : null}
                   <Statistics statistics={this.props.matchStatus.statistics} matchInfo={this.props.match}/>
                 </ScrollView>
               </AtTabsPane>}
-              {match.type && match.type.indexOf(3) != -1 && <AtTabsPane current={this.state.currentTab} index={tabs[3]}>
+              {match.type && match.type.indexOf(MATCH_TYPE.lineUp) != -1 &&
+              <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.lineUp]}>
                 <LineUp players={this.props.playerList}
                         matchInfo={this.props.match}
                         switchTab={this.switchTeamPlayer}
                         loading={this.state.playerLoading}/>
-              </AtTabsPane>}
-              {match.type && match.type.indexOf(4) != -1 && <AtTabsPane current={this.state.currentTab} index={tabs[4]}>
-                <ChattingRoom
-                  matchInfo={this.props.match}
-                  userInfo={this.props.userInfo}
-                  nextPage={this.getCommentList_next}
-                  loading={this.state.chatLoading}
-                  intoView={this.state.commentIntoView}
-                  sendMessage={this.sendMessage}
-                  comments={this.state.comments}
-                />
               </AtTabsPane>}
             </AtTabs>
           </View>
@@ -1475,6 +1534,24 @@ class Live extends Component<PageOwnProps, PageState> {
           handleConfirm={this.onPremissionSuccess}
           handleCancel={this.onPremissionCancel}
           handleClose={this.onPremissionClose}/>
+        <AtFloatLayout
+          className="qz-gift-float"
+          title="礼物"
+          onClose={this.hideGiftPanel}
+          isOpened={this.state.giftOpen}>
+          <GiftPanel gifts={this.props.giftList}
+                     loading={this.props.giftList == null || this.props.giftList.length == 0}/>
+        </AtFloatLayout>
+        {match.league ?
+          <View className="qz-live-match-up__league">
+            <AtFab size="small" onClick={this.onLeagueClick.bind(this, match.league)}>
+              <Image className="qz-live-match-up__league-image"
+                     src={match.league && match.league.headImg ? match.league.headImg : defaultLogo}
+              />
+            </AtFab>
+          </View>
+          : null
+        }
       </View>
     )
   }
@@ -1492,6 +1569,7 @@ const mapStateToProps = (state) => {
     danmuList: state.match.danmu,
     payEnabled: state.config ? state.config.payEnabled : null,
     shareSentence: state.config ? state.config.shareSentence : [],
+    giftList: state.pay ? state.pay.gifts  : [],
   }
 }
 export default connect(mapStateToProps)(Live)

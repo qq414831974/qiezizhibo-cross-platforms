@@ -1,8 +1,9 @@
 @import '../../../../app';
 
 .qz-chatting-room {
+  margin-top: 10px;
   position: relative;
-  height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px); //减去tab的高度
+  height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px); //减去tab的高度
   background-color: $color-bg-grey;
 
   &__loading {
@@ -16,11 +17,11 @@
   &__chat-content {
     position: absolute;
     top: 0;
-    height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 110px); //减去tab的高度
+    height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 110px); //减去tab的高度
     width: 100vw;
 
     &__container {
-      min-height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 110px); //减去tab的高度
+      min-height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 110px); //减去tab的高度
       width: 94vw;
       padding: 3vw;
     }
@@ -32,7 +33,12 @@
     align-items: center;
     margin-top: $spacing-v-md;
   }
-
+  &__chat-item-hint {
+    width: 100%;
+    text-align: left;
+    color: $color-text-placeholder;
+    font-size: $font-size-sm;
+  }
   &__chat-item-left {
     justify-content: flex-start;
 
@@ -155,12 +161,13 @@
       display: flex !important;
       align-items: center;
       justify-content: center;
-      padding-top: 10px !important;
-      padding-bottom: 10px !important;
+      padding: 0 !important;
     }
   }
 }
-
+.qz-chatting-room-iphoneX {
+  height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 34px); //减去tab的高度
+}
 .none {
   display: none;
 }

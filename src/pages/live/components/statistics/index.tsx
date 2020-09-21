@@ -1,7 +1,7 @@
 import Taro, {Component} from '@tarojs/taro'
 import {View, Text} from '@tarojs/components'
 import './index.scss'
-import StatBar from '../stat-bar';
+import StatBar from '../nooice-bar';
 
 const statisticsType = [
 

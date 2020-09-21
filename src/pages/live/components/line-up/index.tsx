@@ -30,8 +30,8 @@ interface LineUp {
 class LineUp extends Component<PageOwnProps, PageState> {
   static defaultProps = {}
 
-  constructor() {
-    super(...arguments)
+  constructor(props) {
+    super(props)
     this.state = {
       current: 0
     }

@@ -48,10 +48,17 @@ export class FootballEventType {
   static TEXT = 1000;//1000:文字描述
 }
 export const MATCH_TYPE = {
-  1: '时间轴',
-  2: '统计',
-  3: '名单',
-  4: '聊天室',
+  timeLine: 1,
+  lineUp: 3,
+  chattingRoom: 4,
+}
+export const TABS_TYPE = {
+  heatPlayer: "heatPlayer",
+  matchUp: "matchUp",
+  heatReward: "heatReward",
+  giftRank: "giftRank",
+  statistics: "statistics",
+  lineUp: "lineUp",
 }
 export const ORDER_TYPE = {
   "normal": 0,

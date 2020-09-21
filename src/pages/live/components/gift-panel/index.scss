@@ -1,0 +1,69 @@
+@import '../../../../app';
+@import "~taro-ui/dist/style/components/flex.scss";
+@import "~taro-ui/dist/style/components/icon.scss";
+
+.qz-gifts {
+  &__content {
+    height: 366px;
+  }
+
+  &__bottom-container {
+    display: flex;
+    width: 100%;
+    height: 90px;
+    background-color: $color-bg-base;
+    box-shadow: 4px 0 4px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  &__bottom {
+    align-self: center;
+
+    &-left {
+      width: 50%;
+      max-width: 50%;
+    }
+
+    &-num-container {
+      width: 47.5%;
+      max-width: 47.5%;
+      position: relative;
+      border-radius: 30px 0 0 30px;
+      border: solid $color-bg-blue-main 4px;
+    }
+
+    &-num {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: $color-text-base;
+    }
+
+    &-arrow {
+      position: absolute;
+      right: $spacing-v-md;
+      bottom: 7px;
+      font-size: 36px;
+      color: $color-bg-blue-main;
+    }
+
+    &-button {
+      width: 47.5%;
+      max-width: 47.5%;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 25%);
+    grid-template-rows: auto;
+    padding: 40px;
+
+    &-item {
+      image {
+        width: 100px;
+        height: 100px;
+      }
+    }
+  }
+}

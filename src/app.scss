@@ -55,6 +55,7 @@ $color-link-disabled: #BFBFBF !default;
 
 /* 背景色 */
 $color-bg: #FFF !default;
+$color-bg-transparent: rgba(255, 255, 255, 0) !default;
 $color-bg-base: #FAFBFC !default;
 $color-bg-light: #ECF5FD !default;
 $color-bg-lighter: tint($color-bg-light, 50%) !default;
@@ -547,4 +548,10 @@ $at-timeline-line-color: $color-border-lighter !default;
 
 .at-action-sheet{
   white-space: pre-wrap;
+}
+.vertical-middle{
+  vertical-align: middle;
+}
+.half-circle-button{
+  border-radius: 0 30px 30px 0 !important;
 }

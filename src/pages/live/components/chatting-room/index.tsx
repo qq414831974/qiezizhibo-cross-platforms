@@ -21,6 +21,7 @@ type PageOwnProps = {
   loading: boolean;
   intoView?: string;
   sendMessage: any;
+  isIphoneX: boolean;
 }
 
 type PageState = {
@@ -46,7 +47,7 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
     return value
   }
   handleSendMessage = () => {
-    if(this.state.textInput == null || this.state.textInput.trim() == ''){
+    if (this.state.textInput == null || this.state.textInput.trim() == '') {
       return;
     }
     this.setState({messageSending: true})
@@ -77,7 +78,7 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
   render() {
     const {comments = [], loading = false, intoView = ''} = this.props
     return (
-      <View className="qz-chatting-room">
+      <View className={`qz-chatting-room ${this.props.isIphoneX ? "qz-chatting-room-iphoneX" : ""}`}>
         <ScrollView scrollY={loading ? false : true} className="qz-chatting-room__chat-content"
                     scrollIntoView={intoView}
                     upper-threshold={20}
@@ -86,6 +87,9 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
             <AtActivityIndicator mode="center" content="加载中..."/>
           </View>}
           <View className="qz-chatting-room__chat-content__container">
+            <View className="qz-chatting-room__chat-item-hint">
+              直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约
+            </View>
             {this.getCommentsList(comments).map((item: any) => (
               item.user && item.user.userNo === this.props.userInfo.userNo ?
                 <View key={`message-${item.id}`}
@@ -132,7 +136,8 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
             ))}
           </View>
         </ScrollView>
-        <View className="qz-chatting-room__chat-bottom-bar">
+        <View
+          className="qz-chatting-room__chat-bottom-bar">
           <AtInput
             name="chatInput"
             clear
@@ -142,12 +147,13 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
             onChange={this.handleChatInputChange}
             onConfirm={this.handleSendMessage}
             confirmType='发送'
-            adjustPosition={true}
+            adjustPosition
             border={false}
             className='qz-input-no-padding'
           >
             <View className="qz-chatting-room__chat-bottom-bar-button">
-              <AtButton type="primary" size="small" loading={this.state.messageSending} onClick={this.handleSendMessage}>发送</AtButton>
+              <AtButton type="primary" size="small" loading={this.state.messageSending}
+                        onClick={this.handleSendMessage}>发送</AtButton>
             </View>
           </AtInput>
         </View>
