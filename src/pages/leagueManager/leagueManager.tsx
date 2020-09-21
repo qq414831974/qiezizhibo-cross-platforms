@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, Image} from '@tarojs/components'
-import {AtActivityIndicator, AtTabs, AtTabsPane} from "taro-ui"
+import {AtActivityIndicator, AtTabs, AtTabsPane, AtMessage} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import defaultLogo from '../../assets/default-logo.png'
 
@@ -12,6 +12,9 @@ import LeaguePlayerTable from "./components/league-player-table";
 import LeagueRegulations from "./components/league-regulations";
 import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
+import EncryptionModal from "../../components/modal-encryption";
+import Request from "../../utils/request";
+import * as api from "../../constants/api";
 
 type PageStateProps = {
   leagueTeams: any;
@@ -30,6 +33,8 @@ type PageState = {
   tabloading: boolean;
   currentTab: number;
   tabsClass: string;
+  isEncryption: any;
+  password: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -63,6 +68,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       tabloading: false,
       currentTab: 1,
       tabsClass: '',
+      isEncryption: false,
+      password: null,
     }
   }
 
@@ -75,6 +82,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
   componentDidMount() {
     this.$router.params && this.$router.params.id && this.getLeagueList(this.$router.params.id);
+    this.$router.params && this.$router.params.id && this.getLeagueEncryption(this.$router.params.id);
     const query = Taro.createSelectorQuery();
     query.select('.qz-league-manager-tabs').boundingClientRect(rect => {
       this.tabsY = (rect as {
@@ -133,6 +141,27 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     // this.setState({
     //   currentTab: tab
     // });
+  }
+  getLeagueEncryption = (leagueId) => {
+    new Request().get(api.API_LEAGUE_ENCRYPTION(leagueId), null).then((data: any) => {
+      if (data.isEncryption && data.password) {
+        this.setState({isEncryption: true, password: data.password});
+      }
+    })
+  }
+  onEncryptionConfirm = (password) => {
+    if (password == this.state.password) {
+      Taro.atMessage({
+        'message': '欢迎进入',
+        'type': 'success',
+      })
+      this.setState({isEncryption: false});
+    } else {
+      Taro.atMessage({
+        'message': '密码错误',
+        'type': 'error',
+      })
+    }
   }
 
   render() {
@@ -202,6 +231,10 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             </AtTabsPane>}
           </AtTabs>}
         </View>
+        <EncryptionModal
+          isOpened={this.state.isEncryption}
+          handleConfirm={this.onEncryptionConfirm}/>
+        <AtMessage/>
       </View>
     )
   }

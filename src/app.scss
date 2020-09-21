@@ -543,3 +543,9 @@ $at-timeline-line-color: $color-border-lighter !default;
 .none{
   display: none;
 }
+.modal-overlay-blur{
+  .at-modal__overlay{
+    background-color: rgba(0,0,0,0.3);
+    backdrop-filter: blur(30px);
+  }
+}

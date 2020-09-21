@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, Text, Image, Video, ScrollView} from '@tarojs/components'
-import {AtTabs, AtTabsPane, AtIcon} from "taro-ui"
+import {AtTabs, AtTabsPane, AtIcon, AtMessage} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import MatchUp from './components/match-up'
 import StatBar from './components/stat-bar'
@@ -12,7 +12,7 @@ import matchAction from "../../actions/match";
 import liveAction from "../../actions/live";
 import playerAction from "../../actions/player";
 import {getTimeDifference, getStorage, hasLogin, clearLoginToken} from '../../utils/utils'
-import {FootballEventType, MATCH_TYPE, LOADING_TEXT, CacheManager, default as global} from "../../constants/global";
+import {FootballEventType, MATCH_TYPE, LOADING_TEXT, CacheManager} from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import supportLeft from '../../assets/live/support-left.png'
 import supportRight from '../../assets/live/support-right.png'
@@ -28,6 +28,7 @@ import LineUp from "./components/line-up";
 import ChattingRoom from "./components/chatting-room";
 import LoginModal from "../../components/modal-login";
 import PhoneModal from "../../components/modal-phone";
+import EncryptionModal from "../../components/modal-encryption";
 import * as error from "../../constants/error";
 import userAction from "../../actions/user";
 import goal from "../../assets/live/goal.png";
@@ -91,6 +92,8 @@ type PageState = {
   firstplay: boolean;
   danmuUnable: boolean;
   comments: any;
+  isEncryption: any;
+  password: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -177,6 +180,8 @@ class Live extends Component<PageOwnProps, PageState> {
       firstplay: true,
       danmuUnable: false,
       comments: [],
+      isEncryption: false,
+      password: null,
     }
   }
 
@@ -219,6 +224,7 @@ class Live extends Component<PageOwnProps, PageState> {
         this.startTimer_CountDown();
         this.startTimer_Danmu();
         this.getCollection(data.id);
+        this.getMatchEncryption(data.id);
         if (data.type.indexOf(4) >= 0) {
           this.initSocket(data.id);
         }
@@ -385,7 +391,7 @@ class Live extends Component<PageOwnProps, PageState> {
   startTimer_matchStatus = (id) => {
     this.clearTimer_matchStatus();
     let timeout = 60000;
-    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+    if (CacheManager.getInstance().CACHE_ENABLED) {
       timeout = 300000;
     }
     this.timerID_matchStatus = setInterval(() => {
@@ -465,7 +471,7 @@ class Live extends Component<PageOwnProps, PageState> {
     return new Request().get(api.API_CACHED_LIVE_MANUAL(id), null).then((data: any) => {
       if (data.available) {
         return liveAction.livePingManual(id)
-      }else{
+      } else {
         return liveAction.livePing(id)
       }
     })
@@ -976,6 +982,28 @@ class Live extends Component<PageOwnProps, PageState> {
     console.log(e)
   }
 
+  getMatchEncryption = (matchId) => {
+    new Request().get(api.API_MATCH_ENCRYPTION(matchId), null).then((data: any) => {
+      if (data.isEncryption && data.password) {
+        this.setState({isEncryption: true, password: data.password});
+      }
+    })
+  }
+  onEncryptionConfirm = (password) => {
+    if (password == this.state.password) {
+      Taro.atMessage({
+        'message': '欢迎进入',
+        'type': 'success',
+      })
+      this.setState({isEncryption: false});
+    } else {
+      Taro.atMessage({
+        'message': '密码错误',
+        'type': 'error',
+      })
+    }
+  }
+
   render() {
     const {match = null, matchStatus = null} = this.props;
     const {diffDayTime = {diffDay: "", diffTime: "00:00"}, liveStatus, leftNooice = 0, rightNooice = 0} = this.state;
@@ -989,13 +1017,11 @@ class Live extends Component<PageOwnProps, PageState> {
         tabs[item] = tabIndex;
       }
     })
-    const {bulletinConfig} = this.props
-    const weihu = bulletinConfig && bulletinConfig.length > 0 && bulletinConfig[0].content === "升级维护中";
 
     return (
       <View className='qz-live-content'>
         <View className='qz-live-match__content'>
-          {weihu ? <View className='qz-live-match__video'>
+          {this.state.isEncryption ? <View className='qz-live-match__video'>
             <Image src={match.poster} className="qz-live-match__video-poster-img"/>
           </View> : <Video
             id="videoPlayer"
@@ -1099,7 +1125,7 @@ class Live extends Component<PageOwnProps, PageState> {
                         <View className="qz-live-match-up__nooice-center">
                           <RoundButton
                             size={30}
-                            img={weihu ? supportLeft : playButton}
+                            img={playButton}
                             text={this.props.matchStatus.online ? this.props.matchStatus.online : "0"}
                             onClick={() => {
                             }}/>
@@ -1198,6 +1224,10 @@ class Live extends Component<PageOwnProps, PageState> {
           handleCancel={this.onPhoneCancel}
           handleClose={this.onPhoneClose}
           handleError={this.onPhoneError}/>
+        <EncryptionModal
+          isOpened={this.state.isEncryption}
+          handleConfirm={this.onEncryptionConfirm}/>
+        <AtMessage/>
       </View>
     )
   }
