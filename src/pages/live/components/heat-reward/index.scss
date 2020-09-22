@@ -1,0 +1,28 @@
+@import '../../../../app';
+
+.qz-heatreward {
+  width: 100vw;
+  display: block;
+  height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px); //减去tab的高度
+
+  &-title {
+    background-color: $color-bg-grey;
+    padding: $spacing-v-md 0;
+    width: 100vw;
+    text-align: center;
+    //font-weight: bolder;
+    font-size: $font-size-base;
+  }
+
+  &-img {
+    width: 100vw;
+  }
+
+  &-loading {
+    width: 100vw;
+    height: 10vw;
+    position: relative;
+    margin-top: $spacing-v-md;
+  }
+
+}

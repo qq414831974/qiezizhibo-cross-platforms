@@ -30,6 +30,7 @@ import {
   ORDER_STAUTS,
   REPOST_TEXT,
   SHARE_SENTENCE_TYPE,
+  HEAT_TYPE
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import star from '../../assets/live/star.png'
@@ -59,6 +60,7 @@ import owngoal from "../../assets/live/owngoal.png";
 import Request from "../../utils/request";
 import ModalAlbum from "../../components/modal-album";
 import GiftPanel from "./components/gift-panel";
+import HeatReward from "./components/heat-reward";
 
 type Bulletin = {
   id: number,
@@ -132,6 +134,7 @@ type PageState = {
   permissionShow: boolean;
   sharePictureUrl: string | null;
   isIphoneX: boolean;
+  heatRule: any;
   heatType: number | null;
   giftOpen: boolean;
 }
@@ -230,6 +233,7 @@ class Live extends Component<PageOwnProps, PageState> {
       permissionShow: false,
       sharePictureUrl: null,
       isIphoneX: false,
+      heatRule: null,
       heatType: null,
       giftOpen: false,
     }
@@ -339,8 +343,7 @@ class Live extends Component<PageOwnProps, PageState> {
     new Request().get(api.API_MATCH_HEAT, {matchId: id}).then((data: any) => {
       if (data.available) {
         payAction.getGiftList({matchId: id});
-        this.setState({heatType: data.type})
-
+        this.setState({heatRule: data, heatType: data.type})
       }
     })
   }
@@ -1256,7 +1259,7 @@ class Live extends Component<PageOwnProps, PageState> {
     const tabs: any = {};
     let tabIndex = 0;
     //球员热度比拼
-    if (this.state.heatType == 1) {
+    if (this.state.heatType == HEAT_TYPE.PLAYER_HEAT) {
       tabList.push({title: '人气榜'})
       tabs[TABS_TYPE.heatPlayer] = tabIndex;
       tabIndex = tabIndex + 1;
@@ -1265,13 +1268,13 @@ class Live extends Component<PageOwnProps, PageState> {
     tabs[TABS_TYPE.matchUp] = tabIndex;
     tabIndex = tabIndex + 1;
     //开启热度比拼
-    if (this.state.heatType == 0 || this.state.heatType == 1) {
+    if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT) {
       tabList.push({title: '奖励'})
       tabs[TABS_TYPE.heatReward] = tabIndex;
       tabIndex = tabIndex + 1;
     }
     //开启打赏榜
-    if (this.state.heatType == 0 || this.state.heatType == 1) {
+    if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT) {
       tabList.push({title: '打赏榜'})
       tabs[TABS_TYPE.giftRank] = tabIndex;
       tabIndex = tabIndex + 1;
@@ -1399,7 +1402,7 @@ class Live extends Component<PageOwnProps, PageState> {
                     className="qz-live__top-tabs__content"
                     tabList={tabList}
                     onClick={this.switchTab.bind(this)}>
-              {this.state.heatType == 1 ?
+              {this.state.heatType == HEAT_TYPE.PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
 
                 </AtTabsPane>
@@ -1466,12 +1469,12 @@ class Live extends Component<PageOwnProps, PageState> {
                   </View>
                 </ScrollView>
               </AtTabsPane>
-              {this.state.heatType == 0 || this.state.heatType == 1 ?
+              {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatReward]}>
-
+                  <HeatReward heatRule={this.state.heatRule} loading={this.state.heatRule == null}/>
                 </AtTabsPane>
                 : null}
-              {this.state.heatType == 0 || this.state.heatType == 1 ?
+              {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.giftRank]}>
 
                 </AtTabsPane>
@@ -1539,8 +1542,10 @@ class Live extends Component<PageOwnProps, PageState> {
           title="礼物"
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}>
-          <GiftPanel gifts={this.props.giftList}
-                     loading={this.props.giftList == null || this.props.giftList.length == 0}/>
+          <GiftPanel
+            heatType={this.state.heatType}
+            gifts={this.props.giftList}
+            loading={this.props.giftList == null || this.props.giftList.length == 0}/>
         </AtFloatLayout>
         {match.league ?
           <View className="qz-live-match-up__league">
@@ -1569,7 +1574,7 @@ const mapStateToProps = (state) => {
     danmuList: state.match.danmu,
     payEnabled: state.config ? state.config.payEnabled : null,
     shareSentence: state.config ? state.config.shareSentence : [],
-    giftList: state.pay ? state.pay.gifts  : [],
+    giftList: state.pay ? state.pay.gifts : [],
   }
 }
 export default connect(mapStateToProps)(Live)

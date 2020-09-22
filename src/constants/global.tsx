@@ -87,3 +87,12 @@ export const REPOST_TEXT = [
   "我在球场上打飞机，你来直播间刷飞机~",
   "踢球最怕没人看，你会来看我吗？",
 ];
+export const HEAT_TYPE = {
+  TEAM_HEAT: 0,
+  PLAYER_HEAT: 1,
+}
+export const GROWTH_TYPE = {
+  USER_EXP: 1,
+  TEAM_HEAT: 2,
+  PLAYER_HEAT: 3,
+}

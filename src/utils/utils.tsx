@@ -1,6 +1,9 @@
 import Taro, {ENV_TYPE} from '@tarojs/taro';
 import '../sdk/cnchar.2.0.3.min.js';
 
+export const isInteger = (num) => {
+  return typeof num == "number" && num % 1 == 0;
+}
 const formatNumber = n => {
   n = n.toString()
   return n[1] ? n : '0' + n

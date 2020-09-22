@@ -4,7 +4,8 @@
 
 .qz-gifts {
   &__content {
-    height: 366px;
+    height: 416px;
+    width: 100%;
   }
 
   &__bottom-container {
@@ -19,9 +20,50 @@
     align-self: center;
 
     &-left {
-      width: 50%;
-      max-width: 50%;
+      padding: 0 $spacing-v-lg;
+      display: flex;
+      align-items: center;
+      height: 100%;
     }
+
+    &-price {
+      font-size: $font-size-base;
+      font-weight: 800;
+      color: $color-text-title;
+    }
+
+    &-heat {
+      font-size: $font-size-xs;
+      font-weight: 800;
+      color: $color-text-disabled;
+      margin-left: $spacing-v-sm;
+    }
+    &-exp {
+      font-size: $font-size-xs;
+      font-weight: 800;
+      color: $color-text-disabled;
+      margin-left: $spacing-v-sm;
+    }
+
+    &-discount {
+      position: relative;
+      font-size: $font-size-sm;
+      font-weight: 800;
+      color: $color-text-disabled;
+      margin-left: $spacing-v-sm;
+    }
+
+    //&-discount:after {
+    //  content: "";
+    //  position: absolute;
+    //  border-bottom: 4px solid $color-text-disabled;
+    //  -webkit-transform: rotate(45deg);
+    //  -moz-transform: rotate(45deg);
+    //  width: $font-size-base * 1.5;
+    //  height: $font-size-base;
+    //  right: $font-size-base/2;
+    //  top: -$font-size-base/5;
+    //}
 
     &-num-container {
       width: 47.5%;
@@ -41,7 +83,7 @@
 
     &-arrow {
       position: absolute;
-      right: $spacing-v-md;
+      right: $spacing-v-sm;
       bottom: 7px;
       font-size: 36px;
       color: $color-bg-blue-main;
@@ -57,9 +99,45 @@
     display: grid;
     grid-template-columns: repeat(4, 25%);
     grid-template-rows: auto;
-    padding: 40px;
+    padding: 0 40px 40px 40px;
+    box-sizing: border-box;
+
+    &-item-active {
+      //border: solid $color-bg-blue-main 2px;
+      background-color: $color-bg-light;
+    }
 
     &-item {
+      padding: $spacing-v-md;
+      border-radius: 10px;
+      box-sizing: border-box;
+      height: min-content;
+
+      &-img-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+      }
+
+      &-name {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        font-size: $font-size-sm;
+        color: $color-text-title;
+      }
+
+      &-price {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        font-size: $font-size-xs;
+        color: $color-grey-2;
+      }
+
       image {
         width: 100px;
         height: 100px;
