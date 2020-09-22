@@ -170,7 +170,7 @@ class Home extends Component<PageOwnProps, PageState> {
       leagueAction.getLeagueList({
         pageSize: 10,
         pageNum: 1,
-        leagueType: 4,
+        leagueType: 3,
         sortField: "remark",
         sortOrder: "desc",
         matchnum: weihu ? null : 3,
