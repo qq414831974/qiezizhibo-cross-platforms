@@ -1,7 +1,6 @@
 @import '../../../../app';
 
 .qz-chatting-room {
-  margin-top: 10px;
   position: relative;
   height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px); //减去tab的高度
   background-color: $color-bg-grey;
@@ -33,12 +32,14 @@
     align-items: center;
     margin-top: $spacing-v-md;
   }
+
   &__chat-item-hint {
     width: 100%;
     text-align: left;
     color: $color-text-placeholder;
     font-size: $font-size-sm;
   }
+
   &__chat-item-left {
     justify-content: flex-start;
 
@@ -70,6 +71,16 @@
         position: absolute;
         right: calc(90px + 3vw);
       }
+    }
+  }
+
+  &__chat-item-center {
+    justify-content: center;
+    .qz-chatting-room__chat-text__broadcast{
+      width: 100%;
+      text-align: center;
+      color: $color-text-placeholder;
+      font-size: $font-size-sm;
     }
   }
 
@@ -165,9 +176,11 @@
     }
   }
 }
+
 .qz-chatting-room-iphoneX {
   height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 34px); //减去tab的高度
 }
+
 .none {
   display: none;
 }

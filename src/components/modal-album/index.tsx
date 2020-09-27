@@ -52,9 +52,10 @@ class ModalAlbum extends Component<PageOwnProps, PageState> {
 
   render() {
     const {isOpened = false, handleClose, handleCancel} = this.props;
+
     return (
       <AtModal isOpened={isOpened} onClose={handleClose} className="qz-album-modal">
-        <AtModalContent>
+        {isOpened ? <AtModalContent>
           <View className="center">
             <AtAvatar circle image={defaultLogo}/>
           </View>
@@ -65,7 +66,7 @@ class ModalAlbum extends Component<PageOwnProps, PageState> {
           <Text className="light-gray qz-album-modal-content_tip">
             • 茄子体育将保存图片到您的相册
           </Text>
-        </AtModalContent>
+        </AtModalContent> : null}
         <AtModalAction>
           <Button onClick={handleCancel}>
             <Text className="mini-gray">暂不授权</Text>

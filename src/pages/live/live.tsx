@@ -4,6 +4,8 @@ import {AtTabs, AtTabsPane, AtIcon, AtButton, AtCurtain, AtToast, AtMessage, AtF
 import {connect} from '@tarojs/redux'
 import MatchUp from './components/match-up'
 import NooiceBar from './components/nooice-bar'
+import GiftNotify from './components/gift-notify'
+import HeatTeam from './components/heat-team'
 import RoundButton from '../../components/round-button'
 import * as api from '../../constants/api'
 
@@ -30,7 +32,7 @@ import {
   ORDER_STAUTS,
   REPOST_TEXT,
   SHARE_SENTENCE_TYPE,
-  HEAT_TYPE
+  HEAT_TYPE, GIFT_TYPE
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import star from '../../assets/live/star.png'
@@ -38,7 +40,7 @@ import starActive from '../../assets/live/star-active.png'
 import share from '../../assets/live/share.png'
 import moment from '../../assets/live/moment.png'
 import headphones from '../../assets/live/headphones.png'
-import playButton from '../../assets/live/play-button-disabled.png'
+import views_icon from '../../assets/live/views_icon.png'
 import withShare from "../../utils/withShare";
 import TimeLine from "./components/time-line";
 import Statistics from "./components/statistics";
@@ -61,6 +63,7 @@ import Request from "../../utils/request";
 import ModalAlbum from "../../components/modal-album";
 import GiftPanel from "./components/gift-panel";
 import HeatReward from "./components/heat-reward";
+import GiftRank from "./components/gift-rank";
 
 type Bulletin = {
   id: number,
@@ -137,6 +140,13 @@ type PageState = {
   heatRule: any;
   heatType: number | null;
   giftOpen: boolean;
+  currentSupportTeam: any;
+  teamHeats: any;
+  playerHeats: any;
+  giftSendQueue: any;
+  giftRanks: any;
+  giftRanksLoading: any;
+  broadcastList: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -173,17 +183,20 @@ class Live extends Component<PageOwnProps, PageState> {
    * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
-  timerID_liveInfo: any = null
   timerID_CountDown: any = null
   timerID_matchStatus: any = null
   timerID_socketHeartBeat: any = null
   timerID_danmu: any = null
+  timerID_giftController: any = null
   timeoutID_playCountDown: any = null;
   socketTask: Taro.SocketTask | null
   videoContext: Taro.VideoContext | null
   timeout_danmu: any = {};
   animElemIds: any = {};
+  timeout_gift: any = {};
+  timeout_gift_show: any = {};
   danmuRow: any = [[], [], [], [], []];
+  giftRows: any = {left: [{}, {}, {}, {}, {}], right: [{}, {}, {}, {}, {}], unset: []};
   isupdating: boolean = false;
   enterTime: any;
 
@@ -236,6 +249,13 @@ class Live extends Component<PageOwnProps, PageState> {
       heatRule: null,
       heatType: null,
       giftOpen: false,
+      currentSupportTeam: null,
+      teamHeats: null,
+      playerHeats: null,
+      giftSendQueue: [],
+      giftRanks: null,
+      giftRanksLoading: false,
+      broadcastList: [],
     }
   }
 
@@ -258,8 +278,8 @@ class Live extends Component<PageOwnProps, PageState> {
     liveAction.getLiveMediaList_clear()
   }
 
-  // componentDidMount() {
-  componentDidShow() {
+  componentDidMount() {
+    // componentDidShow() {
     this.iphoneXAdjust();
     matchAction.getMatchInfo_clear()
     liveAction.getLiveMediaList_clear()
@@ -269,25 +289,21 @@ class Live extends Component<PageOwnProps, PageState> {
       if (data.activityId) {
         if (data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
+          this.startTimer_Danmu();
           this.getMatchDanmu(data.id, this.state.currentMedia);
+        } else {
+          this.getLiveInfo(data.activityId);
         }
-        const activityId = data.activityId;
-        this.setState({liveLoading: true})
-        this.getLiveInfo(activityId).then((res) => {
-          if (res.isPushing) {
-            this.setState({liveLoaded: true, liveLoading: false})
-          } else {
-            this.setState({liveLoaded: false, liveLoading: false})
-          }
-          this.startTimer_liveInfo(activityId);
-        })
         this.getMatchStatus(data.id).then((status) => {
           this.setUpNooice(status);
           this.startTimer_matchStatus(data.id);
         });
         this.getDiffTime(data)
-        this.startTimer_CountDown();
-        this.startTimer_Danmu();
+        if (data.startTime) {
+          if (Date.parse(data.startTime) - new Date().getTime() > 0) {
+            this.startTimer_CountDown();
+          }
+        }
         this.getCollection(data.id);
         this.initSocket(data.id);
         data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
@@ -311,11 +327,6 @@ class Live extends Component<PageOwnProps, PageState> {
   componentWillUnmount() {
     matchAction.getMatchInfo_clear()
     liveAction.getLiveMediaList_clear()
-    this.componentDidHide();
-  }
-
-  componentDidHide() {
-    this.clearTimer_liveInfo();
     this.clearTimer_matchStatus();
     this.clearTimer_CountDown();
     this.clearTimer_HeartBeat();
@@ -325,6 +336,11 @@ class Live extends Component<PageOwnProps, PageState> {
     this.videoContext && this.videoContext.pause();
     this.videoContext = null;
     this.clearTimer_playCountDown();
+    this.clearTimer_Gift();
+  }
+
+  componentDidHide() {
+    // this.clearTimer_liveInfo();
   }
 
   // componentDidShow() {
@@ -344,21 +360,25 @@ class Live extends Component<PageOwnProps, PageState> {
       if (data.available) {
         payAction.getGiftList({matchId: id});
         this.setState({heatRule: data, heatType: data.type})
+        this.getHeatInfo(id, data.type);
+        this.getGiftRanks(id);
+        this.startTimer_Gift();
       }
     })
   }
   getParamId = () => {
-    // let id;
-    // if (this.$router.params) {
-    //   if (this.$router.params.id == null) {
-    //     id = this.$router.params.scene
-    //   } else {
-    //     id = this.$router.params.id
-    //   }
-    // } else {
-    //   return null;
-    // }
-    return 3147;
+    let id;
+    if (this.$router.params) {
+      if (this.$router.params.id == null) {
+        id = this.$router.params.scene
+      } else {
+        id = this.$router.params.id
+      }
+    } else {
+      return null;
+    }
+    // return 3147;
+    return id;
   }
   initCurtain = (id) => {
     new Request().get(`${api.API_CONFIG_BULLETIN_MATCH(id)}`, null).then((res: Array<any>) => {
@@ -394,13 +414,29 @@ class Live extends Component<PageOwnProps, PageState> {
             }
           });
         } else if (res.data !== 'success') {
-          if (context.props.matchStatus.status < FootballEventType.FINISH) {
-            const comment = JSON.parse(res.data);
-            context.sendLiveDanmu({text: comment.content, id: comment.id, user: comment.user});
+          const comment = JSON.parse(res.data);
+          if (comment && comment.broadcast) {
+            const giftOrder = JSON.parse(comment.content);
+            context.addToGiftSendQueue(giftOrder);
+            let broadcastList = context.state.broadcastList;
+            let broadcastText = '';
+            if (giftOrder && giftOrder.user && giftOrder.user.name) {
+              broadcastText = broadcastText + giftOrder.user.name + "送出";
+            }
+            if (giftOrder && giftOrder.gift && giftOrder.gift.name) {
+              broadcastText = broadcastText + giftOrder.gift.name + giftOrder.num + "个";
+            }
+            broadcastList.push({broadcast: true, content: broadcastText, id: giftOrder.id, date: new Date()})
+            context.setState({broadcastList: broadcastList})
+            context.getCommentList(context.props.match.id);
           } else {
-            context.getMatchDanmu(context.props.match.id, context.state.currentMedia);
+            if (context.props.matchStatus.status < FootballEventType.FINISH) {
+              context.sendLiveDanmu({text: comment.content, id: comment.id, user: comment.user});
+            } else {
+              context.getMatchDanmu(context.props.match.id, context.state.currentMedia);
+            }
+            context.getCommentList(context.props.match.id);
           }
-          context.getCommentList(context.props.match.id);
         }
       })
       task.onError(function () {
@@ -472,6 +508,17 @@ class Live extends Component<PageOwnProps, PageState> {
       clearInterval(this.timerID_danmu)
     }
   }
+  startTimer_Gift = () => {
+    this.clearTimer_Gift();
+    this.timerID_giftController = setInterval(() => {
+      this.addUnsetToGiftSendQueue();
+    }, 1000)
+  }
+  clearTimer_Gift = () => {
+    if (this.timerID_giftController) {
+      clearInterval(this.timerID_giftController)
+    }
+  }
   startTimer_HeartBeat = () => {
     this.clearTimer_HeartBeat();
     this.timerID_socketHeartBeat = setInterval(() => {
@@ -484,7 +531,7 @@ class Live extends Component<PageOwnProps, PageState> {
     }
   }
   startTimer_CountDown = () => {
-    this.clearTimer_liveInfo();
+    this.clearTimer_CountDown();
     this.timerID_CountDown = setInterval(() => {
       this.getDiffTime()
     }, 1000)
@@ -507,6 +554,11 @@ class Live extends Component<PageOwnProps, PageState> {
       this.getMatchStatus(id).then((status) => {
         this.setUpNooice(status);
       })
+      if (match && match.status != FootballEventType.FINISH) {
+        this.getLiveInfo(id);
+      }
+      this.getHeatInfo(id, null);
+      this.getGiftRanks(id);
     }, 60000)
   }
   clearTimer_matchStatus = () => {
@@ -515,24 +567,24 @@ class Live extends Component<PageOwnProps, PageState> {
     }
   }
 
-  startTimer_liveInfo = (id) => {
-    this.clearTimer_liveInfo();
-    this.timerID_liveInfo = setInterval(() => {
-      this.setState({liveLoading: true})
-      this.getLiveInfo(id).then((res) => {
-        if (res.isPushing) {
-          this.setState({liveLoaded: true, liveLoading: false})
-        } else {
-          this.setState({liveLoaded: false, liveLoading: false})
-        }
-      });
-    }, 60000)
-  }
-  clearTimer_liveInfo = () => {
-    if (this.timerID_liveInfo) {
-      clearInterval(this.timerID_liveInfo)
-    }
-  }
+  // startTimer_liveInfo = (id) => {
+  //   this.clearTimer_liveInfo();
+  //   this.timerID_liveInfo = setInterval(() => {
+  //     this.setState({liveLoading: true})
+  //     this.getLiveInfo(id).then((res) => {
+  //       if (res.isPushing) {
+  //         this.setState({liveLoaded: true, liveLoading: false})
+  //       } else {
+  //         this.setState({liveLoaded: false, liveLoading: false})
+  //       }
+  //     });
+  //   }, 60000)
+  // }
+  // clearTimer_liveInfo = () => {
+  //   if (this.timerID_liveInfo) {
+  //     clearInterval(this.timerID_liveInfo)
+  //   }
+  // }
 
   async getUserInfo(onSuccess?: Function | null) {
     if (await hasLogin()) {
@@ -571,7 +623,37 @@ class Live extends Component<PageOwnProps, PageState> {
     return liveAction.getLiveMediaList(id)
   }
   getLiveInfo = (id) => {
-    return liveAction.livePing(id)
+    this.setState({liveLoading: true})
+    liveAction.livePing(id).then((res) => {
+      if (res.isPushing) {
+        this.setState({liveLoaded: true, liveLoading: false})
+      } else {
+        this.setState({liveLoaded: false, liveLoading: false})
+      }
+    })
+  }
+  getHeatInfo = (id, type) => {
+    let heatType = this.state.heatType;
+    if (type != null) {
+      heatType = type;
+    }
+    if (heatType == HEAT_TYPE.TEAM_HEAT) {
+      new Request().get(api.API_MATCH_TEAM_HEAT, {matchId: id}).then((data: any) => {
+        // let teamHeats = {};
+        if (Array.isArray(data)) {
+          //   for (let teamHeat of data) {
+          //     teamHeats[teamHeat.teamId] = teamHeat;
+          //   }
+          this.setState({teamHeats: data})
+        }
+      })
+    } else if (heatType == HEAT_TYPE.PLAYER_HEAT) {
+      new Request().get(api.API_MATCH_PLAYER_HEAT, {matchId: id}).then((data: any) => {
+        if (Array.isArray(data)) {
+          this.setState({playerHeats: data})
+        }
+      })
+    }
   }
   getCollection = async (id) => {
     const collectMatch = await getStorage('collectMatch')
@@ -651,17 +733,17 @@ class Live extends Component<PageOwnProps, PageState> {
     this.setState({chatLoading: true})
     matchAction.getMatchComment({pageNum: 1, pageSize: 10, matchId: matchId, startTime: this.enterTime}).then(() => {
       // this.setState({commentIntoView: `message-${this.props.commentList.list.length}`})
-      const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
+      const commentList: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
       // setTimeout(() => {
       if (commentList && commentList.length > 0) {
         this.setState({
-          comments: this.props.commentList.records,
+          comments: commentList,
           chatLoading: false,
           commentIntoView: `message-${commentList[commentList.length - 1].id}`
         })
       } else {
         this.setState({
-          comments: this.props.commentList.records,
+          comments: commentList,
           chatLoading: false,
         })
       }
@@ -678,20 +760,20 @@ class Live extends Component<PageOwnProps, PageState> {
         matchId: this.props.match.id,
         startTime: this.enterTime
       }).then(() => {
-        const commentList_next: Array<any> = this.getCommentsList(this.props.commentList.records);
+        const commentList_next: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
         let index = commentList_next.indexOf(commentList[0]) - 1;
         if (index < 0) {
           index = 0
         }
         if (commentList && commentList.length > 0) {
           this.setState({
-            comments: this.props.commentList.records,
+            comments: commentList_next,
             chatLoading: false,
             commentIntoView: `message-${commentList_next[index].id}`,
           })
         } else {
           this.setState({
-            comments: this.props.commentList.records,
+            comments: commentList_next,
             chatLoading: false,
           })
         }
@@ -957,18 +1039,63 @@ class Live extends Component<PageOwnProps, PageState> {
 
   onPaySuccess = (orderId: string) => {
     this.setState({payOpen: false})
-    this.getOrderStatus(orderId)
+    this.getOrderStatus(orderId, null)
   }
-  getOrderStatus = async (orderId: string) => {
+
+  onGiftPayError = (reason) => {
+    switch (reason) {
+      case error.ERROR_PAY_CANCEL: {
+        Taro.showToast({
+          title: "支付失败,用户取消支付",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_PAY_ERROR: {
+        Taro.showToast({
+          title: "支付失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_SEND_GIFT_ERROR: {
+        Taro.showToast({
+          title: "赠送礼物失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
+
+  onGiftPaySuccess = (orderId: any) => {
+    this.setState({giftOpen: false})
+    if (orderId == GIFT_TYPE.FREE) {
+      this.getParamId() && this.getHeatInfo(this.getParamId(), null);
+      this.getParamId() && payAction.getGiftList({matchId: this.getParamId()});
+    } else {
+      this.getOrderStatus(orderId, ORDER_TYPE.gift);
+    }
+    Taro.showToast({
+      title: "送出礼物成功",
+      icon: 'none',
+    });
+  }
+
+  getOrderStatus = async (orderId: string, type) => {
     new Request().post(api.API_ORDER_QUERY(orderId), {}).then((res) => {
       if (res == ORDER_STAUTS.paid) {
         Taro.showToast({
           title: "支付成功",
           icon: 'none',
         });
-        this.setState({needPay: false})
-        this.getParamId() && this.getMatchInfo(this.getParamId());
-        this.getParamId() && this.getMatchStatus(this.getParamId());
+        if (type != null && type == ORDER_TYPE.gift) {
+          this.getParamId() && this.getHeatInfo(this.getParamId(), null);
+        } else {
+          this.setState({needPay: false})
+          this.getParamId() && this.getMatchInfo(this.getParamId());
+          this.getParamId() && this.getMatchStatus(this.getParamId());
+        }
       }
     });
   }
@@ -1071,21 +1198,23 @@ class Live extends Component<PageOwnProps, PageState> {
       this.setState({videoShowMore: false})
     }, 3000)
     this.setState({firstplay: false})
-    this.clearTimer_playCountDown();
-    this.timeoutID_playCountDown = setTimeout(async () => {
-      if (this.props.match && this.props.match.status == FootballEventType.FINISH) {
-        if (!await this.isUserLogin()) {
-          this.setState({tryplayed: true})
-          Taro.showToast({
-            title: "录播视频只提供10秒试看，登录后可观看完整视频。",
-            duration: 2000,
-            icon: "none",
-          });
-          this.showAuth();
-          this.videoContext && this.videoContext.pause();
+    if (!await this.isUserLogin()) {
+      this.clearTimer_playCountDown();
+      this.timeoutID_playCountDown = setTimeout(async () => {
+        if (this.props.match && this.props.match.status == FootballEventType.FINISH) {
+          if (!await this.isUserLogin()) {
+            this.setState({tryplayed: true})
+            Taro.showToast({
+              title: "录播视频只提供10秒试看，登录后可观看完整视频。",
+              duration: 2000,
+              icon: "none",
+            });
+            this.showAuth();
+            this.videoContext && this.videoContext.pause();
+          }
         }
-      }
-    }, 10000)
+      }, 10000)
+    }
   }
 
   handleVideoTime = (e) => {
@@ -1120,17 +1249,13 @@ class Live extends Component<PageOwnProps, PageState> {
 
   refreshDanmu = () => {
     const indexs: Array<any> = [];
-    this.state.danmuCurrent.map((item) => {
-      if (this.timeout_danmu[item.id] == null) {
-        indexs.push(item);
-      }
-    });
-    // console.log("this.state.danmuCurrent")
-    // console.log(this.state.danmuCurrent)
-    // console.log("refreshDanmu")
-    // console.log(indexs)
-    // console.log("timeout_danmu")
-    // console.log(this.timeout_danmu)
+    if (this.state.danmuCurrent && this.state.danmuCurrent.length > 0) {
+      this.state.danmuCurrent.map((item) => {
+        if (this.timeout_danmu[item.id] == null) {
+          indexs.push(item);
+        }
+      });
+    }
     if (indexs.length > 0) {
       if (this.isupdating) {
         return;
@@ -1300,16 +1425,150 @@ class Live extends Component<PageOwnProps, PageState> {
   hideGiftPanel = () => {
     this.setState({giftOpen: false})
   }
+  getHeatStartTime = () => {
+    const {match = null} = this.props;
+    const {heatRule = null} = this.state;
+    if (match && match.startTime && heatRule && heatRule.startInterval) {
+      let startTime = new Date(match.startTime)
+      startTime.setMinutes(startTime.getMinutes() + heatRule.startInterval);
+      return startTime;
+    }
+    return null
+  }
+  getHeatEndTime = () => {
+    const {match = null} = this.props;
+    const {heatRule = null} = this.state;
+    if (match && match.startTime && match.duration && heatRule && heatRule.endInterval) {
+      let endTime = new Date(match.startTime)
+      endTime.setMinutes(endTime.getMinutes() + match.duration + heatRule.endInterval);
+      return endTime;
+    }
+    return null
+  }
+  handleLeftSupport = () => {
+    const {match = null} = this.props;
+    if (match == null || match.hostteam == null) {
+      return;
+    }
+    this.setState({currentSupportTeam: match.hostteam})
+    this.showGiftPanel();
+  }
+  handleRightSupport = () => {
+    const {match = null} = this.props;
+    if (match == null || match.guestteam == null) {
+      return;
+    }
+    this.setState({currentSupportTeam: match.guestteam})
+    this.showGiftPanel();
+  }
+
+  addUnsetToGiftSendQueue = () => {
+    let unshiftIndex = -1;
+    this.giftRows.unset.some((data, index) => {
+      this.addToGiftSendQueue(data);
+      unshiftIndex = index;
+      return true;
+    })
+    if (unshiftIndex != -1) {
+      this.giftRows.unset.splice(unshiftIndex, 1);
+    }
+  }
+
+  addToGiftSendQueue = (giftOrder) => {
+    let position = "left";
+    if (giftOrder.match != null && giftOrder.targetType == HEAT_TYPE.TEAM_HEAT && giftOrder.externalId != null) {
+      if (giftOrder.match.hostTeamId == giftOrder.externalId) {
+        position = "left";
+      } else {
+        position = "right";
+      }
+    }
+    giftOrder.position = position;
+    const row = this.assignGiftRow(giftOrder, position);
+    giftOrder.row = row;
+    if (row != -1) {
+      this.state.giftSendQueue.push(giftOrder)
+      this.initGiftTimeout(giftOrder.id);
+      this.setState({giftSendQueue: this.state.giftSendQueue})
+    }
+  }
+
+  assignGiftRow = (giftOrderItem, position) => {
+    let rowIndex = -1;
+    let isInsert = false;
+    const giftRow = this.giftRows[position];
+    let giftRow_reverse = this.giftRows["position"];
+    if (position == "left") {
+      giftRow_reverse = this.giftRows["right"];
+    } else {
+      giftRow_reverse = this.giftRows["left"];
+    }
+    if (giftRow != null) {
+      giftRow.map((row, index) => {
+        if (row.id == null && giftRow_reverse[index].id == null && !isInsert) {
+          giftRow[index] = giftOrderItem;
+          rowIndex = index;
+          isInsert = true;
+        }
+      })
+    }
+    if (rowIndex == -1) {
+      this.giftRows.unset.push(giftOrderItem);
+    }
+    return rowIndex;
+  }
+
+  initGiftTimeout(id) {
+    this.timeout_gift[id] = setTimeout(() => {
+      this.timeout_gift[id] = null
+      const showQueue = this.state.giftSendQueue;
+      showQueue.forEach(data => {
+        if (data.id == id) {
+          data.active = true;
+        }
+      });
+      this.setState({giftSendQueue: showQueue}, () => {
+        this.timeout_gift_show[id] = setTimeout(() => {
+          this.timeout_gift_show[id] = null
+          const giftSendQueue = this.state.giftSendQueue.filter(item => item.id != id);
+          this.setState({giftSendQueue: giftSendQueue});
+          let giftRowsShadow = this.giftRows;
+          for (let position in giftRowsShadow) {
+            for (let rowKey in giftRowsShadow[position]) {
+              if (giftRowsShadow[position][rowKey] != null && giftRowsShadow[position][rowKey].id == id) {
+                giftRowsShadow[position][rowKey] = {};
+              }
+            }
+          }
+          this.giftRows = giftRowsShadow;
+        }, 5000);
+      });
+    }, 300);
+  }
+
+  getGiftRanks = (id) => {
+    this.setState({giftRanksLoading: true})
+    new Request().get(api.API_GIFT_RANK_MATCH(id), null).then((data: any) => {
+      if (Array.isArray(data)) {
+        this.setState({giftRanks: data, giftRanksLoading: false})
+      }
+    });
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
-    const {diffDayTime = {diffDay: "", diffTime: "00:00"}, liveStatus, leftNooice = 0, rightNooice = 0} = this.state;
+    const {
+      diffDayTime = {
+        diffDay: "",
+        diffTime: "00:00"
+      }, liveStatus, leftNooice = 0, rightNooice = 0, teamHeats = null
+    } = this.state;
     let {tabList, tabs} = this.getTabsList(match);
 
     return (
       <View className='qz-live-content'>
         <View className='qz-live-match__content'>
-          {!this.state.needPay ? <View className='qz-live-match__video'>
+          {this.state.needPay ? <View className='qz-live-match__video'>
             <Image src={match.poster} className="qz-live-match__video-poster-img"/>
             {match && <AtButton onClick={this.onPayClick} type='primary'
                                 className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
@@ -1371,6 +1630,10 @@ class Live extends Component<PageOwnProps, PageState> {
                     </View>
                   </View>
                 ))}
+                <View className="qz-live-match__video-controllers__views">
+                  <Image className="qz-live-match__video-controllers__views-img" src={views_icon}/>
+                  {this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
+                </View>
                 <View
                   className={`qz-live-match__video-controllers__right ${this.state.videoShowMore ? "qz-live-matc1h__video-controllers__right-more" : ""}`}>
                   <View
@@ -1409,85 +1672,107 @@ class Live extends Component<PageOwnProps, PageState> {
                 : null}
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.matchUp]}>
                 <ScrollView className="qz-live-match-up__scroll-content">
-                  <View className="qz-live-match-up__content">
-                    <MatchUp className="qz-live-match-up__match-up" matchInfo={match}
-                             matchStatus={matchStatus}
-                             onlytime={this.isThisYear(new Date(match.startTime))}
-                             onMonopolyClick={this.onMonopolyClick}/>
-                    <View className="qz-live-match-up__function-bar">
-                      <RoundButton
-                        size={30}
-                        img={playButton}
-                        text={this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
-                        onClick={() => {
-                        }}/>
-                      <RoundButton
-                        size={30}
-                        img={this.state.isCollect ? starActive : star}
-                        text={this.state.isCollect ? "已收藏" : "收藏"}
-                        onClick={this.showGiftPanel}/>
-                      <RoundButton
-                        size={30}
-                        img={moment}
-                        text="朋友圈"
-                        onClick={this.onShareMoment}/>
-                      <RoundButton
-                        size={30}
-                        img={headphones}
-                        text="客服"
-                        openType="contact"
-                        onClick={() => {
-                        }}/>
-                      <RoundButton
-                        size={30}
-                        img={share}
-                        text="分享"
-                        openType="share"
-                        onClick={() => {
-                        }}/>
+                  {this.state.currentTab != tabs[TABS_TYPE.matchUp] ? <View/> : (
+                    <View className="qz-live-match-up__content">
+                      <MatchUp className="qz-live-match-up__match-up" matchInfo={match}
+                               matchStatus={matchStatus}
+                               onlytime={this.isThisYear(new Date(match.startTime))}
+                               onMonopolyClick={this.onMonopolyClick}/>
+                      <View className="qz-live-match-up__function-bar">
+                        {/*<RoundButton*/}
+                        {/*  size={30}*/}
+                        {/*  img={playButton}*/}
+                        {/*  text={this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}*/}
+                        {/*  onClick={() => {*/}
+                        {/*  }}/>*/}
+                        <RoundButton
+                          size={30}
+                          img={this.state.isCollect ? starActive : star}
+                          text={this.state.isCollect ? "已收藏" : "收藏"}
+                          onClick={this.onCollectClick}/>
+                        <RoundButton
+                          size={30}
+                          img={moment}
+                          text="朋友圈"
+                          onClick={this.onShareMoment}/>
+                        <RoundButton
+                          size={30}
+                          img={headphones}
+                          text="客服"
+                          openType="contact"
+                          onClick={() => {
+                          }}/>
+                        <RoundButton
+                          size={30}
+                          img={share}
+                          text="分享"
+                          openType="share"
+                          onClick={() => {
+                          }}/>
+                      </View>
+                      {match.hostteam && match.guestteam ?
+                        (this.state.heatType == HEAT_TYPE.TEAM_HEAT ?
+                            <HeatTeam
+                              teamHeats={teamHeats}
+                              onHandleLeftSupport={this.handleLeftSupport}
+                              onHandleRightSupport={this.handleRightSupport}
+                              startTime={this.getHeatStartTime()}
+                              endTime={this.getHeatEndTime()}
+                            />
+                            :
+                            <NooiceBar
+                              percent={leftNooice == 0 && rightNooice == 0 ? 50 : (leftNooice * 100 / (leftNooice + rightNooice))}
+                              leftText={`${leftNooice}`}
+                              rightText={`${rightNooice}`}
+                              leftMoveClass={this.state.nooiceLeftMoveClass}
+                              rightMoveClass={this.state.nooiceRightMoveClass}
+                              handleLeftNooice={this.handleLeftNooice}
+                              handleRightNooice={this.handleRightNooice}
+                            />
+                        ) : null}
+                      {match.type && match.type.indexOf(MATCH_TYPE.chattingRoom) != -1 &&
+                      <ChattingRoom
+                        isIphoneX={this.state.isIphoneX}
+                        matchInfo={this.props.match}
+                        userInfo={this.props.userInfo}
+                        nextPage={this.getCommentList_next}
+                        loading={this.state.chatLoading}
+                        intoView={this.state.commentIntoView}
+                        sendMessage={this.sendMessage}
+                        comments={this.state.comments}
+                      />}
                     </View>
-                    {match.hostteam && match.guestteam ? <NooiceBar
-                      percent={leftNooice == 0 && rightNooice == 0 ? 50 : (leftNooice * 100 / (leftNooice + rightNooice))}
-                      leftText={`${leftNooice}`}
-                      rightText={`${rightNooice}`}
-                      leftMoveClass={this.state.nooiceLeftMoveClass}
-                      rightMoveClass={this.state.nooiceRightMoveClass}
-                      handleLeftNooice={this.handleLeftNooice}
-                      handleRightNooice={this.handleRightNooice}
-                    /> : null}
-                    {match.type && match.type.indexOf(MATCH_TYPE.chattingRoom) != -1 &&
-                    <ChattingRoom
-                      isIphoneX={this.state.isIphoneX}
-                      matchInfo={this.props.match}
-                      userInfo={this.props.userInfo}
-                      nextPage={this.getCommentList_next}
-                      loading={this.state.chatLoading}
-                      intoView={this.state.commentIntoView}
-                      sendMessage={this.sendMessage}
-                      comments={this.state.comments}
-                    />}
-                  </View>
+                  )}
                 </ScrollView>
               </AtTabsPane>
               {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatReward]}>
-                  <HeatReward heatRule={this.state.heatRule} loading={this.state.heatRule == null}/>
+                  <HeatReward heatRule={this.state.heatRule} loading={this.state.heatRule == null}
+                              hidden={this.state.currentTab != tabs[TABS_TYPE.heatReward]}/>
                 </AtTabsPane>
                 : null}
               {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.giftRank]}>
-
+                  <GiftRank giftRanks={this.state.giftRanks} loading={this.state.giftRanksLoading}
+                            hidden={this.state.currentTab != tabs[TABS_TYPE.giftRank]}/>
                 </AtTabsPane>
                 : null}
               {match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1 &&
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.statistics]}>
                 <ScrollView scrollY className="qz-live-statistics">
-                  {this.props.matchStatus.timeLines && this.props.matchStatus.timeLines.length > 0 ?
-                    <TimeLine
-                      timeline={this.props.matchStatus.timeLines.filter(ele => eventType[ele.eventType] != null)}
-                      matchInfo={this.props.match}/>
-                    : null}
-                  <Statistics statistics={this.props.matchStatus.statistics} matchInfo={this.props.match}/>
+                  {this.state.currentTab != tabs[TABS_TYPE.statistics] ? <View/>
+                    :
+                    (
+                      <View>
+                        {this.props.matchStatus.timeLines && this.props.matchStatus.timeLines.length > 0 ?
+                          <TimeLine
+                            timeline={this.props.matchStatus.timeLines.filter(ele => eventType[ele.eventType] != null)}
+                            matchInfo={this.props.match}/>
+                          : null}
+                        <Statistics statistics={this.props.matchStatus.statistics} matchInfo={this.props.match}/>
+                      </View>
+                    )
+                  }
                 </ScrollView>
               </AtTabsPane>}
               {match.type && match.type.indexOf(MATCH_TYPE.lineUp) != -1 &&
@@ -1495,7 +1780,8 @@ class Live extends Component<PageOwnProps, PageState> {
                 <LineUp players={this.props.playerList}
                         matchInfo={this.props.match}
                         switchTab={this.switchTeamPlayer}
-                        loading={this.state.playerLoading}/>
+                        loading={this.state.playerLoading}
+                        hidden={this.state.currentTab != tabs[TABS_TYPE.lineUp]}/>
               </AtTabsPane>}
             </AtTabs>
           </View>
@@ -1543,10 +1829,25 @@ class Live extends Component<PageOwnProps, PageState> {
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}>
           <GiftPanel
+            matchInfo={match}
+            supportTeam={this.state.currentSupportTeam}
             heatType={this.state.heatType}
             gifts={this.props.giftList}
-            loading={this.props.giftList == null || this.props.giftList.length == 0}/>
+            loading={this.props.giftList == null || this.props.giftList.length == 0}
+            onHandlePaySuccess={this.onGiftPaySuccess}
+            onHandlePayError={this.onGiftPayError}
+            hidden={!this.state.giftOpen}/>
         </AtFloatLayout>
+        {this.state.giftSendQueue && this.state.giftSendQueue.map((data: any) => (
+          <GiftNotify
+            active={data.active}
+            key={data.id}
+            position={data.position}
+            gift={data.gift}
+            user={data.user}
+            num={data.num}
+            row={data.row}/>
+        ))}
         {match.league ?
           <View className="qz-live-match-up__league">
             <AtFab size="small" onClick={this.onLeagueClick.bind(this, match.league)}>

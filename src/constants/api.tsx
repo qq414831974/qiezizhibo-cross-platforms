@@ -87,7 +87,7 @@ export const API_ORDER_USER = `${pay_service}/order/user`;
 export const API_GIFT_LIST = `${pay_service}/gift/list`;
 export const API_GIFT_SEND_FREE = `${pay_service}/gift/sendFree`;
 export const API_GIFT_SEND_FREE_LIMIT = `${pay_service}/gift/freeLimit`;
-export const API_GIFT_ORDER_MATCH = (id) => `${pay_service}/gift/rank/match/${id}`;
+export const API_GIFT_RANK_MATCH = (id) => `${pay_service}/gift/rank/match/${id}`;
 
 //heat
 export const API_MATCH_HEAT = `${football_service}/heat/match`;

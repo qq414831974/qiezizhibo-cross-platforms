@@ -15,6 +15,7 @@ type PageOwnProps = {
   matchInfo: any;
   switchTab: any;
   loading: boolean;
+  hidden: any;
 }
 
 type PageState = {
@@ -46,9 +47,12 @@ class LineUp extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {players = [], matchInfo = {}, loading = false} = this.props
+    const {players = [], matchInfo = {}, loading = false, hidden = false} = this.props
     const hostTeam = matchInfo.hostteam ? matchInfo.hostteam : {name: "主队"};
     const guestTeam = matchInfo.guestteam ? matchInfo.guestteam : {name: "客队"};
+    if (hidden) {
+      return <View/>
+    }
     return (
       <View className="qz-lineup">
         <AtSegmentedControl

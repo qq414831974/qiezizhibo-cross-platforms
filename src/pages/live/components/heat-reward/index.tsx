@@ -11,6 +11,7 @@ type PageDispatchProps = {}
 type PageOwnProps = {
   heatRule: any;
   loading: boolean;
+  hidden: boolean;
 }
 
 type PageState = {
@@ -34,7 +35,10 @@ class HeatReward extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {heatRule = null, loading = true} = this.props
+    const {heatRule = null, loading = true, hidden = false} = this.props
+    if (hidden) {
+      return <View/>
+    }
 
     return (
       <ScrollView scrollY className="qz-heatreward">

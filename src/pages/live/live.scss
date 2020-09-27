@@ -111,6 +111,32 @@
       pointer-events: none !important;
       background-color: transparent;
 
+      &__views {
+        color: $color-text-base-inverse;
+        height: 48px;
+        line-height: 48px;
+        font-size: $font-size-sm;
+        padding: 0 24px;
+        background: rgba(0, 0, 0, 0.3);
+        position: absolute;
+        vertical-align: middle;
+        align-items: center;
+        top: 4vw;
+        left: 2vw;
+        z-index: -1;
+        display: flex;
+        pointer-events: none !important;
+        border-radius: 4px;
+
+        &-img {
+          width: 24px;
+          height: 24px;
+          margin-right: 10px;
+          pointer-events: none !important;
+          z-index: -1;
+        }
+      }
+
       &__danmu-container {
         //display: flex;
         //flex-direction: row;

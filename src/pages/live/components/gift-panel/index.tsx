@@ -14,6 +14,11 @@ type PageOwnProps = {
   gifts: [];
   loading: boolean;
   heatType: number | null;
+  matchInfo: any;
+  supportTeam: any;
+  onHandlePaySuccess: any;
+  onHandlePayError: any;
+  hidden: any;
 }
 
 type PageState = {
@@ -122,14 +127,16 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
   onGiftSendClick = () => {
     this.setState({giftConfirmOpen: true})
   }
-  onGiftConfrimCancel = ()=>{
+  onGiftConfrimCancel = () => {
     this.setState({giftConfirmOpen: false})
   }
-  onGiftConfrim = ()=>{
+  onGiftConfrim = (orderId: any) => {
     this.setState({giftConfirmOpen: false})
+    this.props.onHandlePaySuccess(orderId);
   }
+
   render() {
-    const {gifts = [], loading = false, heatType = 0} = this.props
+    const {gifts = [], loading = false, heatType = 0,hidden = false} = this.props
     const {currentGift = null, currentNum = 0} = this.state
     const discountPrice = this.getGiftDiscountPriceByNum(currentGift, currentNum);
     const realPrice = this.getGiftRealPriceByNum(currentGift, currentNum);
@@ -139,7 +146,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
 
     return (
       <View className="qz-gifts">
-        {loading ?
+        {loading || hidden ?
           <View className="qz-lineup-content-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
           :
           <View>
@@ -155,9 +162,12 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
                       <View className="qz-gifts__grid-item-name">
                         <Text>{data.name}</Text>
                       </View>
-                      <View className="qz-gifts__grid-item-price">
-                        <Text>{getYuan(data.price)}茄币</Text>
-                      </View>
+                      {data.type == global.GIFT_TYPE.CHARGE ? <View className="qz-gifts__grid-item-price">
+                          <Text>{getYuan(data.price)}茄币</Text>
+                        </View> :
+                        <View className="qz-gifts__grid-item-price">
+                          <Text>免费(余{data.limitRemain})</Text>
+                        </View>}
                     </View>
                   )
                 )}
@@ -217,9 +227,13 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
               isOpened={this.state.giftConfirmOpen}
               gift={this.state.currentGift}
               num={this.state.currentNum}
+              matchId={this.props.matchInfo ? this.props.matchInfo.id : null}
+              externalId={this.props.heatType == global.HEAT_TYPE.TEAM_HEAT && this.props.supportTeam ? this.props.supportTeam.id : null}
               giftInfo={{price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp}}
+              heatType={this.props.heatType}
               handleCancel={this.onGiftConfrimCancel}
               handleConfirm={this.onGiftConfrim}
+              handleError={this.props.onHandlePayError}
             />
           </View>
         }

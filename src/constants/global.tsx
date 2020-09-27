@@ -65,6 +65,7 @@ export const ORDER_TYPE = {
   "live": 1,
   "record": 2,
   "monopoly": 3,
+  "gift": 4,
 }
 export const ORDER_STAUTS = {
   "notpaid": 0,
@@ -95,4 +96,8 @@ export const GROWTH_TYPE = {
   USER_EXP: 1,
   TEAM_HEAT: 2,
   PLAYER_HEAT: 3,
+}
+export const GIFT_TYPE = {
+  FREE: 0,
+  CHARGE: 1,
 }

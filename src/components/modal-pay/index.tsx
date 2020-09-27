@@ -174,6 +174,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
   render() {
     const {isOpened = false, handleCancel, charge, payEnabled} = this.props;
     const {isChargeOpen = false, isMonopolyOpen = false} = this.state;
+
     if (!payEnabled) {
       return (<AtModal isOpened={isOpened} onClose={handleCancel}>
         <AtModalContent>
@@ -192,7 +193,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
     return (
       <View>
         <AtModal isOpened={isOpened} onClose={handleCancel}>
-          <AtModalContent>
+          {isOpened ? <AtModalContent>
             <View className="center">
               <AtAvatar circle image={defaultLogo}/>
             </View>
@@ -221,7 +222,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
               • 购买<Text className="bold">“请大家围观”</Text>后，您的<Text className="bold">头像及昵称</Text>会在直播间<Text
               className="bold">永久展示</Text>，且所有观众都可免费观看本场比赛，同时可联系客服获取录像下载地址。
             </View> : null}
-          </AtModalContent>
+          </AtModalContent> : null}
           {charge && charge.monopolyOnly && charge.isMonopolyCharge ? <AtModalAction>
               <Button className="black" onClick={this.handleMonopolyOpen}>请大家围观(本场)</Button>
             </AtModalAction> :

@@ -75,9 +75,10 @@ class ModalPhone extends Component<PageOwnProps, PageState> {
 
   render() {
     const {isOpened = false, handleClose, handleCancel} = this.props;
+
     return (
       <AtModal isOpened={isOpened} onClose={handleClose}>
-        <AtModalContent>
+        {isOpened ? <AtModalContent>
           <View className="center">
             <AtAvatar circle image={defaultLogo}/>
           </View>
@@ -91,7 +92,7 @@ class ModalPhone extends Component<PageOwnProps, PageState> {
           <View className="light-gray qz-phone-modal-content_tip">
             • 请验证手机号
           </View>
-        </AtModalContent>
+        </AtModalContent> : null}
         <AtModalAction>
           <Button onClick={handleCancel}>
             <Text className="mini-gray">暂不授权</Text>

@@ -1,0 +1,148 @@
+@import '../../../../app';
+
+.qz-giftnotify {
+  position: fixed;
+  //width: 400px;
+  width: 0;
+  height: 80px;
+  bottom: 50%;
+  z-index: $zindex-modal;
+  visibility: hidden;
+  transition: width 300ms $timing-func, visibility 300ms $timing-func;
+
+  &-content {
+    height: 80px;
+    min-height: 80px;
+    max-height: 80px;
+    width: 100%;
+    //transition: width 300ms $timing-func;
+    &-text-small {
+      font-size: $font-size-sm;
+    }
+
+    &-text-mini {
+      font-size: $font-size-xs;
+    }
+    &-gift {
+      &-name {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+
+        &-text {
+          width: calc(100% - 60px - 60px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: $font-size-sm;
+          color: $color-text-base-inverse;
+        }
+      }
+
+      &-img {
+        position: absolute;
+        top: 50%;
+        width: 100px;
+        height: 100px;
+        transform: translateY(-50%);
+      }
+
+      &-num {
+        position: absolute;
+        top: 40%;
+        height: 60px;
+        text-shadow: 0px 0px 10px #827717, 0 0 1px #827717, 0 0 #827717, 0 0 #827717, 0 0 #827717, 0 0 #827717, 0 0 #827717;
+        color: white;
+        font-size: $font-size-lg;
+      }
+    }
+
+    &-user {
+      &-name {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: $font-size-base;
+        color: $color-warning;
+        white-space: nowrap;
+
+        &-text {
+          width: calc(100% - 80px - 80px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+      }
+
+      &-avatar {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        width: 60px;
+        height: 60px;
+        transform: translateY(-50%);
+        border-radius: 50%;
+        background-clip: border-box;
+        overflow: hidden;
+      }
+    }
+  }
+}
+
+.qz-giftnotify-left {
+  left: 0;
+
+  .qz-giftnotify-content {
+    background: url("../../../../assets/live/notify-left.png") no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .qz-giftnotify-content-gift-img {
+    right: -10%;
+  }
+
+  .qz-giftnotify-content-gift-num {
+    right: calc(-10% + 100px);
+  }
+
+  .qz-giftnotify-content-user-avatar {
+    left: 20px;
+  }
+}
+
+.qz-giftnotify-right {
+  right: 0;
+
+  .qz-giftnotify-content {
+    background: url("../../../../assets/live/notify-right.png") no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .qz-giftnotify-content-gift-img {
+    left: -10%;
+  }
+
+  .qz-giftnotify-content-gift-num {
+    left: calc(-10% + 100px);
+  }
+
+  .qz-giftnotify-content-user-avatar {
+    right: 20px;
+  }
+}
+
+.qz-giftnotify-active {
+  width: 380px;
+  visibility: visible;
+}

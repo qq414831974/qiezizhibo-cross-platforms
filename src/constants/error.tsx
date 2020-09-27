@@ -11,3 +11,5 @@ export const ERROR_LOCATION_FAILED = 'error_location_failed';
 export const ERROR_PAY_CANCEL = 'error_pay_cancel';
 //支付失败
 export const ERROR_PAY_ERROR = 'error_pay';
+
+export const ERROR_SEND_GIFT_ERROR = 'error_gift';

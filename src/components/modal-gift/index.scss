@@ -36,3 +36,33 @@
   padding: 0 $spacing-h-md;
   font-size: $font-size-xs;
 }
+
+.qz-gift-modal-content_captcha-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .qz-gift-modal-content_captcha {
+    font-style: italic;
+    font-weight: bold;
+    border: 0;
+    letter-spacing: 3px;
+    font-size: $font-size-base;
+    background-color: #ccc;
+    padding: 5px;
+    margin-right: 10px;
+    color: blue;
+  }
+
+  .qz-gift-modal-content_captcha-change {
+    font-size: $font-size-sm;
+  }
+
+  .qz-gift-modal-content_captcha-title {
+    font-size: $font-size-sm;
+  }
+
+  .qz-gift-modal-content_captcha-input {
+    font-size: $font-size-sm;
+  }
+}

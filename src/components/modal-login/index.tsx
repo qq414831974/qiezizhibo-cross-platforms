@@ -97,7 +97,7 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
     const {isOpened = false, handleClose, handleCancel} = this.props;
     return (
       <AtModal isOpened={isOpened} onClose={handleClose}>
-        <AtModalContent>
+        {isOpened ? <AtModalContent>
           <View className="center">
             <AtAvatar circle image={defaultLogo}/>
           </View>
@@ -108,7 +108,7 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
           <Text className="light-gray qz-login-modal-content_tip">
             • 茄子体育将获得您的公开信息（昵称、头像等）
           </Text>
-        </AtModalContent>
+        </AtModalContent> : null}
         <AtModalAction>
           <Button onClick={handleCancel}>
             <Text className="mini-gray">暂不登录</Text>

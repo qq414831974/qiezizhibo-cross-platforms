@@ -91,49 +91,55 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
               直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约
             </View>
             {this.getCommentsList(comments).map((item: any) => (
-              item.user && item.user.userNo === this.props.userInfo.userNo ?
+              item.broadcast ?
                 <View key={`message-${item.id}`}
                       id={`message-${item.id}`}
-                      className="qz-chatting-room__chat-item qz-chatting-room__chat-item-right">
-                  <View className="qz-chatting-room__chat-text-container">
-                    <View className="qz-chatting-room__chat-text__text">
-                      {/*<Text>{`message-${index}`}</Text>*/}
-                      <Text>{item.content}</Text>
+                      className="qz-chatting-room__chat-item qz-chatting-room__chat-item-center">
+                  <Text className="qz-chatting-room__chat-text__broadcast">{item.content}</Text>
+                </View> :
+                (item.user && item.user.userNo === this.props.userInfo.userNo ?
+                    <View key={`message-${item.id}`}
+                          id={`message-${item.id}`}
+                          className="qz-chatting-room__chat-item qz-chatting-room__chat-item-right">
+                      <View className="qz-chatting-room__chat-text-container">
+                        <View className="qz-chatting-room__chat-text__text">
+                          {/*<Text>{`message-${index}`}</Text>*/}
+                          <Text>{item.content}</Text>
+                        </View>
+                      </View>
+                      <View className="qz-chatting-room__chat-avatar-container">
+                        <View className="qz-chatting-room__chat-avatar__avatar">
+                          <Image src={item.user.avatar ? item.user.avatar : noperson}/>
+                        </View>
+                        <View className="qz-chatting-room__chat-avatar__name">
+                          <Text className="qz-chatting-room__chat-avatar__name-text">
+                            {item.user ? item.user.name : "已注销"}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                  <View className="qz-chatting-room__chat-avatar-container">
-                    <View className="qz-chatting-room__chat-avatar__avatar">
-                      <Image src={item.user.avatar ? item.user.avatar : noperson}/>
+                    :
+                    <View key={`message-${item.id}`}
+                          id={`message-${item.id}`}
+                          className="qz-chatting-room__chat-item qz-chatting-room__chat-item-left">
+                      <View className="qz-chatting-room__chat-avatar-container">
+                        <View className="qz-chatting-room__chat-avatar__avatar">
+                          <Image src={item.user.avatar ? item.user.avatar : noperson}/>
+                        </View>
+                        <View className="qz-chatting-room__chat-avatar__name">
+                          <Text className="qz-chatting-room__chat-avatar__name-text">
+                            {item.user ? item.user.name : "已注销"}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="qz-chatting-room__chat-text-container">
+                        <View className="qz-chatting-room__chat-text__text">
+                          {/*<Text>{`message-${index}`}</Text>*/}
+                          <Text>{item.content}</Text>
+                        </View>
+                      </View>
                     </View>
-                    <View className="qz-chatting-room__chat-avatar__name">
-                      <Text className="qz-chatting-room__chat-avatar__name-text">
-                        {item.user ? item.user.name : "已注销"}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-                :
-                <View key={`message-${item.id}`}
-                      id={`message-${item.id}`}
-                      className="qz-chatting-room__chat-item qz-chatting-room__chat-item-left">
-                  <View className="qz-chatting-room__chat-avatar-container">
-                    <View className="qz-chatting-room__chat-avatar__avatar">
-                      <Image src={item.user.avatar ? item.user.avatar : noperson}/>
-                    </View>
-                    <View className="qz-chatting-room__chat-avatar__name">
-                      <Text className="qz-chatting-room__chat-avatar__name-text">
-                        {item.user ? item.user.name : "已注销"}
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="qz-chatting-room__chat-text-container">
-                    <View className="qz-chatting-room__chat-text__text">
-                      {/*<Text>{`message-${index}`}</Text>*/}
-                      <Text>{item.content}</Text>
-                    </View>
-                  </View>
-                </View>
-            ))}
+                )))}
           </View>
         </ScrollView>
         <View
@@ -146,7 +152,7 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
             value={this.state.textInput}
             onChange={this.handleChatInputChange}
             onConfirm={this.handleSendMessage}
-            confirmType='发送'
+            confirmType='send'
             adjustPosition
             border={false}
             className='qz-input-no-padding'

@@ -50,8 +50,11 @@ export const formatDayTime = date => {
 }
 export const getTimeDifference = (time) => {
   let diff = '';
+  let diff_hour_minute_sencod = '';
   let day = '';
-  const time_diff = Date.parse(time) - new Date().getTime(); //时间差的毫秒数
+  let time_diff;
+  time_diff = Date.parse(time) - new Date().getTime(); //时间差的毫秒数
+
   if (time_diff <= 0) {
     return null;
   }
@@ -63,6 +66,7 @@ export const getTimeDifference = (time) => {
   //计算出小时数
   const leave1 = time_diff % (24 * 3600 * 1000);
   const hours = Math.floor(leave1 / (3600 * 1000));
+  const dayHours = Math.floor(leave1 / (3600 * 1000)) + (days > 0 ? days * 24 : 0);
   if (hours > 0) {
     // diff += hours + '小时';
     diff += (hours < 10 ? "0" + hours.toString() : hours) + ':';
@@ -72,16 +76,27 @@ export const getTimeDifference = (time) => {
       diff += (hours < 10 ? "0" + hours.toString() : hours) + ':';
     }
   }
+  if (dayHours > 0) {
+    // diff += hours + '小时';
+    diff_hour_minute_sencod += (dayHours < 10 ? "0" + dayHours.toString() : dayHours) + ':';
+  } else {
+    if (diff !== '') {
+      // diff += hours + '小时';
+      diff_hour_minute_sencod += (dayHours < 10 ? "0" + dayHours.toString() : dayHours) + ':';
+    }
+  }
   //计算相差分钟数
   const leave2 = leave1 % (3600 * 1000);
   const minutes = Math.floor(leave2 / (60 * 1000));
   if (minutes > 0) {
     // diff += minutes + '分';
     diff += (minutes < 10 ? "0" + minutes.toString() : minutes) + ':';
+    diff_hour_minute_sencod += (minutes < 10 ? "0" + minutes.toString() : minutes) + ':';
   } else {
     if (diff !== '') {
       // diff += minutes + '分';
       diff += (minutes < 10 ? "0" + minutes.toString() : hours) + ':';
+      diff_hour_minute_sencod += (minutes < 10 ? "0" + minutes.toString() : hours) + ':';
     }
   }
   //计算相差秒数
@@ -90,16 +105,18 @@ export const getTimeDifference = (time) => {
   if (seconds > 0) {
     // diff += seconds + '秒';
     diff += (seconds < 10 ? "0" + seconds.toString() : seconds);
-
+    diff_hour_minute_sencod += (seconds < 10 ? "0" + seconds.toString() : seconds);
   } else {
     if (diff !== '') {
       // diff += seconds + '秒';
       diff += (seconds < 10 ? "0" + seconds.toString() : seconds);
+      diff_hour_minute_sencod += (seconds < 10 ? "0" + seconds.toString() : seconds);
     }
   }
   return {
     diffDay: day,
-    diffTime: diff
+    diffTime: diff,
+    diffDayTime: diff_hour_minute_sencod,
   };
 }
 export const isH5 = () => {

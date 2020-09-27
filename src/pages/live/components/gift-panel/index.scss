@@ -3,6 +3,8 @@
 @import "~taro-ui/dist/style/components/icon.scss";
 
 .qz-gifts {
+  overflow: hidden;
+
   &__content {
     height: 416px;
     width: 100%;
@@ -38,6 +40,7 @@
       color: $color-text-disabled;
       margin-left: $spacing-v-sm;
     }
+
     &-exp {
       font-size: $font-size-xs;
       font-weight: 800;
