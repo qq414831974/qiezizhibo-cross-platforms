@@ -101,7 +101,7 @@ class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
     return res;
   }
   nextPage = (tab) => {
-    if (!global.CacheManager.getInstance().CACHE_ENABLED) {
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
       return;
     }
     if (typeof (tab) != 'number') {

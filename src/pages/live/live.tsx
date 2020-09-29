@@ -518,7 +518,7 @@ class Live extends Component<PageOwnProps, PageState> {
   getDiffTime = (data = null) => {
     const {match = data} = this.props;
     if (match) {
-      const startTime = match.startTime;
+      const startTime = new Date(match.startTime);
       if (startTime) {
         const diff = getTimeDifference(startTime);
         this.setState({
