@@ -16,6 +16,7 @@ type PageOwnProps = {
   heatType: number | null;
   matchInfo: any;
   supportTeam: any;
+  supportPlayer: any;
   onHandlePaySuccess: any;
   onHandlePayError: any;
   hidden: any;
@@ -25,6 +26,7 @@ type PageState = {
   currentGift: any;
   currentNum: number;
   selectorValue: number;
+  numSelectorValue: Array<any>;
   numSelector: Array<any>;
   giftConfirmOpen: boolean;
 }
@@ -38,19 +40,22 @@ interface GiftPanel {
 class GiftPanel extends Component<PageOwnProps, PageState> {
   static defaultProps = {}
 
+  numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100];
+
   constructor(props) {
     super(props)
     this.state = {
       currentGift: null,
       currentNum: 0,
       selectorValue: 0,
+      numSelectorValue: [],
       numSelector: [],
       giftConfirmOpen: false,
     }
   }
 
   componentDidMount() {
-    this.setState({numSelector: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100]});
+    this.setState({numSelectorValue: this.numbers, numSelector: this.numbers});
   }
 
 
@@ -104,6 +109,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     return null;
   }
   onGiftClick = (gift) => {
+    this.refreshDiscount(gift);
     this.setState({currentGift: gift, currentNum: 1, selectorValue: 0})
   }
   onNumPickerChange = (e) => {
@@ -134,9 +140,21 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     this.setState({giftConfirmOpen: false})
     this.props.onHandlePaySuccess(orderId);
   }
+  refreshDiscount = (gift) => {
+    const values: any = [];
+    for (let number of this.numbers) {
+      const discount = this.getDiscountValue(gift, number);
+      if (discount) {
+        values.push(number + `(${discount / 10}折)`);
+      } else {
+        values.push(number);
+      }
+    }
+    this.setState({numSelectorValue: values, numSelector: this.numbers});
+  }
 
   render() {
-    const {gifts = [], loading = false, heatType = 0,hidden = false} = this.props
+    const {gifts = [], loading = false, heatType = 0, hidden = false} = this.props
     const {currentGift = null, currentNum = 0} = this.state
     const discountPrice = this.getGiftDiscountPriceByNum(currentGift, currentNum);
     const realPrice = this.getGiftRealPriceByNum(currentGift, currentNum);
@@ -202,7 +220,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
                       <Picker
                         className="h-full center"
                         mode='selector'
-                        range={this.state.numSelector}
+                        range={this.state.numSelectorValue}
                         onChange={this.onNumPickerChange}
                         value={this.state.selectorValue}>
                         <View className="at-icon at-icon-chevron-down qz-gifts__bottom-arrow"/>
@@ -228,7 +246,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
               gift={this.state.currentGift}
               num={this.state.currentNum}
               matchId={this.props.matchInfo ? this.props.matchInfo.id : null}
-              externalId={this.props.heatType == global.HEAT_TYPE.TEAM_HEAT && this.props.supportTeam ? this.props.supportTeam.id : null}
+              externalId={this.props.heatType == global.HEAT_TYPE.TEAM_HEAT && this.props.supportTeam ? this.props.supportTeam.id : (this.props.heatType == global.HEAT_TYPE.PLAYER_HEAT && this.props.supportPlayer ? this.props.supportPlayer.id : null)}
               giftInfo={{price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp}}
               heatType={this.props.heatType}
               handleCancel={this.onGiftConfrimCancel}

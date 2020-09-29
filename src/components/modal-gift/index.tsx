@@ -57,6 +57,7 @@ type PageState = {
   isPaying: boolean;
   captcha: any;
   captchaInput: any;
+  enabledFreeGift: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -73,6 +74,16 @@ class ModalGift extends Component<PageOwnProps, PageState> {
     },
     handleError: () => {
     },
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      isPaying: false,
+      captcha: null,
+      captchaInput: null,
+      enabledFreeGift: true,
+    }
   }
 
   componentDidMount() {
@@ -165,7 +176,13 @@ class ModalGift extends Component<PageOwnProps, PageState> {
     })
   }
   sendFreeGift = (userNo) => {
+    if (!this.state.enabledFreeGift) {
+      Taro.showToast({title: "一分钟只能送出一次免费礼物", icon: "none"})
+      return;
+    }
     const {handleConfirm, handleError, gift, num = 0} = this.props;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const contxt = this;
     Taro.showLoading({title: global.LOADING_TEXT})
     if (this.state.isPaying) {
       return;
@@ -188,6 +205,9 @@ class ModalGift extends Component<PageOwnProps, PageState> {
           this.setState({isPaying: false})
           if (res) {
             handleConfirm(global.GIFT_TYPE.FREE);
+            setTimeout(() => {
+              contxt.setState({enabledFreeGift: true});
+            }, 61000);
           } else {
             handleError(error.ERROR_SEND_GIFT_ERROR);
           }

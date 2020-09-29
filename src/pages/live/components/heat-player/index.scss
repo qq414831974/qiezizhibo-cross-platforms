@@ -1,0 +1,212 @@
+@import '../../../../app';
+@import '../../live';
+@import "~taro-ui/dist/style/components/flex.scss";
+
+.qz-heat-player-container {
+  height: calc(100vh - (9 / 16 * 100vw) - 36px - 1.45 * 28px);
+  position: relative;
+}
+
+.qz-heat-player-header {
+  &__search {
+
+  }
+
+  &__status {
+    &-title {
+      font-size: $font-size-base;
+      color: $color-text-title;
+      white-space: nowrap;
+    }
+
+    &-value {
+      font-size: $font-size-sm;
+      color: $color-text-placeholder;
+      white-space: nowrap;
+    }
+  }
+}
+
+.qz-heat-player-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: fit-content;
+  align-self: center;
+  background-color: $color-bg-base;
+  box-shadow: 4px 0 4px 0 rgba(0, 0, 0, 0.3);
+  padding: $spacing-v-sm 0;
+
+  &-left {
+    padding: 0 $spacing-v-md;
+  }
+
+  &-right {
+    padding: 0 $spacing-v-md;
+  }
+
+  &-left-info {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+
+  &-user {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    font-size: $font-size-sm;
+    font-weight: 800;
+    color: $color-text-title;
+    margin-left: $spacing-v-lg;
+
+    image {
+      height: 40px;
+      width: 40px;
+      border-radius: 50%;
+    }
+
+    text {
+      margin-left: $spacing-v-xs;
+    }
+  }
+
+  &-heat {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    font-size: $font-size-sm;
+    font-weight: 800;
+    color: $color-text-title;
+    margin-left: $spacing-v-lg;
+
+    image {
+      width: $font-size-sm;
+      height: $font-size-sm;
+      border-radius: 50%;
+    }
+
+    text {
+      margin-left: $spacing-v-xs;
+    }
+  }
+}
+
+.qz-heat-player-content {
+  height: calc(100vh - (9 / 16 * 100vw) - 36px - 1.45 * 28px - 85px);
+  width: 100%;
+}
+
+.qz-heat-player__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 25%);
+  grid-template-rows: auto;
+  padding: 0 40px 160px 40px;
+  box-sizing: border-box;
+
+  &-item-active {
+    //border: solid $color-bg-blue-main 2px;
+    background-color: $color-bg-light;
+  }
+
+  &-item {
+    position: relative;
+    padding: $spacing-v-md;
+    border-radius: 10px;
+    box-sizing: border-box;
+    height: min-content;
+
+    &-img-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+
+      image {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+      }
+    }
+
+    &-name {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      font-size: $font-size-sm;
+      color: $color-text-title;
+    }
+
+    &-heat {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      font-size: $font-size-sm;
+      color: $color-text-base-inverse;
+      border-radius: 17px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0 10px;
+
+      &-value {
+        margin-left: $spacing-v-xs;
+      }
+
+      image {
+        width: $font-size-sm;
+        height: $font-size-sm;
+      }
+    }
+
+    &-rank {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    &-rank-1 {
+      background: url("../../../../assets/live/medal.png");
+      background-size: 100% 100%;
+    }
+
+    &-rank-2 {
+      background: url("../../../../assets/live/medal-2.png");
+      background-size: 100% 100%;
+    }
+
+    &-rank-3 {
+      background: url("../../../../assets/live/medal-3.png");
+      background-size: 100% 100%;
+    }
+
+    &-shirt {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: $font-size-sm;
+      color: $color-grey-1;
+      width: 45px;
+      height: 45px;
+      background: url("../../../../assets/live/t-shirt.png");
+      background-size: 100% 100%;
+    }
+
+    &-shirtNum {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      font-size: $font-size-xs;
+      color: $color-text-disabled;
+    }
+  }
+}

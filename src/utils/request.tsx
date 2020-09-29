@@ -115,7 +115,7 @@ const request = async (options) => {
               }
               if (showToast) {
                 Taro.showToast({
-                  title: res && res.message || defaultMsg,
+                  title: res && res.data && res.data.message || defaultMsg,
                   icon: 'none',
                   complete: () => {
                     if (statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN || url.includes("refresh_token")) {

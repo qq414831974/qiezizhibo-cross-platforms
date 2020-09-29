@@ -215,8 +215,8 @@ export const getCityData = (cityArray: Array<any>): any => {
   return cityData
 }
 
-export const getYuan = (fen: number): number => {
-  return fen / 100;
+export const getYuan = (fen: number): any => {
+  return (fen / 100).toFixed(2);
 }
 
 

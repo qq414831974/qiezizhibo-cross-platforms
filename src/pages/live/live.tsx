@@ -64,6 +64,7 @@ import ModalAlbum from "../../components/modal-album";
 import GiftPanel from "./components/gift-panel";
 import HeatReward from "./components/heat-reward";
 import GiftRank from "./components/gift-rank";
+import HeatPlayer from "./components/heat-player";
 
 type Bulletin = {
   id: number,
@@ -141,6 +142,7 @@ type PageState = {
   heatType: number | null;
   giftOpen: boolean;
   currentSupportTeam: any;
+  currentSupportPlayer: any;
   teamHeats: any;
   playerHeats: any;
   giftSendQueue: any;
@@ -250,6 +252,7 @@ class Live extends Component<PageOwnProps, PageState> {
       heatType: null,
       giftOpen: false,
       currentSupportTeam: null,
+      currentSupportPlayer: null,
       teamHeats: null,
       playerHeats: null,
       giftSendQueue: [],
@@ -1554,6 +1557,10 @@ class Live extends Component<PageOwnProps, PageState> {
       }
     });
   }
+  handlePlayerSupport = (player) => {
+    this.setState({currentSupportPlayer: player})
+    this.showGiftPanel();
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
@@ -1561,7 +1568,7 @@ class Live extends Component<PageOwnProps, PageState> {
       diffDayTime = {
         diffDay: "",
         diffTime: "00:00"
-      }, liveStatus, leftNooice = 0, rightNooice = 0, teamHeats = null
+      }, liveStatus, leftNooice = 0, rightNooice = 0, teamHeats = null, playerHeats = null
     } = this.state;
     let {tabList, tabs} = this.getTabsList(match);
 
@@ -1667,7 +1674,12 @@ class Live extends Component<PageOwnProps, PageState> {
                     onClick={this.switchTab.bind(this)}>
               {this.state.heatType == HEAT_TYPE.PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
-
+                  <HeatPlayer
+                    startTime={this.getHeatStartTime()}
+                    endTime={this.getHeatEndTime()}
+                    playerHeats={playerHeats}
+                    onHandlePlayerSupport={this.handlePlayerSupport}
+                    hidden={this.state.currentTab != tabs[TABS_TYPE.heatPlayer]}/>
                 </AtTabsPane>
                 : null}
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.matchUp]}>
@@ -1825,12 +1837,13 @@ class Live extends Component<PageOwnProps, PageState> {
           handleClose={this.onPremissionClose}/>
         <AtFloatLayout
           className="qz-gift-float"
-          title="礼物"
+          title={`礼物送给${this.state.heatType == HEAT_TYPE.TEAM_HEAT && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : (this.state.heatType == HEAT_TYPE.PLAYER_HEAT && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}>
           <GiftPanel
             matchInfo={match}
             supportTeam={this.state.currentSupportTeam}
+            supportPlayer={this.state.currentSupportPlayer}
             heatType={this.state.heatType}
             gifts={this.props.giftList}
             loading={this.props.giftList == null || this.props.giftList.length == 0}
@@ -1848,7 +1861,7 @@ class Live extends Component<PageOwnProps, PageState> {
             num={data.num}
             row={data.row}/>
         ))}
-        {match.league ?
+        {match.league && this.state.currentTab == tabs[TABS_TYPE.matchUp] ?
           <View className="qz-live-match-up__league">
             <AtFab size="small" onClick={this.onLeagueClick.bind(this, match.league)}>
               <Image className="qz-live-match-up__league-image"
