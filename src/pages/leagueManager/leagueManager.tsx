@@ -651,7 +651,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     const {leaguePlayers, leagueTeams, league} = this.props
     let tabList = [{title: '规程'}, {title: '赛程'}]
     let tabIndex = 1;
-    const tabs: Array<any> = [];
+    const tabs: Array<any> = {};
     if (league.showleagueteam) {
       tabList.push({title: '积分榜'})
       tabIndex = tabIndex + 1;
