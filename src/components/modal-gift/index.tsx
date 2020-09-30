@@ -51,6 +51,7 @@ type PageOwnProps = {
   matchId: any,
   externalId: any,
   heatType: any,
+  leagueId: any,
 }
 
 type PageState = {
@@ -130,10 +131,11 @@ class ModalGift extends Component<PageOwnProps, PageState> {
       openId: openId,
       userNo: userNo,
       type: global.ORDER_TYPE.gift,
-      description: `茄子体育-礼物-${gift.id}-${num}-${this.props.matchId}-${this.props.heatType}-${this.props.externalId}`,
+      description: `茄子体育-礼物-${gift.id}-${num}-${this.props.leagueId}-${this.props.matchId}-${this.props.heatType}-${this.props.externalId}`,
       products: [{productId: gift.productId, number: num, isSecond: false}],
       attach: JSON.stringify({
         matchId: this.props.matchId,
+        leagueId: this.props.leagueId,
         type: global.GIFT_TYPE.CHARGE,
         giftId: gift.id,
         externalId: this.props.externalId,
@@ -198,6 +200,7 @@ class ModalGift extends Component<PageOwnProps, PageState> {
           userNo: userNo,
           giftId: gift.id,
           matchId: this.props.matchId,
+          leagueId: this.props.leagueId,
           targetType: this.props.heatType,
           externalId: this.props.externalId,
         }).then((res: any) => {
@@ -234,13 +237,10 @@ class ModalGift extends Component<PageOwnProps, PageState> {
 
   render() {
     const {isOpened = false, handleCancel, gift, num = 0, giftInfo = null} = this.props;
-    if (!isOpened) {
-      return <View/>
-    }
     return (
       <View>
         <AtModal isOpened={isOpened} onClose={handleCancel}>
-          <AtModalContent>
+          {isOpened ? <AtModalContent>
             <View className="center">
               <AtAvatar circle size="small" image={gift && gift.pic ? gift.pic : defaultLogo}/>
             </View>
@@ -255,12 +255,12 @@ class ModalGift extends Component<PageOwnProps, PageState> {
               : null}
             {giftInfo && giftInfo.heatValue ?
               <View className="light-gray qz-gift-modal-content_tip">
-                • +{giftInfo.heatValue}热度
+                • 热度 +{giftInfo.heatValue}
               </View>
               : null}
             {giftInfo && giftInfo.expValue ?
               <View className="light-gray qz-gift-modal-content_tip">
-                • +{giftInfo.expValue}经验
+                • 经验 +{giftInfo.expValue}
               </View>
               : null}
             {giftInfo && gift && gift.type == global.GIFT_TYPE.FREE ?
@@ -278,7 +278,7 @@ class ModalGift extends Component<PageOwnProps, PageState> {
                 </View>
               </View>
               : null}
-          </AtModalContent>
+          </AtModalContent> : null}
           <AtModalAction>
             <Button className="mini-gray" onClick={handleCancel}>取消</Button>
             <Button className="black" onClick={this.handleConfirm}>确定</Button>

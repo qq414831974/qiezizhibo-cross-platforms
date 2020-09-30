@@ -7,6 +7,22 @@
   position: relative;
 }
 
+.qz-heat-player__loading {
+  width: 100vw;
+  height: 10vw;
+  position: absolute;
+  top: $spacing-v-md;
+  left: 0;
+}
+
+.qz-heat-player__nomore {
+  width: 100vw;
+  height: 10vw;
+  position: absolute;
+  bottom: 42px;
+  left: 0;
+}
+
 .qz-heat-player-header {
   &__search {
 

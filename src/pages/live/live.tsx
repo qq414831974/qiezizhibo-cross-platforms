@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
-import {View, Text, Image, Video, ScrollView} from '@tarojs/components'
-import {AtTabs, AtTabsPane, AtIcon, AtButton, AtCurtain, AtToast, AtMessage, AtFab, AtFloatLayout} from "taro-ui"
+import {Image, ScrollView, Text, Video, View} from '@tarojs/components'
+import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtMessage, AtTabs, AtTabsPane, AtToast} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import MatchUp from './components/match-up'
 import NooiceBar from './components/nooice-bar'
@@ -15,24 +15,25 @@ import liveAction from "../../actions/live";
 import playerAction from "../../actions/player";
 import payAction from "../../actions/pay";
 import {
-  getTimeDifference,
-  getStorage,
-  hasLogin,
   clearLoginToken,
+  formatTimeSecond,
+  getStorage,
+  getTimeDifference,
+  hasLogin,
   random,
-  random_weight,
-  formatTimeSecond
+  random_weight
 } from '../../utils/utils'
 import {
   FootballEventType,
-  MATCH_TYPE,
-  TABS_TYPE,
+  GIFT_TYPE,
+  HEAT_TYPE,
   LOADING_TEXT,
-  ORDER_TYPE,
+  MATCH_TYPE,
   ORDER_STAUTS,
+  ORDER_TYPE,
   REPOST_TEXT,
   SHARE_SENTENCE_TYPE,
-  HEAT_TYPE, GIFT_TYPE
+  TABS_TYPE
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import star from '../../assets/live/star.png'
@@ -145,10 +146,14 @@ type PageState = {
   currentSupportPlayer: any;
   teamHeats: any;
   playerHeats: any;
+  playerHeatTotal: any;
   giftSendQueue: any;
   giftRanks: any;
   giftRanksLoading: any;
   broadcastList: any;
+  leagueId: any;
+  playerHeatRefreshFunc: any;
+  playerHeatLoading: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -255,10 +260,14 @@ class Live extends Component<PageOwnProps, PageState> {
       currentSupportPlayer: null,
       teamHeats: null,
       playerHeats: null,
+      playerHeatTotal: null,
       giftSendQueue: [],
       giftRanks: null,
       giftRanksLoading: false,
       broadcastList: [],
+      leagueId: null,
+      playerHeatRefreshFunc: null,
+      playerHeatLoading: false,
     }
   }
 
@@ -290,6 +299,9 @@ class Live extends Component<PageOwnProps, PageState> {
     this.getParamId() && this.initCurtain(this.getParamId());
     this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
       if (data.activityId) {
+        if (data.leaguematchId) {
+          this.setState({leagueId: data.leaguematchId});
+        }
         if (data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
           this.startTimer_Danmu();
@@ -363,7 +375,7 @@ class Live extends Component<PageOwnProps, PageState> {
       if (data.available) {
         payAction.getGiftList({matchId: id});
         this.setState({heatRule: data, heatType: data.type})
-        this.getHeatInfo(id, data.type);
+        this.getTeamHeatInfo(id, data.type);
         this.getGiftRanks(id);
         this.startTimer_Gift();
       }
@@ -560,7 +572,7 @@ class Live extends Component<PageOwnProps, PageState> {
       if (match && match.status != FootballEventType.FINISH) {
         this.getLiveInfo(id);
       }
-      this.getHeatInfo(id, null);
+      this.getTeamHeatInfo(id, null);
       this.getGiftRanks(id);
     }, 60000)
   }
@@ -635,7 +647,7 @@ class Live extends Component<PageOwnProps, PageState> {
       }
     })
   }
-  getHeatInfo = (id, type) => {
+  getTeamHeatInfo = (id, type) => {
     let heatType = this.state.heatType;
     if (type != null) {
       heatType = type;
@@ -650,11 +662,76 @@ class Live extends Component<PageOwnProps, PageState> {
           this.setState({teamHeats: data})
         }
       })
-    } else if (heatType == HEAT_TYPE.PLAYER_HEAT) {
-      new Request().get(api.API_MATCH_PLAYER_HEAT, {matchId: id}).then((data: any) => {
-        if (Array.isArray(data)) {
-          this.setState({playerHeats: data})
+    }
+  }
+  onPlayerHeatRefresh = (func) => {
+    this.setState({playerHeatRefreshFunc: func});
+  }
+  getPlayerHeatInfo = (pageNum, pageSize, name) => {
+    if (this.state.playerHeatLoading) {
+      return;
+    }
+    let heatType = this.state.heatType;
+    let param: any = {pageNum: pageNum, pageSize: pageSize}
+    if (name) {
+      param.name = name;
+    }
+    if (heatType == HEAT_TYPE.PLAYER_HEAT) {
+      param.matchId = this.getParamId();
+      this.setState({playerHeatLoading: true})
+      new Request().get(api.API_MATCH_PLAYER_HEAT, param).then((data: any) => {
+        this.setState({playerHeatLoading: false})
+        this.setState({playerHeats: data})
+      })
+      new Request().get(api.API_MATCH_PLAYER_HEAT_TOTAL, {matchId: this.getParamId()}).then((data: any) => {
+        this.setState({playerHeatTotal: data})
+      })
+    } else if (heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+      param.leagueId = this.state.leagueId;
+      this.setState({playerHeatLoading: true})
+      new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
+        this.setState({playerHeatLoading: false})
+        this.setState({playerHeats: data})
+      })
+      new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.state.leagueId}).then((data: any) => {
+        this.setState({playerHeatTotal: data})
+      })
+    }
+  }
+  getPlayerHeatInfoAdd = (pageNum, pageSize, name) => {
+    if (this.state.playerHeatLoading) {
+      return;
+    }
+    let heatType = this.state.heatType;
+    let param: any = {pageNum: pageNum, pageSize: pageSize}
+    if (name) {
+      param.name = name;
+    }
+    if (heatType == HEAT_TYPE.PLAYER_HEAT) {
+      param.matchId = this.getParamId();
+      this.setState({playerHeatLoading: true})
+      new Request().get(api.API_MATCH_PLAYER_HEAT, param).then((data: any) => {
+        this.setState({playerHeatLoading: false})
+        const playerHeats = this.state.playerHeats;
+        playerHeats.records = playerHeats.records.concat(data.records);
+        playerHeats.current = data.current;
+        if (playerHeats.current > data.pages) {
+          playerHeats.current = data.pages;
         }
+        this.setState({playerHeats: playerHeats})
+      })
+    } else if (heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+      param.leagueId = this.state.leagueId;
+      this.setState({playerHeatLoading: true})
+      new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
+        this.setState({playerHeatLoading: false})
+        const playerHeats = this.state.playerHeats;
+        playerHeats.records = playerHeats.records.concat(data.records);
+        playerHeats.current = data.current;
+        if (playerHeats.current > data.pages) {
+          playerHeats.current = data.pages;
+        }
+        this.setState({playerHeats: playerHeats})
       })
     }
   }
@@ -1074,8 +1151,9 @@ class Live extends Component<PageOwnProps, PageState> {
   onGiftPaySuccess = (orderId: any) => {
     this.setState({giftOpen: false})
     if (orderId == GIFT_TYPE.FREE) {
-      this.getParamId() && this.getHeatInfo(this.getParamId(), null);
+      this.getParamId() && this.getTeamHeatInfo(this.getParamId(), null);
       this.getParamId() && payAction.getGiftList({matchId: this.getParamId()});
+      this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
     } else {
       this.getOrderStatus(orderId, ORDER_TYPE.gift);
     }
@@ -1093,7 +1171,8 @@ class Live extends Component<PageOwnProps, PageState> {
           icon: 'none',
         });
         if (type != null && type == ORDER_TYPE.gift) {
-          this.getParamId() && this.getHeatInfo(this.getParamId(), null);
+          this.getParamId() && this.getTeamHeatInfo(this.getParamId(), null);
+          this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
         } else {
           this.setState({needPay: false})
           this.getParamId() && this.getMatchInfo(this.getParamId());
@@ -1387,7 +1466,7 @@ class Live extends Component<PageOwnProps, PageState> {
     const tabs: any = {};
     let tabIndex = 0;
     //球员热度比拼
-    if (this.state.heatType == HEAT_TYPE.PLAYER_HEAT) {
+    if (this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
       tabList.push({title: '人气榜'})
       tabs[TABS_TYPE.heatPlayer] = tabIndex;
       tabIndex = tabIndex + 1;
@@ -1396,13 +1475,13 @@ class Live extends Component<PageOwnProps, PageState> {
     tabs[TABS_TYPE.matchUp] = tabIndex;
     tabIndex = tabIndex + 1;
     //开启热度比拼
-    if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT) {
+    if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
       tabList.push({title: '奖励'})
       tabs[TABS_TYPE.heatReward] = tabIndex;
       tabIndex = tabIndex + 1;
     }
     //开启打赏榜
-    if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT) {
+    if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
       tabList.push({title: '打赏榜'})
       tabs[TABS_TYPE.giftRank] = tabIndex;
       tabIndex = tabIndex + 1;
@@ -1672,14 +1751,20 @@ class Live extends Component<PageOwnProps, PageState> {
                     className="qz-live__top-tabs__content"
                     tabList={tabList}
                     onClick={this.switchTab.bind(this)}>
-              {this.state.heatType == HEAT_TYPE.PLAYER_HEAT ?
+              {this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
                   <HeatPlayer
+                    heatType={this.state.heatType}
+                    onPlayerHeatRefresh={this.onPlayerHeatRefresh}
+                    totalHeat={this.state.playerHeatTotal}
                     startTime={this.getHeatStartTime()}
                     endTime={this.getHeatEndTime()}
                     playerHeats={playerHeats}
                     onHandlePlayerSupport={this.handlePlayerSupport}
-                    hidden={this.state.currentTab != tabs[TABS_TYPE.heatPlayer]}/>
+                    hidden={this.state.currentTab != tabs[TABS_TYPE.heatPlayer]}
+                    onGetPlayerHeatInfo={this.getPlayerHeatInfo}
+                    onGetPlayerHeatInfoAdd={this.getPlayerHeatInfoAdd}
+                  />
                 </AtTabsPane>
                 : null}
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.matchUp]}>
@@ -1757,13 +1842,13 @@ class Live extends Component<PageOwnProps, PageState> {
                   )}
                 </ScrollView>
               </AtTabsPane>
-              {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT ?
+              {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatReward]}>
                   <HeatReward heatRule={this.state.heatRule} loading={this.state.heatRule == null}
                               hidden={this.state.currentTab != tabs[TABS_TYPE.heatReward]}/>
                 </AtTabsPane>
                 : null}
-              {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT ?
+              {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.giftRank]}>
                   <GiftRank giftRanks={this.state.giftRanks} loading={this.state.giftRanksLoading}
                             hidden={this.state.currentTab != tabs[TABS_TYPE.giftRank]}/>
@@ -1837,10 +1922,11 @@ class Live extends Component<PageOwnProps, PageState> {
           handleClose={this.onPremissionClose}/>
         <AtFloatLayout
           className="qz-gift-float"
-          title={`礼物送给${this.state.heatType == HEAT_TYPE.TEAM_HEAT && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : (this.state.heatType == HEAT_TYPE.PLAYER_HEAT && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
+          title={`礼物送给${this.state.heatType == HEAT_TYPE.TEAM_HEAT && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}>
           <GiftPanel
+            leagueId={this.state.leagueId}
             matchInfo={match}
             supportTeam={this.state.currentSupportTeam}
             supportPlayer={this.state.currentSupportPlayer}
@@ -1876,19 +1962,24 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    match: state.match.match,
-    matchStatus: state.match.status,
-    mediaList: state.live.mediaList,
-    ping: state.live.ping,
-    playerList: state.player.playerList.records,
-    userInfo: state.user.userInfo,
-    commentList: state.match.comment,
-    danmuList: state.match.danmu,
-    payEnabled: state.config ? state.config.payEnabled : null,
-    shareSentence: state.config ? state.config.shareSentence : [],
-    giftList: state.pay ? state.pay.gifts : [],
+const
+  mapStateToProps = (state) => {
+    return {
+      match: state.match.match,
+      matchStatus: state.match.status,
+      mediaList: state.live.mediaList,
+      ping: state.live.ping,
+      playerList: state.player.playerList.records,
+      userInfo: state.user.userInfo,
+      commentList: state.match.comment,
+      danmuList: state.match.danmu,
+      payEnabled: state.config ? state.config.payEnabled : null,
+      shareSentence: state.config ? state.config.shareSentence : [],
+      giftList: state.pay ? state.pay.gifts : [],
+    }
   }
-}
-export default connect(mapStateToProps)(Live)
+export default connect(mapStateToProps)
+
+(
+  Live
+)

@@ -1,16 +1,20 @@
 import Taro, {Component} from '@tarojs/taro'
 import {View, Text, Image, ScrollView} from '@tarojs/components'
-import {AtSearchBar, AtDivider, AtButton} from 'taro-ui'
+import {AtSearchBar, AtDivider, AtButton, AtActivityIndicator, AtLoadMore} from 'taro-ui'
 
 import './index.scss'
 import {getTimeDifference} from "../../../../utils/utils";
 import noperson from '../../../../assets/no-person.png';
 import flame from '../../../../assets/live/flame.png';
+import * as global from "../../../../constants/global";
 
 type PageStateProps = {}
 
 type PageDispatchProps = {
   onHandlePlayerSupport?: any;
+  onGetPlayerHeatInfo?: any;
+  onGetPlayerHeatInfoAdd?: any;
+  onPlayerHeatRefresh?: any;
 }
 
 type PageOwnProps = {
@@ -18,15 +22,17 @@ type PageOwnProps = {
   startTime?: any;
   endTime?: any;
   hidden?: any;
+  heatType?: any;
+  totalHeat?: any;
 }
 
 type PageState = {
   startDiffDayTime: any;
   endDiffDayTime: any;
-  isBeenSearch: any;
   searchText: any;
   currentPlayerHeat: any;
-  searchPlayerHeats: any;
+  loadingMore: any;
+  pulldownRefresh: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -47,6 +53,8 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
   timerID_CountDown: any = null;
 
   componentDidMount() {
+    this.props.onPlayerHeatRefresh && this.props.onPlayerHeatRefresh(this.refresh);
+    this.refresh();
     this.startTimer_CountDown();
   }
 
@@ -54,6 +62,9 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     this.clearTimer_CountDown();
   }
 
+  refresh = () => {
+    this.props.onGetPlayerHeatInfo(1, 20, this.state.searchText);
+  }
   getStartDiffTime = () => {
     const time = this.props.startTime;
     if (time) {
@@ -134,26 +145,13 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     })
   }
   onSearch = () => {
-    const playerHeats = this.props.playerHeats;
-    if (this.state.searchText != null && this.state.searchText.trim() != "") {
-      const result: Array<any> = [];
-      for (let playerHeat of playerHeats) {
-        if (playerHeat.player && (playerHeat.player.name.indexOf(this.state.searchText) != -1 || playerHeat.player.shirtNum == this.state.searchText)) {
-          result.push(playerHeat);
-        }
-      }
-      this.setState({isBeenSearch: true, searchPlayerHeats: result})
-    }
+    this.props.onGetPlayerHeatInfo(1, 20, this.state.searchText);
   }
   onClear = () => {
-    this.setState({isBeenSearch: false, searchText: ""})
-  }
-  getTotalHeats = (playerHeats) => {
-    let heats = 0;
-    for (let playerHeat of playerHeats) {
-      heats = heats + playerHeat.heat + playerHeat.heatBase;
-    }
-    return heats;
+    this.setState({
+      searchText: "",
+    })
+    this.props.onGetPlayerHeatInfo(1, 20, null);
   }
   onPlayerClick = (playerHeat) => {
     this.setState({currentPlayerHeat: playerHeat})
@@ -170,18 +168,37 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     }
     return heat;
   }
+  nextPage = () => {
+    if (this.state.loadingMore) {
+      return;
+    }
+    this.setState({loadingMore: true})
+    Taro.showLoading({title: global.LOADING_TEXT})
+    this.props.onGetPlayerHeatInfoAdd(this.props.playerHeats.current + 1, 20, this.state.searchText);
+    Taro.hideLoading();
+    this.setState({loadingMore: false})
+  }
+
+  onReachBottom = () => {
+    this.nextPage();
+  }
+
+  onPullDownRefresh() {
+    this.setState({pulldownRefresh: true})
+    Taro.showLoading({title: global.LOADING_TEXT})
+    this.refresh();
+    Taro.hideLoading();
+    this.setState({pulldownRefresh: false})
+  }
 
   render() {
-    const {startDiffDayTime, endDiffDayTime, currentPlayerHeat = null} = this.state
-    const {hidden = false} = this.props
+    const {startDiffDayTime, endDiffDayTime, currentPlayerHeat = null, pulldownRefresh = false} = this.state
+    const {hidden = false, heatType, totalHeat} = this.props
     let playerHeats = this.props.playerHeats;
     const onPlayerClick = this.onPlayerClick;
     const getHeat = this.getHeat;
     if (hidden) {
       return <View/>
-    }
-    if (this.state.isBeenSearch) {
-      playerHeats = this.state.searchPlayerHeats;
     }
 
     return (
@@ -194,7 +211,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
               onActionClick={this.onSearch}
               onConfirm={this.onSearch}
               onClear={this.onClear}
-              placeholder="请输入姓名或编号"
+              placeholder="请输入姓名"
             />
           </View>
           <View className="qz-heat-player-header__status">
@@ -204,7 +221,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                   参赛选手
                 </View>
                 <View className="w-full center qz-heat-player-header__status-value">
-                  {playerHeats && playerHeats.length ? playerHeats.length : 0}
+                  {playerHeats && playerHeats.total ? playerHeats.total : 0}
                 </View>
               </View>
               <View className="at-col at-col-4">
@@ -212,7 +229,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                   累计人气值
                 </View>
                 <View className="w-full center qz-heat-player-header__status-value">
-                  {playerHeats ? this.getTotalHeats(playerHeats) : 0}
+                  {totalHeat ? totalHeat : 0}
                 </View>
               </View>
               <View className="at-col at-col-4">
@@ -229,9 +246,16 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
           </View>
         </View>
         <AtDivider height={12} lineColor="#E5E5E5"/>
-        <ScrollView scrollY className="qz-heat-player-content">
+        <ScrollView scrollY className="qz-heat-player-content"
+                    upperThreshold={20}
+                    lowerThreshold={20}
+                    onScrollToUpper={this.onPullDownRefresh}
+                    onScrollToLower={this.onReachBottom}>
           <View className="qz-heat-player__grid">
-            {playerHeats && playerHeats.map((data: any) => (
+            {pulldownRefresh ? <View className="qz-heat-player__loading">
+              <AtActivityIndicator mode="center" content="加载中..."/>
+            </View> : null}
+            {playerHeats && playerHeats.records.map((data: any, index) => (
                 <View key={data.id}
                       className={`qz-heat-player__grid-item ${currentPlayerHeat && currentPlayerHeat.id == data.id ? "qz-heat-player__grid-item-active" : ""}`}
                       onClick={onPlayerClick.bind(this, data)}>
@@ -241,7 +265,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                       <Image src={flame}/>
                       <Text className="qz-heat-player__grid-item-heat-value">{getHeat(data)}</Text>
                     </View>
-                    {data.index <= 3 ?
+                    {index <= 3 ?
                       <View className={`qz-heat-player__grid-item-rank qz-heat-player__grid-item-rank-${data.index}`}>
                       </View> : null}
                   </View>
@@ -251,12 +275,20 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                   {/*<View className="qz-heat-player__grid-item-shirt">*/}
                   {/*  <Text>{data.player && data.player.shirtNum ? data.player.shirtNum : "0"}</Text>*/}
                   {/*</View>*/}
-                  <View className="qz-heat-player__grid-item-shirtNum">
-                    <Text>{data.player && data.player.shirtNum ? data.player.shirtNum : "0"}号</Text>
-                  </View>
+                  {heatType && heatType == global.HEAT_TYPE.PLAYER_HEAT ?
+                    <View className="qz-heat-player__grid-item-shirtNum">
+                      <Text>{data.player && data.player.shirtNum ? data.player.shirtNum : "0"}号</Text>
+                    </View> : null}
+                  {heatType && heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
+                    <View className="qz-heat-player__grid-item-shirtNum">
+                      <Text>{data.sequence ? data.sequence : "0"}号</Text>
+                    </View> : null}
                 </View>
               )
             )}
+            {playerHeats && playerHeats.total <= playerHeats.records.length ? <View className="qz-heat-player__nomore">
+              <AtLoadMore status="noMore" noMoreText="没有更多了"/>
+            </View> : null}
           </View>
         </ScrollView>
         <View className="qz-heat-player-footer">
@@ -268,12 +300,16 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                     <Image
                       src={currentPlayerHeat.player && currentPlayerHeat.player.headImg ? currentPlayerHeat.player.headImg : noperson}/>
                     <Text>{currentPlayerHeat.player && currentPlayerHeat.player.name ? currentPlayerHeat.player.name : "球员"}</Text>
-                    <Text>({currentPlayerHeat.player && currentPlayerHeat.player.shirtNum ? currentPlayerHeat.player.shirtNum : "0"}号)</Text>
+                    {heatType && heatType == global.HEAT_TYPE.PLAYER_HEAT ?
+                      <Text>({currentPlayerHeat.player && currentPlayerHeat.player.shirtNum ? currentPlayerHeat.player.shirtNum : "0"}号)</Text>
+                      : null}
+                    {heatType && heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
+                      <Text>({currentPlayerHeat.sequence ? currentPlayerHeat.sequence : "0"}号)</Text> : null}
                   </View>
                   <View className="qz-heat-player-footer-heat">
                     <Image src={flame}/>
                     <Text>{getHeat(currentPlayerHeat)}</Text>
-                    <Text>(第{currentPlayerHeat.index}名)</Text>
+                    {/*<Text>(第{currentPlayerHeat.index}名)</Text>*/}
                   </View>
                 </View>
                 :

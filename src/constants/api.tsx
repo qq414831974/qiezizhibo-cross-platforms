@@ -93,3 +93,6 @@ export const API_GIFT_RANK_MATCH = (id) => `${pay_service}/gift/rank/match/${id}
 export const API_MATCH_HEAT = `${football_service}/heat/match`;
 export const API_MATCH_TEAM_HEAT = `${football_service}/heat/match/team`;
 export const API_MATCH_PLAYER_HEAT = `${football_service}/heat/match/player`;
+export const API_MATCH_PLAYER_HEAT_TOTAL = `${football_service}/heat/match/player/total`;
+export const API_LEAGUE_PLAYER_HEAT = `${football_service}/heat/league/player`;
+export const API_LEAGUE_PLAYER_HEAT_TOTAL = `${football_service}/heat/league/player/total`;

@@ -29,7 +29,7 @@
     }
 
     &-price {
-      font-size: $font-size-base;
+      font-size: $font-size-sm;
       font-weight: 800;
       color: $color-text-title;
     }
@@ -39,6 +39,15 @@
       font-weight: 800;
       color: $color-text-disabled;
       margin-left: $spacing-v-sm;
+      display: flex;
+      align-items: center;
+      image{
+        width: $font-size-xs;
+        height: $font-size-xs;
+      }
+      text{
+        margin-left: $spacing-v-xxs;
+      }
     }
 
     &-exp {
@@ -50,7 +59,7 @@
 
     &-discount {
       position: relative;
-      font-size: $font-size-sm;
+      font-size: $font-size-xs;
       font-weight: 800;
       color: $color-text-disabled;
       margin-left: $spacing-v-sm;

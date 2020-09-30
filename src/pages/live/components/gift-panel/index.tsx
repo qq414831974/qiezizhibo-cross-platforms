@@ -5,6 +5,7 @@ import './index.scss'
 import * as global from '../../../../constants/global';
 import {getYuan, isInteger} from '../../../../utils/utils';
 import GiftModal from '../../../../components/modal-gift';
+import flame from '../../../../assets/live/flame.png';
 
 type PageStateProps = {}
 
@@ -20,6 +21,7 @@ type PageOwnProps = {
   onHandlePaySuccess: any;
   onHandlePayError: any;
   hidden: any;
+  leagueId: any;
 }
 
 type PageState = {
@@ -196,13 +198,14 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
                 <View className="at-col at-col-7">
                   <View className="qz-gifts__bottom-left">
                     {discountPrice ?
-                      <View className="qz-gifts__bottom-price">茄币：{discountPrice}</View>
+                      <View
+                        className="qz-gifts__bottom-price">茄币：{currentGift.type == global.GIFT_TYPE.CHARGE ? discountPrice : "免费"}</View>
                       : null}
                     {realPrice ?
                       <View className="qz-gifts__bottom-discount">(原价{realPrice})</View>
                       : null}
                     {heat ?
-                      <View className="qz-gifts__bottom-heat">+{heat}热度</View> : null}
+                      <View className="qz-gifts__bottom-heat"><Image src={flame}/><Text>+{heat}</Text></View> : null}
                     {/*{exp ?*/}
                     {/*  <View className="qz-gifts__bottom-exp">+{exp}经验</View> : null}*/}
                   </View>
@@ -246,7 +249,8 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
               gift={this.state.currentGift}
               num={this.state.currentNum}
               matchId={this.props.matchInfo ? this.props.matchInfo.id : null}
-              externalId={this.props.heatType == global.HEAT_TYPE.TEAM_HEAT && this.props.supportTeam ? this.props.supportTeam.id : (this.props.heatType == global.HEAT_TYPE.PLAYER_HEAT && this.props.supportPlayer ? this.props.supportPlayer.id : null)}
+              leagueId={this.props.leagueId ? this.props.leagueId : null}
+              externalId={this.props.heatType == global.HEAT_TYPE.TEAM_HEAT && this.props.supportTeam ? this.props.supportTeam.id : ((this.props.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.props.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.props.supportPlayer ? this.props.supportPlayer.id : null)}
               giftInfo={{price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp}}
               heatType={this.props.heatType}
               handleCancel={this.onGiftConfrimCancel}

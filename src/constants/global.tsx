@@ -91,6 +91,7 @@ export const REPOST_TEXT = [
 export const HEAT_TYPE = {
   TEAM_HEAT: 0,
   PLAYER_HEAT: 1,
+  LEAGUE_PLAYER_HEAT: 2,
 }
 export const GROWTH_TYPE = {
   USER_EXP: 1,
