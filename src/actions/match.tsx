@@ -57,16 +57,19 @@ export const getMatchInfo: any = createApiAction(match.MATCH, (id: number) => {
 export const getMatchInfo_clear: any = createAction(match.MATCH_CLEAR)
 export const getMatchList: any = createApiAction(match.MATCHES, (params: MatchParams | any) => {
   let url = api.API_MATCHES;
+  let changed = false;
   if (global.CacheManager.getInstance().CACHE_ENABLED && params.round != null) {
     url = api.API_CACHED_MATCHES(params.leagueId, params.round);
-    params = null;
+    changed = true;
   }
-  if (global.CacheManager.getInstance().CACHE_ENABLED && params.status != null) {
-    if (params.status == "finish") {
-      url = api.API_CACHED_MATCHES_FINISH;
-    } else if (params.status == "unfinish") {
-      url = api.API_CACHED_MATCHES_UNFINISH;
-    }
+  if (global.CacheManager.getInstance().CACHE_ENABLED && params.status != null && params.status == "finish") {
+    url = api.API_CACHED_MATCHES_FINISH;
+    changed = true;
+  } else if (global.CacheManager.getInstance().CACHE_ENABLED && params.status != null && params.status == "unfinish") {
+    url = api.API_CACHED_MATCHES_UNFINISH;
+    changed = true;
+  }
+  if (changed) {
     params = null;
   }
   return new Request().get(url, params);
