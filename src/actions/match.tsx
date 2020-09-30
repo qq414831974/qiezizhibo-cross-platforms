@@ -47,7 +47,7 @@ type DanmuParams = {
   matchId: number,
   index: number,
 }
-export const getMatchInfo: any = createApiAction(match.MATCH, (id: number) =>{
+export const getMatchInfo: any = createApiAction(match.MATCH, (id: number) => {
   let url = api.API_MATCH(id);
   if (global.CacheManager.getInstance().CACHE_ENABLED) {
     url = api.API_CACHED_MATCH(id);
@@ -59,6 +59,14 @@ export const getMatchList: any = createApiAction(match.MATCHES, (params: MatchPa
   let url = api.API_MATCHES;
   if (global.CacheManager.getInstance().CACHE_ENABLED && params.round != null) {
     url = api.API_CACHED_MATCHES(params.leagueId, params.round);
+    params = null;
+  }
+  if (global.CacheManager.getInstance().CACHE_ENABLED && params.status != null) {
+    if (params.status == "finish") {
+      url = api.API_CACHED_MATCHES_FINISH;
+    } else if (params.status == "unfinish") {
+      url = api.API_CACHED_MATCHES_UNFINISH;
+    }
     params = null;
   }
   return new Request().get(url, params);

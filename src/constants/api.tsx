@@ -87,3 +87,7 @@ export const API_CACHED_MATCHES = (leagueId, round) => `${cached_service}/league
 export const API_CACHED_PLAYERS = (teamId) => `${cached_service}/team/player/${teamId}.json`;
 export const API_CACHED_MATCH = (id) => `${cached_service}/match/${id}.json`;
 export const API_CACHED_LIVE_MANUAL = (id) => `${cached_service}/live/${id}.json`;
+
+export const API_CACHED_LEAGUE_SERIES_LEAGUE = (id) => `${cached_service}/series/${id}.json`;
+export const API_CACHED_MATCHES_FINISH = `${cached_service}/match/finish.json`;
+export const API_CACHED_MATCHES_UNFINISH = `${cached_service}/match/live.json`;

@@ -536,6 +536,10 @@ class Live extends Component<PageOwnProps, PageState> {
       if (match.status == FootballEventType.FINISH) {
         status = LiveStatus.FINISH;
       } else {
+        if (CacheManager.getInstance().CACHE_ENABLED) {
+          status = LiveStatus.ENABLED;
+          return status;
+        }
         if (this.state.liveLoading && !this.state.liveLoaded) {
           status = LiveStatus.LOADING;
         } else if (this.state.diffDayTime != null && match.status == FootballEventType.UNOPEN && !this.props.ping.isPushing) {

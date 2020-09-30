@@ -7,6 +7,7 @@ import matchAction from "../../actions/match";
 import './match.scss'
 import MatchList from "./components/match-list";
 import withShare from "../../utils/withShare";
+import * as global from "../../constants/global";
 
 type Bulletin = {
   id: number,
@@ -128,6 +129,9 @@ class Match extends Component<PageOwnProps, PageState> {
     });
   }
   nextPage = (tab) => {
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      return;
+    }
     if (typeof(tab) != 'number') {
       tab = this.state.currentTab
     }

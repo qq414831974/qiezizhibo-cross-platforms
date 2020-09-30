@@ -66,7 +66,14 @@ export const getLeagueSeriesList: any = createApiAction(league.LEAGUE_SERIES, (p
   return new Request().get(url, params);
 })
 export const getLeagueSeriesList_add: any = createApiAction(league.LEAGUE_SERIES_ADD, (params: LeagueSeriesParams) => new Request().get(api.API_LEAGUE_SERIES, params))
-export const getLeagueSeriesLeagues: any = createApiAction(league.LEAGUE_SERIES_LEAGUE, (params: SeriesLeagueParams) => new Request().get(api.API_LEAGUE_SERIES_LEAGUE, params))
+export const getLeagueSeriesLeagues: any = createApiAction(league.LEAGUE_SERIES_LEAGUE, (params: SeriesLeagueParams | any) => {
+  let url = api.API_LEAGUE_SERIES_LEAGUE;
+  if (global.CacheManager.getInstance().CACHE_ENABLED) {
+    url = api.API_CACHED_LEAGUE_SERIES_LEAGUE(params.seriesId);
+    params = null;
+  }
+  return new Request().get(url, params);
+})
 export const getLeaguePlayer: any = createApiAction(league.LEAGUE_PLAYERS, (params: LeaguePlayerParams) => new Request().get(api.API_LEAGUE_PLAYER, params))
 export const getLeagueTeam: any = createApiAction(league.LEAGUE_TEAMS, (params: LeagueTeamParams) => new Request().get(api.API_LEAGUE_TEAM, params))
 export const getLeagueReport: any = createApiAction(league.LEAGUE_REPORT, (id: number) => new Request().get(api.API_LEAGUE_REPORT(id), null))
