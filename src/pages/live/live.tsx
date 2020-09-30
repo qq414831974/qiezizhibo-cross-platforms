@@ -392,7 +392,8 @@ class Live extends Component<PageOwnProps, PageState> {
     this.clearTimer_matchStatus();
     let timeout = 60000;
     if (CacheManager.getInstance().CACHE_ENABLED) {
-      timeout = 300000;
+      // timeout = 300000;
+      return;
     }
     this.timerID_matchStatus = setInterval(() => {
       const {match} = this.props;
@@ -652,6 +653,9 @@ class Live extends Component<PageOwnProps, PageState> {
     }
   }
   addNooice = (teamId) => {
+    if (CacheManager.getInstance().CACHE_ENABLED) {
+      return;
+    }
     matchAction.addMatchNooice({matchId: this.props.match.id, teamId: teamId})
   }
   handleLeftNooice = async () => {
@@ -987,7 +991,11 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   getMatchEncryption = (matchId) => {
-    new Request().get(api.API_MATCH_ENCRYPTION(matchId), null).then((data: any) => {
+    let url = api.API_MATCH_ENCRYPTION(matchId)
+    if (CacheManager.getInstance().CACHE_ENABLED) {
+      url = api.API_CACHED_MATCH_ENCRYPTION(matchId);
+    }
+    new Request().get(url, null).then((data: any) => {
       if (data.isEncryption && data.password) {
         this.setState({isEncryption: true, password: data.password});
       }
