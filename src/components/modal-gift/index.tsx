@@ -250,7 +250,7 @@ class ModalGift extends Component<PageOwnProps, PageState> {
             <AtDivider height={36} lineColor="#E5E5E5"/>
             {giftInfo && giftInfo.price ?
               <View className="black qz-gift-modal-content_tip">
-                • {giftInfo.price}元{giftInfo && giftInfo.realPrice ? `(原价${giftInfo.realPrice}元)` : ""}
+                • {giftInfo.price / 10}元{giftInfo && giftInfo.realPrice ? `(原价${giftInfo.realPrice / 10}元)` : ""}
               </View>
               : null}
             {giftInfo && giftInfo.heatValue ?

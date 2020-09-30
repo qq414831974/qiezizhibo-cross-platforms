@@ -1,12 +1,18 @@
-@import '../../../../app';
-@import '../../live';
+@import '../../app';
 @import "~taro-ui/dist/style/components/flex.scss";
 
 .qz-heat-player-container {
   height: calc(100vh - (9 / 16 * 100vw) - 36px - 1.45 * 28px);
   position: relative;
 }
-
+.qz-heat-player-container-league {
+  height: calc(100vh - 70px - 28px * 1.3 - 48px - 1px);
+  position: relative;
+  .qz-heat-player-content {
+    height: calc(100vh - 70px - 28px * 1.3 - 48px - 1px - 85px);
+    width: 100%;
+  }
+}
 .qz-heat-player__loading {
   width: 100vw;
   height: 5vw;
@@ -19,7 +25,7 @@
   width: 100vw;
   height: 10vw;
   position: absolute;
-  bottom: 200px;
+  bottom: 160px;
   left: 0;
 }
 
@@ -188,17 +194,17 @@
     }
 
     &-rank-1 {
-      background: url("../../../../assets/live/medal.png");
+      background: url("../../assets/live/medal.png");
       background-size: 100% 100%;
     }
 
     &-rank-2 {
-      background: url("../../../../assets/live/medal-2.png");
+      background: url("../../assets/live/medal-2.png");
       background-size: 100% 100%;
     }
 
     &-rank-3 {
-      background: url("../../../../assets/live/medal-3.png");
+      background: url("../../assets/live/medal-3.png");
       background-size: 100% 100%;
     }
 
@@ -213,7 +219,7 @@
       color: $color-grey-1;
       width: 45px;
       height: 45px;
-      background: url("../../../../assets/live/t-shirt.png");
+      background: url("../../assets/live/t-shirt.png");
       background-size: 100% 100%;
     }
 
@@ -223,7 +229,7 @@
       align-items: center;
       width: 100%;
       font-size: $font-size-xs;
-      color: $color-text-disabled;
+      color: $color-grey-1;
     }
   }
 }

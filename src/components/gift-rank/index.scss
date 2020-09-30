@@ -1,4 +1,4 @@
-@import '../../../../app';
+@import '../../app';
 
 @mixin active {
   transition: background-color 0.3s;
@@ -85,7 +85,7 @@
       width: 40px;
 
       &-r1 {
-        background: url("../../../../assets/live/medal.png");
+        background: url("../../assets/live/medal.png");
         background-size: 100% 100%;
         .qz-giftrank-list__item-rank-text{
           display: none;
@@ -93,7 +93,7 @@
       }
 
       &-r2 {
-        background: url("../../../../assets/live/medal-2.png");
+        background: url("../../assets/live/medal-2.png");
         background-size: 100% 100%;
         .qz-giftrank-list__item-rank-text{
           display: none;
@@ -101,7 +101,7 @@
       }
 
       &-r3 {
-        background: url("../../../../assets/live/medal-3.png");
+        background: url("../../assets/live/medal-3.png");
         background-size: 100% 100%;
         .qz-giftrank-list__item-rank-text{
           display: none;

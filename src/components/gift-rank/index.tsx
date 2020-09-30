@@ -1,7 +1,7 @@
 import Taro, {Component} from '@tarojs/taro'
 import {ScrollView, View, Image} from '@tarojs/components'
 import './index.scss'
-import NoUser from '../../../../assets/no-user.png'
+import NoUser from '../../assets/no-user.png'
 
 
 type PageStateProps = {}

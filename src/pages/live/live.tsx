@@ -4,7 +4,7 @@ import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtMessage, AtTabs, At
 import {connect} from '@tarojs/redux'
 import MatchUp from './components/match-up'
 import NooiceBar from './components/nooice-bar'
-import GiftNotify from './components/gift-notify'
+import GiftNotify from '../../components/gift-notify'
 import HeatTeam from './components/heat-team'
 import RoundButton from '../../components/round-button'
 import * as api from '../../constants/api'
@@ -62,10 +62,10 @@ import substitutionRight from "../../assets/live/substitution_arrow_right.png";
 import owngoal from "../../assets/live/owngoal.png";
 import Request from "../../utils/request";
 import ModalAlbum from "../../components/modal-album";
-import GiftPanel from "./components/gift-panel";
-import HeatReward from "./components/heat-reward";
-import GiftRank from "./components/gift-rank";
-import HeatPlayer from "./components/heat-player";
+import GiftPanel from "../../components/gift-panel";
+import HeatReward from "../../components/heat-reward";
+import GiftRank from "../../components/gift-rank";
+import HeatPlayer from "../../components/heat-player";
 
 type Bulletin = {
   id: number,
@@ -1471,7 +1471,7 @@ class Live extends Component<PageOwnProps, PageState> {
       tabs[TABS_TYPE.heatPlayer] = tabIndex;
       tabIndex = tabIndex + 1;
     }
-    tabList.push({title: '赛况'})
+    tabList.push({title: this.state.heatType == HEAT_TYPE.TEAM_HEAT ? "有奖PK" : "赛况"})
     tabs[TABS_TYPE.matchUp] = tabIndex;
     tabIndex = tabIndex + 1;
     //开启热度比拼
@@ -1509,9 +1509,10 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   getHeatStartTime = () => {
     const {match = null} = this.props;
+    const {league = null} = match;
     const {heatRule = null} = this.state;
-    if (match && match.startTime && heatRule && heatRule.startInterval) {
-      let startTime = new Date(match.startTime)
+    if (league && league.dateBegin && heatRule && heatRule.startInterval) {
+      let startTime = new Date(league.dateBegin)
       startTime.setMinutes(startTime.getMinutes() + heatRule.startInterval);
       return startTime;
     }
@@ -1519,10 +1520,11 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   getHeatEndTime = () => {
     const {match = null} = this.props;
+    const {league = null} = match;
     const {heatRule = null} = this.state;
-    if (match && match.startTime && match.duration && heatRule && heatRule.endInterval) {
-      let endTime = new Date(match.startTime)
-      endTime.setMinutes(endTime.getMinutes() + match.duration + heatRule.endInterval);
+    if (league && league.dateEnd && heatRule && heatRule.endInterval) {
+      let endTime = new Date(league.dateEnd)
+      endTime.setMinutes(endTime.getMinutes() + heatRule.endInterval);
       return endTime;
     }
     return null
@@ -1632,6 +1634,7 @@ class Live extends Component<PageOwnProps, PageState> {
     this.setState({giftRanksLoading: true})
     new Request().get(api.API_GIFT_RANK_MATCH(id), null).then((data: any) => {
       if (Array.isArray(data)) {
+        data = data.filter(res => res.charge != null && res.charge != 0);
         this.setState({giftRanks: data, giftRanksLoading: false})
       }
     });
@@ -1978,8 +1981,4 @@ const
       giftList: state.pay ? state.pay.gifts : [],
     }
   }
-export default connect(mapStateToProps)
-
-(
-  Live
-)
+export default connect(mapStateToProps)(Live)

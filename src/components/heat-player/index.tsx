@@ -3,10 +3,10 @@ import {View, Text, Image, ScrollView} from '@tarojs/components'
 import {AtSearchBar, AtDivider, AtButton, AtActivityIndicator, AtLoadMore} from 'taro-ui'
 
 import './index.scss'
-import {getTimeDifference} from "../../../../utils/utils";
-import noperson from '../../../../assets/no-person.png';
-import flame from '../../../../assets/live/flame.png';
-import * as global from "../../../../constants/global";
+import {getTimeDifference} from "../../utils/utils";
+import noperson from '../../assets/no-person.png';
+import flame from '../../assets/live/flame.png';
+import * as global from "../../constants/global";
 
 type PageStateProps = {}
 
@@ -24,6 +24,7 @@ type PageOwnProps = {
   hidden?: any;
   heatType?: any;
   totalHeat?: any;
+  isLeauge?: any;
 }
 
 type PageState = {
@@ -205,7 +206,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     }
 
     return (
-      <View className="qz-heat-player-container">
+      <View className={`${this.props.isLeauge ? "qz-heat-player-container-league" : "qz-heat-player-container"}`}>
         <View className="qz-heat-player-header">
           <View className="qz-heat-player-header__search">
             <AtSearchBar

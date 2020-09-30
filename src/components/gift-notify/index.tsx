@@ -1,8 +1,8 @@
 import Taro, {Component} from '@tarojs/taro'
 import {View, Image} from '@tarojs/components'
 import './index.scss'
-import NoUser from '../../../../assets/no-user.png'
-import defaultLogo from '../../../../assets/default-logo.png'
+import NoUser from '../../assets/no-user.png'
+import defaultLogo from '../../assets/default-logo.png'
 
 
 type PageStateProps = {}

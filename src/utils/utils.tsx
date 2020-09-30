@@ -219,7 +219,10 @@ export const getYuan = (fen: number): any => {
   let yuan = (fen / 100).toFixed(2);
   return Number(yuan);
 }
-
+export const getJiao = (fen: number): any => {
+  let jiao = (fen / 10).toFixed(2);
+  return Number(jiao);
+}
 
 export const random = (lower, upper) => {
   return Math.floor(Math.random() * (upper - lower + 1)) + lower;

@@ -2,10 +2,10 @@ import Taro, {Component} from '@tarojs/taro'
 import {View, ScrollView, Text, Image, Picker} from '@tarojs/components'
 import {AtActivityIndicator, AtButton, AtInputNumber} from 'taro-ui'
 import './index.scss'
-import * as global from '../../../../constants/global';
-import {getYuan, isInteger} from '../../../../utils/utils';
-import GiftModal from '../../../../components/modal-gift';
-import flame from '../../../../assets/live/flame.png';
+import * as global from '../../constants/global';
+import {getJiao, isInteger} from '../../utils/utils';
+import GiftModal from '../../components/modal-gift';
+import flame from '../../assets/live/flame.png';
 
 type PageStateProps = {}
 
@@ -77,9 +77,9 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     if (gift != null) {
       const discount = this.getDiscountValue(gift, num);
       if (discount != null) {
-        return getYuan(gift.price * num * discount / 100);
+        return getJiao(gift.price * num * discount / 100);
       } else {
-        return getYuan(gift.price * num);
+        return getJiao(gift.price * num);
       }
     }
     return null;
@@ -88,7 +88,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     if (gift != null) {
       const discount = this.getDiscountValue(gift, num);
       if (discount != null) {
-        return getYuan(gift.price * num);
+        return getJiao(gift.price * num);
       } else {
         return null;
       }
@@ -122,15 +122,26 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
   }
   onNumInputChange = (value) => {
     value = Number(value);
-    if (!isInteger(value)) {
+    if (!isInteger(value) || value <= 0) {
       Taro.showToast({
         'title': "请输入整数",
         'icon': 'none',
       })
-      return;
-    } else {
-      this.setState({currentNum: value})
+      this.setState({currentNum: 1})
+      return 1;
     }
+    if (this.state.currentGift.type == global.GIFT_TYPE.FREE) {
+      if (value > 1) {
+        Taro.showToast({
+          'title': "免费礼物只能单个赠送",
+          'icon': 'none',
+        })
+        this.setState({currentNum: 1})
+        return 1;
+      }
+    }
+    this.setState({currentNum: value})
+    return value;
   }
   onGiftSendClick = () => {
     this.setState({giftConfirmOpen: true})
@@ -143,6 +154,10 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     this.props.onHandlePaySuccess(orderId);
   }
   refreshDiscount = (gift) => {
+    if (gift.type == global.GIFT_TYPE.FREE) {
+      this.setState({numSelectorValue: [1], numSelector: [1]});
+      return;
+    }
     const values: any = [];
     for (let number of this.numbers) {
       const discount = this.getDiscountValue(gift, number);
@@ -183,7 +198,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
                         <Text>{data.name}</Text>
                       </View>
                       {data.type == global.GIFT_TYPE.CHARGE ? <View className="qz-gifts__grid-item-price">
-                          <Text>{getYuan(data.price)}茄币</Text>
+                          <Text>{getJiao(data.price)}茄币</Text>
                         </View> :
                         <View className="qz-gifts__grid-item-price">
                           <Text>免费(余{data.limitRemain})</Text>

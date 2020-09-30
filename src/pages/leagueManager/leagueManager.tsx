@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, Image} from '@tarojs/components'
-import {AtActivityIndicator, AtTabs, AtTabsPane} from "taro-ui"
+import {AtActivityIndicator, AtTabs, AtTabsPane, AtMessage, AtFloatLayout, AtFab} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import defaultLogo from '../../assets/default-logo.png'
 
@@ -12,7 +12,19 @@ import LeaguePlayerTable from "./components/league-player-table";
 import LeagueRegulations from "./components/league-regulations";
 import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
-import { random_weight} from "../../utils/utils";
+import {clearLoginToken, getStorage, hasLogin, random_weight} from "../../utils/utils";
+import Request from "../../utils/request";
+import * as api from "../../constants/api";
+import payAction from "../../actions/pay";
+import userAction from "../../actions/user";
+import * as error from "../../constants/error";
+import LoginModal from "../../components/modal-login";
+import PhoneModal from "../../components/modal-phone";
+import GiftPanel from "../../components/gift-panel";
+import GiftNotify from "../../components/gift-notify";
+import HeatPlayer from "../../components/heat-player";
+import GiftRank from "../../components/gift-rank";
+import {TABS_TYPE} from "../../constants/global";
 
 type PageStateProps = {
   leagueTeams: any;
@@ -20,6 +32,8 @@ type PageStateProps = {
   league: any;
   locationConfig: { city: string, province: string }
   shareSentence: any;
+  userInfo: any;
+  giftList: any;
 }
 
 type PageDispatchProps = {}
@@ -32,6 +46,21 @@ type PageState = {
   tabloading: boolean;
   currentTab: number;
   tabsClass: string;
+  loginOpen: any,
+  phoneOpen: any,
+  heatRule: null,
+  heatType: null,
+  giftOpen: any,
+  currentSupportTeam: any,
+  currentSupportPlayer: any,
+  playerHeats: any,
+  playerHeatTotal: any,
+  giftSendQueue: any,
+  giftRanks: any,
+  giftRanksLoading: any,
+  broadcastList: any,
+  playerHeatRefreshFunc: any,
+  playerHeatLoading: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -43,7 +72,13 @@ interface LeagueManager {
 @withShare({})
 class LeagueManager extends Component<PageOwnProps, PageState> {
   tabsY: number;
-  scrollTop: number;
+  timerID_socketHeartBeat: any = null
+  timerID_giftController: any = null
+  socketTask: Taro.SocketTask | null
+  timeout_gift: any = {};
+  timeout_gift_show: any = {};
+  giftRows: any = {left: [{}, {}, {}, {}, {}], right: [{}, {}, {}, {}, {}], unset: []};
+
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -65,6 +100,21 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       tabloading: false,
       currentTab: 1,
       tabsClass: '',
+      loginOpen: false,
+      phoneOpen: false,
+      heatRule: null,
+      heatType: null,
+      giftOpen: false,
+      currentSupportTeam: null,
+      currentSupportPlayer: null,
+      playerHeats: null,
+      playerHeatTotal: null,
+      giftSendQueue: [],
+      giftRanks: null,
+      giftRanksLoading: false,
+      broadcastList: [],
+      playerHeatRefreshFunc: null,
+      playerHeatLoading: false,
     }
   }
 
@@ -85,6 +135,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
   componentDidMount() {
     this.getParamId() && this.getLeagueList(this.getParamId());
+    this.initHeatCompetition(this.getParamId());
     const query = Taro.createSelectorQuery();
     query.select('.qz-league-manager-tabs').boundingClientRect(rect => {
       this.tabsY = (rect as {
@@ -97,6 +148,10 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   componentWillUnmount() {
+    this.clearTimer_HeartBeat();
+    this.socketTask && this.socketTask.close({})
+    this.socketTask = null;
+    this.clearTimer_Gift();
   }
 
   componentDidShow() {
@@ -106,18 +161,460 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   componentDidHide() {
   }
 
-  getParamId = () =>{
+  getParamId = () => {
     let id;
-    if(this.$router.params){
-      if(this.$router.params.id == null){
+    if (this.$router.params) {
+      if (this.$router.params.id == null) {
         id = this.$router.params.scene
-      }else{
+      } else {
         id = this.$router.params.id
       }
-    }else{
+    } else {
       return null;
     }
     return id;
+  }
+  initHeatCompetition = (id) => {
+    new Request().get(api.API_LEAUGE_HEAT, {leagueId: id}).then((data: any) => {
+      if (data.available) {
+        payAction.getGiftList({});
+        this.setState({heatRule: data, heatType: data.type})
+        this.getGiftRanks(id);
+        this.startTimer_Gift();
+        this.initSocket(id);
+      }
+    })
+  }
+  startTimer_Gift = () => {
+    this.clearTimer_Gift();
+    this.timerID_giftController = setInterval(() => {
+      this.addUnsetToGiftSendQueue();
+    }, 1000)
+  }
+  clearTimer_Gift = () => {
+    if (this.timerID_giftController) {
+      clearInterval(this.timerID_giftController)
+    }
+  }
+  startTimer_HeartBeat = () => {
+    this.clearTimer_HeartBeat();
+    this.timerID_socketHeartBeat = setInterval(() => {
+      this.socketTask && this.socketTask.send({data: "success"});
+    }, 5000)
+  }
+  clearTimer_HeartBeat = () => {
+    if (this.timerID_socketHeartBeat) {
+      clearInterval(this.timerID_socketHeartBeat)
+    }
+  }
+  initSocket = async (matchId) => {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const context = this;
+    const token = await getStorage('accessToken');
+    const header = token ? {'Authorization': `Bearer ${token}`} : {};
+    Taro.connectSocket({
+      url: api.websocket(matchId),
+      header: header
+    }).then(task => {
+      this.socketTask = task;
+      task.onOpen(function () {
+        context.startTimer_HeartBeat();
+      })
+      task.onMessage(function (res) {
+        if (res.data == 'unauthenticated') {
+          Taro.showToast({
+            title: "登陆状态过期请重新授权",
+            duration: 1000,
+            icon: "none",
+            complete: () => {
+              context.showAuth();
+            }
+          });
+        } else if (res.data !== 'success') {
+          const comment = JSON.parse(res.data);
+          if (comment && comment.broadcast) {
+            const giftOrder = JSON.parse(comment.content);
+            context.addToGiftSendQueue(giftOrder);
+            let broadcastList = context.state.broadcastList;
+            let broadcastText = '';
+            if (giftOrder && giftOrder.user && giftOrder.user.name) {
+              broadcastText = broadcastText + giftOrder.user.name + "送出";
+            }
+            if (giftOrder && giftOrder.gift && giftOrder.gift.name) {
+              broadcastText = broadcastText + giftOrder.gift.name + giftOrder.num + "个";
+            }
+            broadcastList.push({broadcast: true, content: broadcastText, id: giftOrder.id, date: new Date()})
+            context.setState({broadcastList: broadcastList})
+          }
+        }
+      })
+      task.onError(function () {
+        console.log('onError')
+      })
+      task.onClose(function (e) {
+        console.log('onClose: ', e)
+      })
+    })
+  }
+
+  async getUserInfo(onSuccess?: Function | null) {
+    if (await hasLogin()) {
+      const openid = await getStorage('wechatOpenid');
+      userAction.getUserInfo({openId: openid}, {
+        success: (res) => {
+          Taro.hideLoading()
+          Taro.stopPullDownRefresh()
+          if (onSuccess) {
+            onSuccess(res);
+          }
+        }, failed: () => {
+          this.clearLoginState();
+          Taro.hideLoading()
+          Taro.stopPullDownRefresh()
+        }
+      });
+    } else {
+      this.clearLoginState();
+      Taro.hideLoading()
+      Taro.stopPullDownRefresh()
+    }
+  }
+
+  onPlayerHeatRefresh = (func) => {
+    this.setState({playerHeatRefreshFunc: func});
+  }
+  getPlayerHeatInfo = (pageNum, pageSize, name) => {
+    if (this.state.playerHeatLoading) {
+      return;
+    }
+    let heatType = this.state.heatType;
+    let param: any = {pageNum: pageNum, pageSize: pageSize}
+    if (name) {
+      param.name = name;
+    }
+    if (heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+      param.leagueId = this.getParamId();
+      this.setState({playerHeatLoading: true})
+      new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
+        this.setState({playerHeatLoading: false})
+        this.setState({playerHeats: data})
+      })
+      new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.getParamId()}).then((data: any) => {
+        this.setState({playerHeatTotal: data})
+      })
+    }
+  }
+  getPlayerHeatInfoAdd = (pageNum, pageSize, name) => {
+    if (this.state.playerHeatLoading) {
+      return;
+    }
+    let heatType = this.state.heatType;
+    let param: any = {pageNum: pageNum, pageSize: pageSize}
+    if (name) {
+      param.name = name;
+    }
+    if (heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+      param.leagueId = this.getParamId();
+      this.setState({playerHeatLoading: true})
+      new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
+        this.setState({playerHeatLoading: false})
+        const playerHeats = this.state.playerHeats;
+        playerHeats.records = playerHeats.records.concat(data.records);
+        playerHeats.current = data.current;
+        if (playerHeats.current > data.pages) {
+          playerHeats.current = data.pages;
+        }
+        this.setState({playerHeats: playerHeats})
+      })
+    }
+  }
+  showAuth = () => {
+    this.setState({loginOpen: true});
+  }
+
+  onAuthClose = () => {
+    this.setState({loginOpen: false})
+  }
+
+  onAuthCancel = () => {
+    this.setState({loginOpen: false})
+  }
+
+  onAuthError = (reason) => {
+    switch (reason) {
+      case error.ERROR_WX_UPDATE_USER: {
+        Taro.showToast({
+          title: "更新用户信息失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_WX_LOGIN: {
+        Taro.showToast({
+          title: "微信登录失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_LOGIN: {
+        Taro.showToast({
+          title: "登录失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
+
+  onAuthSuccess = () => {
+    this.setState({loginOpen: false})
+    this.getUserInfo((res) => {
+      const {phone} = res.payload
+      if (res.payload != null && phone == null) {
+        this.setState({phoneOpen: true})
+      }
+    })
+  }
+
+  showPhone = async () => {
+    const {userInfo} = this.props
+    if (userInfo && userInfo.phone) {
+      return;
+    }
+    if (!await this.isUserLogin()) {
+      Taro.showToast({title: "请登录后再操作", icon: "none"});
+      this.showAuth();
+    } else {
+      this.setState({phoneOpen: true})
+    }
+  }
+
+  onPhoneClose = () => {
+    this.setState({phoneOpen: false})
+  }
+
+  onPhoneCancel = () => {
+    this.setState({phoneOpen: false})
+  }
+
+  onPhoneError = (reason) => {
+    switch (reason) {
+      case error.ERROR_WX_UPDATE_USER: {
+        Taro.showToast({
+          title: "更新用户信息失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_WX_LOGIN: {
+        Taro.showToast({
+          title: "微信登录失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_LOGIN: {
+        Taro.showToast({
+          title: "登录失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
+
+  onPhoneSuccess = () => {
+    this.setState({phoneOpen: false})
+    this.getUserInfo()
+  }
+
+  onGiftPayError = (reason) => {
+    switch (reason) {
+      case error.ERROR_PAY_CANCEL: {
+        Taro.showToast({
+          title: "支付失败,用户取消支付",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_PAY_ERROR: {
+        Taro.showToast({
+          title: "支付失败",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_SEND_GIFT_ERROR: {
+        Taro.showToast({
+          title: "赠送礼物失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
+
+  onGiftPaySuccess = (orderId: any) => {
+    this.setState({giftOpen: false})
+    if (orderId == global.GIFT_TYPE.FREE) {
+      this.getParamId() && payAction.getGiftList({matchId: this.getParamId()});
+      this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
+    } else {
+      this.getOrderStatus(orderId, global.ORDER_TYPE.gift);
+    }
+    Taro.showToast({
+      title: "送出礼物成功",
+      icon: 'none',
+    });
+  }
+
+  getOrderStatus = async (orderId: string, type) => {
+    new Request().post(api.API_ORDER_QUERY(orderId), {}).then((res) => {
+      if (res == global.ORDER_STAUTS.paid) {
+        Taro.showToast({
+          title: "支付成功",
+          icon: 'none',
+        });
+        if (type != null && type == global.ORDER_TYPE.gift) {
+          this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
+        }
+      }
+    });
+  }
+  isUserLogin = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  clearLoginState = () => {
+    clearLoginToken();
+    userAction.clearUserInfo();
+  }
+  showGiftPanel = () => {
+    this.setState({giftOpen: true})
+  }
+  hideGiftPanel = () => {
+    this.setState({giftOpen: false})
+  }
+  getHeatStartTime = () => {
+    const {league = null} = this.props;
+    const {heatRule = null} = this.state;
+    if (league && league.dateBegin && heatRule && heatRule.startInterval) {
+      let startTime = new Date(league.dateBegin)
+      startTime.setMinutes(startTime.getMinutes() + heatRule.startInterval);
+      return startTime;
+    }
+    return null
+  }
+  getHeatEndTime = () => {
+    const {league = null} = this.props;
+    const {heatRule = null} = this.state;
+    if (league && league.dateEnd && heatRule && heatRule.endInterval) {
+      let endTime = new Date(league.dateEnd)
+      endTime.setMinutes(endTime.getMinutes() + heatRule.endInterval);
+      return endTime;
+    }
+    return null
+  }
+  addUnsetToGiftSendQueue = () => {
+    let unshiftIndex = -1;
+    this.giftRows.unset.some((data, index) => {
+      this.addToGiftSendQueue(data);
+      unshiftIndex = index;
+      return true;
+    })
+    if (unshiftIndex != -1) {
+      this.giftRows.unset.splice(unshiftIndex, 1);
+    }
+  }
+
+  addToGiftSendQueue = (giftOrder) => {
+    let position = "left";
+    if (giftOrder.match != null && giftOrder.targetType == global.HEAT_TYPE.TEAM_HEAT && giftOrder.externalId != null) {
+      if (giftOrder.match.hostTeamId == giftOrder.externalId) {
+        position = "left";
+      } else {
+        position = "right";
+      }
+    }
+    giftOrder.position = position;
+    const row = this.assignGiftRow(giftOrder, position);
+    giftOrder.row = row;
+    if (row != -1) {
+      this.state.giftSendQueue.push(giftOrder)
+      this.initGiftTimeout(giftOrder.id);
+      this.setState({giftSendQueue: this.state.giftSendQueue})
+    }
+  }
+
+  assignGiftRow = (giftOrderItem, position) => {
+    let rowIndex = -1;
+    let isInsert = false;
+    const giftRow = this.giftRows[position];
+    let giftRow_reverse = this.giftRows["position"];
+    if (position == "left") {
+      giftRow_reverse = this.giftRows["right"];
+    } else {
+      giftRow_reverse = this.giftRows["left"];
+    }
+    if (giftRow != null) {
+      giftRow.map((row, index) => {
+        if (row.id == null && giftRow_reverse[index].id == null && !isInsert) {
+          giftRow[index] = giftOrderItem;
+          rowIndex = index;
+          isInsert = true;
+        }
+      })
+    }
+    if (rowIndex == -1) {
+      this.giftRows.unset.push(giftOrderItem);
+    }
+    return rowIndex;
+  }
+
+  initGiftTimeout(id) {
+    this.timeout_gift[id] = setTimeout(() => {
+      this.timeout_gift[id] = null
+      const showQueue = this.state.giftSendQueue;
+      showQueue.forEach(data => {
+        if (data.id == id) {
+          data.active = true;
+        }
+      });
+      this.setState({giftSendQueue: showQueue}, () => {
+        this.timeout_gift_show[id] = setTimeout(() => {
+          this.timeout_gift_show[id] = null
+          const giftSendQueue = this.state.giftSendQueue.filter(item => item.id != id);
+          this.setState({giftSendQueue: giftSendQueue});
+          let giftRowsShadow = this.giftRows;
+          for (let position in giftRowsShadow) {
+            for (let rowKey in giftRowsShadow[position]) {
+              if (giftRowsShadow[position][rowKey] != null && giftRowsShadow[position][rowKey].id == id) {
+                giftRowsShadow[position][rowKey] = {};
+              }
+            }
+          }
+          this.giftRows = giftRowsShadow;
+        }, 5000);
+      });
+    }, 300);
+  }
+
+  getGiftRanks = (id) => {
+    this.setState({giftRanksLoading: true})
+    new Request().get(api.API_GIFT_RANK_MATCH(id), null).then((data: any) => {
+      if (Array.isArray(data)) {
+        data = data.filter(res => res.charge != null && res.charge != 0);
+        this.setState({giftRanks: data, giftRanksLoading: false})
+      }
+    });
+  }
+  handlePlayerSupport = (player) => {
+    this.setState({currentSupportPlayer: player})
+    this.showGiftPanel();
   }
   getLeagueList = (id) => {
     this.setState({loading: true})
@@ -143,6 +640,12 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     //   currentTab: tab
     // });
   }
+  onGiftRankClick = () => {
+
+  }
+  onHeatRewardClick = () => {
+
+  }
 
   render() {
     const {leaguePlayers, leagueTeams, league} = this.props
@@ -158,6 +661,11 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       tabList.push({title: '射手榜'})
       tabIndex = tabIndex + 1;
       tabs[4] = tabIndex;
+    }
+    if (this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+      tabList.push({title: '人气PK'})
+      tabIndex = tabIndex + 1;
+      tabs["leaguePlayerHeat"] = tabIndex;
     }
     if (this.state.loading) {
       return <View className="qz-league-manager-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
@@ -209,8 +717,82 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
                 visible={this.state.currentTab == tabs[4]}
                 playerList={leaguePlayers}/>
             </AtTabsPane>}
+            {this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT &&
+            <AtTabsPane current={this.state.currentTab} index={tabs["leaguePlayerHeat"]}>
+              <HeatPlayer
+                isLeauge
+                heatType={this.state.heatType}
+                onPlayerHeatRefresh={this.onPlayerHeatRefresh}
+                totalHeat={this.state.playerHeatTotal}
+                startTime={this.getHeatStartTime()}
+                endTime={this.getHeatEndTime()}
+                playerHeats={this.state.playerHeats}
+                onHandlePlayerSupport={this.handlePlayerSupport}
+                hidden={this.state.currentTab != tabs["leaguePlayerHeat"]}
+                onGetPlayerHeatInfo={this.getPlayerHeatInfo}
+                onGetPlayerHeatInfoAdd={this.getPlayerHeatInfoAdd}
+              />
+            </AtTabsPane>}
           </AtTabs>}
         </View>
+        <LoginModal
+          isOpened={this.state.loginOpen}
+          handleConfirm={this.onAuthSuccess}
+          handleCancel={this.onAuthCancel}
+          handleClose={this.onAuthClose}
+          handleError={this.onAuthError}/>
+        <PhoneModal
+          isOpened={this.state.phoneOpen}
+          handleConfirm={this.onPhoneSuccess}
+          handleCancel={this.onPhoneCancel}
+          handleClose={this.onPhoneClose}
+          handleError={this.onPhoneError}/>
+        <AtMessage/>
+        <AtFloatLayout
+          className="qz-gift-float"
+          title={`礼物送给${this.state.heatType == global.HEAT_TYPE.TEAM_HEAT && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
+          onClose={this.hideGiftPanel}
+          isOpened={this.state.giftOpen}>
+          <GiftPanel
+            leagueId={this.getParamId()}
+            matchInfo={null}
+            supportTeam={this.state.currentSupportTeam}
+            supportPlayer={this.state.currentSupportPlayer}
+            heatType={this.state.heatType}
+            gifts={this.props.giftList}
+            loading={this.props.giftList == null || this.props.giftList.length == 0}
+            onHandlePaySuccess={this.onGiftPaySuccess}
+            onHandlePayError={this.onGiftPayError}
+            hidden={!this.state.giftOpen}/>
+        </AtFloatLayout>
+        {this.state.giftSendQueue && this.state.giftSendQueue.map((data: any) => (
+          <GiftNotify
+            active={data.active}
+            key={data.id}
+            position={data.position}
+            gift={data.gift}
+            user={data.user}
+            num={data.num}
+            row={data.row}/>
+        ))}
+        {this.state.currentTab == tabs["leaguePlayerHeat"] ?
+          <View className="qz-league-manager-fab qz-league-manager-fab-giftrank">
+            <AtFab size="small" onClick={this.onGiftRankClick}>
+              <Image className="qz-league-manager-fab-image"
+                     src={defaultLogo}/>
+            </AtFab>
+          </View>
+          : null
+        }
+        {this.state.currentTab == tabs["leaguePlayerHeat"] ?
+          <View className="qz-league-manager-fab qz-league-manager-fab-heatreward">
+            <AtFab size="small" onClick={this.onHeatRewardClick}>
+              <Image className="qz-league-manager-fab-image"
+                     src={defaultLogo}/>
+            </AtFab>
+          </View>
+          : null
+        }
       </View>
     )
   }
@@ -218,11 +800,13 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
 const mapStateToProps = (state) => {
   return {
+    userInfo: state.user.userInfo,
     leaguePlayers: state.league.leaguePlayers,
     leagueTeams: state.league.leagueTeams,
     league: state.league.league,
     locationConfig: state.config.locationConfig,
     shareSentence: state.config ? state.config.shareSentence : [],
+    giftList: state.pay ? state.pay.gifts : [],
   }
 }
 export default connect(mapStateToProps)(LeagueManager)
