@@ -9,9 +9,9 @@
 
 .qz-heat-player__loading {
   width: 100vw;
-  height: 10vw;
+  height: 5vw;
   position: absolute;
-  top: $spacing-v-md;
+  top: 0;
   left: 0;
 }
 
@@ -19,7 +19,7 @@
   width: 100vw;
   height: 10vw;
   position: absolute;
-  bottom: 42px;
+  bottom: 200px;
   left: 0;
 }
 
@@ -120,6 +120,7 @@
   grid-template-rows: auto;
   padding: 0 40px 160px 40px;
   box-sizing: border-box;
+  position: relative;
 
   &-item-active {
     //border: solid $color-bg-blue-main 2px;

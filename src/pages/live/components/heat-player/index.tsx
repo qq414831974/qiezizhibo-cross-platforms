@@ -187,8 +187,11 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     this.setState({pulldownRefresh: true})
     Taro.showLoading({title: global.LOADING_TEXT})
     this.refresh();
-    Taro.hideLoading();
-    this.setState({pulldownRefresh: false})
+    Taro.hideLoading({
+      complete: () => {
+        this.setState({pulldownRefresh: false})
+      }
+    });
   }
 
   render() {
