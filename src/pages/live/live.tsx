@@ -66,8 +66,6 @@ import GiftPanel from "../../components/gift-panel";
 import HeatReward from "../../components/heat-reward";
 import GiftRank from "../../components/gift-rank";
 import HeatPlayer from "../../components/heat-player";
-import giftRankImg from "../../assets/gift_rank.png";
-import heatRewardImg from "../../assets/heat_reward.png";
 
 type Bulletin = {
   id: number,
@@ -90,7 +88,6 @@ type PageStateProps = {
   match: any;
   mediaList: any;
   matchStatus: any;
-  ping: any;
   playerList: any;
   userInfo: any;
   commentList: any;
@@ -159,6 +156,7 @@ type PageState = {
   playerHeatLoading: any;
   giftRanksOpen: any,
   heatRewardOpen: any,
+  ping: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -276,6 +274,7 @@ class Live extends Component<PageOwnProps, PageState> {
       playerHeatLoading: false,
       giftRanksOpen: false,
       heatRewardOpen: false,
+      ping: {isPushing: false},
     }
   }
 
@@ -648,13 +647,15 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   getLiveInfo = (id) => {
     this.setState({liveLoading: true})
-    liveAction.livePing(id).then((res) => {
+    // liveAction.livePing(id).then((res) => {
+    new Request().get(api.API_ACTIVITY_PING(id), null, false).then((res: any) => {
       if (res.isPushing) {
-        this.setState({liveLoaded: true, liveLoading: false})
+        this.setState({ping: res, liveLoaded: true, liveLoading: false})
       } else {
-        this.setState({liveLoaded: false, liveLoading: false})
+        this.setState({ping: res, liveLoaded: false, liveLoading: false})
       }
     })
+    // })
   }
   getTeamHeatInfo = (id, type) => {
     let heatType = this.state.heatType;
@@ -850,11 +851,11 @@ class Live extends Component<PageOwnProps, PageState> {
       } else {
         if (this.state.liveLoading && !this.state.liveLoaded) {
           status = LiveStatus.LOADING;
-        } else if (this.state.diffDayTime != null && match.status == FootballEventType.UNOPEN && !this.props.ping.isPushing) {
+        } else if (this.state.diffDayTime != null && match.status == FootballEventType.UNOPEN && !this.state.ping.isPushing) {
           status = LiveStatus.UNOPEN;
-        } else if (this.state.diffDayTime == null && match.status == FootballEventType.UNOPEN && !this.props.ping.isPushing) {
+        } else if (this.state.diffDayTime == null && match.status == FootballEventType.UNOPEN && !this.state.ping.isPushing) {
           status = LiveStatus.ONTIME;
-        } else if (this.state.diffDayTime == null && match.status > FootballEventType.UNOPEN && !this.props.ping.isPushing) {
+        } else if (this.state.diffDayTime == null && match.status > FootballEventType.UNOPEN && !this.state.ping.isPushing) {
           status = LiveStatus.NOTPUSH;
         } else {
           status = LiveStatus.ENABLED;
@@ -2075,7 +2076,6 @@ const
       match: state.match.match,
       matchStatus: state.match.status,
       mediaList: state.live.mediaList,
-      ping: state.live.ping,
       playerList: state.player.playerList.records,
       userInfo: state.user.userInfo,
       commentList: state.match.comment,

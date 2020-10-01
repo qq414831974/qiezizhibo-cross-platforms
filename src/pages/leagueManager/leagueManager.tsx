@@ -3,8 +3,6 @@ import {View, Image} from '@tarojs/components'
 import {AtActivityIndicator, AtTabs, AtTabsPane, AtMessage, AtFloatLayout, AtFab} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import defaultLogo from '../../assets/default-logo.png'
-import giftRankImg from '../../assets/gift_rank.png'
-import heatRewardImg from '../../assets/heat_reward.png'
 
 import './leagueManager.scss'
 import leagueAction from "../../actions/league";
