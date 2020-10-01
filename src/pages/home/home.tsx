@@ -101,7 +101,13 @@ class Home extends Component<PageOwnProps, PageState> {
       }
       this.init();
       this.refresh();
-      Taro.switchTab({url: "/pages/league/league"});
+      if (this.$router.params.id && this.$router.params.page) {
+        Taro.navigateTo({
+          url: '/pages/' + this.$router.params.page + '/' + this.$router.params.page + '?id=' + this.$router.params.id
+        })
+      }else{
+        Taro.switchTab({url: "/pages/league/league"});
+      }
     })
   }
 

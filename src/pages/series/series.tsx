@@ -8,6 +8,9 @@ import './series.scss'
 import LeagueItem from "../../components/league-item";
 import leagueAction from "../../actions/league";
 import withShare from "../../utils/withShare";
+import Request from "../../utils/request";
+import * as api from "../../constants/api";
+import * as global from "../../constants/global";
 
 type PageStateProps = {
   leagueList: any;
@@ -46,12 +49,22 @@ class Series extends Component<PageOwnProps, PageState> {
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
   }
+  $setSharePath = () => `/pages/home/home?id=${this.props.league.id}&page=series`
+
+  $setShareTitle = () => this.props.league.name
 
   componentWillMount() {
   }
 
   componentDidMount() {
-    this.$router.params && this.$router.params.id && this.getLeagueList(this.$router.params.id);
+    new Request().get(api.API_CACHED_CONTROLLER, null).then((data: any) => {
+      if (data.available) {
+        global.CacheManager.getInstance().CACHE_ENABLED = true;
+      } else {
+        global.CacheManager.getInstance().CACHE_ENABLED = false;
+      }
+      this.getParamId() && this.getLeagueList(this.getParamId());
+    })
   }
 
   componentWillUnmount() {
@@ -63,7 +76,19 @@ class Series extends Component<PageOwnProps, PageState> {
 
   componentDidHide() {
   }
-
+  getParamId = () =>{
+    let id;
+    if(this.$router.params){
+      if(this.$router.params.id == null){
+        id = this.$router.params.scene
+      }else{
+        id = this.$router.params.id
+      }
+    }else{
+      return null;
+    }
+    return id;
+  }
   onLeagueItemClick = (item) => {
     if (item.isparent) {
       Taro.navigateTo({url: `../series/series?id=${item.id}`});

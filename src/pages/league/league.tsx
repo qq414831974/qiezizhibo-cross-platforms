@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View} from '@tarojs/components'
-import {AtSearchBar, AtLoadMore, AtActivityIndicator} from "taro-ui"
+import {AtSearchBar, AtLoadMore} from "taro-ui"
 import {connect} from '@tarojs/redux'
 
 import './league.scss'
@@ -8,6 +8,8 @@ import LeagueItem from "../../components/league-item";
 import leagueAction from "../../actions/league";
 import * as global from "../../constants/global";
 import withShare from "../../utils/withShare";
+import Request from "../../utils/request";
+import * as api from "../../constants/api";
 
 type PageStateProps = {
   leagueList: any;
@@ -29,7 +31,6 @@ type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 interface League {
   props: IProps;
 }
-
 @withShare({})
 class League extends Component<PageOwnProps, PageState> {
 
@@ -44,6 +45,7 @@ class League extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '校园足球赛事频道',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    enablePullDownRefresh: true
   }
 
   componentWillMount() {
@@ -57,7 +59,14 @@ class League extends Component<PageOwnProps, PageState> {
   }
 
   componentDidShow() {
-    this.getLeagueList();
+    new Request().get(api.API_CACHED_CONTROLLER, null).then((data: any) => {
+      if (data.available) {
+        global.CacheManager.getInstance().CACHE_ENABLED = true;
+      } else {
+        global.CacheManager.getInstance().CACHE_ENABLED = false;
+      }
+      this.getLeagueList();
+    });
   }
 
   componentDidHide() {
@@ -117,18 +126,19 @@ class League extends Component<PageOwnProps, PageState> {
       this.nextPage();
     }
   }
-
+  onPullDownRefresh() {
+    Taro.showLoading({title: global.LOADING_TEXT})
+    this.getLeagueList();
+    Taro.stopPullDownRefresh();
+  }
   render() {
     const {leagueList} = this.props
 
-    if (this.state.loading) {
-      return <View className="qz-league-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
-    }
     if (leagueList && (leagueList.total <= 0 || leagueList.total == null)) {
       return <AtLoadMore status="noMore" noMoreText={this.state.loading ? "加载中..." : "搜一下"}/>
     }
     let loadingmoreStatus: any = "more";
-    if (this.state.loadingmore) {
+    if (this.state.loadingmore||this.state.loading) {
       loadingmoreStatus = "loading";
     } else if (leagueList.records && (leagueList.total <= leagueList.records.length)) {
       loadingmoreStatus = "noMore"

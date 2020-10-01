@@ -8,18 +8,11 @@ import './match.scss'
 import MatchList from "./components/match-list";
 import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
-
-type Bulletin = {
-  id: number,
-  content: string,
-  type: string,
-  url: string
-}
+import * as api from "../../constants/api";
+import Request from "../../utils/request";
 
 type PageStateProps = {
-  matchList: any;
   locationConfig: { city: string, province: string }
-  bulletinConfig: Array<Bulletin>,
 }
 
 type PageDispatchProps = {}
@@ -32,19 +25,14 @@ type PageState = {
   loadingmore: boolean;
   loading: boolean;
   tabsClass: string;
+  matchList: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
-interface Match {
-  props: IProps;
-}
-
 @withShare({})
 class Match extends Component<PageOwnProps, PageState> {
 
-  scrollTop: number;
-  tabsY: number;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -56,22 +44,34 @@ class Match extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '校园足球赛事频道',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    enablePullDownRefresh: true
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      loadingmore: false,
+      loading: false,
+      searchText: '',
+      currentTab: 0,
+      tabsClass: '',
+      matchList: {},
+    }
   }
 
   componentWillMount() {
   }
 
   componentDidMount() {
-    const query = Taro.createSelectorQuery();
-    query.select('.qz-match-tabs').boundingClientRect(rect => {
-      this.tabsY = (rect as {
-        left: number
-        right: number
-        top: number
-        bottom: number
-      }).top;
-    }).exec();
-    this.switchTab(0);
+    new Request().get(api.API_CACHED_CONTROLLER, null).then((data: any) => {
+      if (data.available) {
+        global.CacheManager.getInstance().CACHE_ENABLED = true;
+      } else {
+        global.CacheManager.getInstance().CACHE_ENABLED = false;
+      }
+      matchAction.getMatchList_clear();
+      this.switchTab(0);
+    })
   }
 
   componentWillUnmount() {
@@ -81,6 +81,12 @@ class Match extends Component<PageOwnProps, PageState> {
   }
 
   componentDidHide() {
+  }
+
+  onPullDownRefresh() {
+    Taro.showLoading({title: global.LOADING_TEXT})
+    this.getMatchList();
+    Taro.stopPullDownRefresh();
   }
 
   onSearchChange = (value) => {
@@ -104,11 +110,9 @@ class Match extends Component<PageOwnProps, PageState> {
   getMatchList = () => {
     let status = "unfinish"
     let orderby = "desc"
-    const {bulletinConfig} = this.props
-    const weihu = bulletinConfig && bulletinConfig.length > 0 && bulletinConfig[0].content === "升级维护中";
     switch (this.state.currentTab) {
       case 0:
-        status = weihu ? "finish" : "unfinish";
+        status = "unfinish";
         orderby = "asc";
         break;
       case 1:
@@ -117,31 +121,39 @@ class Match extends Component<PageOwnProps, PageState> {
         break;
     }
     this.setState({loading: true})
-    matchAction.getMatchList({
+    let url = api.API_MATCHES;
+    let param: any = {
       status: status,
       pageNum: 1,
       pageSize: 10,
       sortOrder: orderby,
       isActivity: true,
       areatype: 2,
-    }).then(() => {
-      this.setState({loading: false})
+    }
+    if (global.CacheManager.getInstance().CACHE_ENABLED && status != null && status == "finish") {
+      url = api.API_CACHED_MATCHES_FINISH;
+      param = null;
+    } else if (global.CacheManager.getInstance().CACHE_ENABLED && status != null && status == "unfinish") {
+      url = api.API_CACHED_MATCHES_UNFINISH;
+      param = null;
+    }
+    new Request().get(url, param).then((data: any) => {
+      this.setState({loading: false, matchList: data})
+      Taro.hideLoading()
     });
   }
   nextPage = (tab) => {
     if (global.CacheManager.getInstance().CACHE_ENABLED) {
       return;
     }
-    if (typeof(tab) != 'number') {
+    if (typeof (tab) != 'number') {
       tab = this.state.currentTab
     }
     let status = "unfinish"
     let orderby = "desc"
-    const {bulletinConfig} = this.props
-    const weihu = bulletinConfig && bulletinConfig.length > 0 && bulletinConfig[0].content === "升级维护中";
     switch (tab) {
       case 0:
-        status = weihu ? "finish" : "unfinish";
+        status = "unfinish";
         orderby = "asc";
         break;
       case 1:
@@ -150,46 +162,55 @@ class Match extends Component<PageOwnProps, PageState> {
         break;
     }
     this.setState({loadingmore: true})
-    matchAction.getMatchList_add({
+    let url = api.API_MATCHES;
+    let param: any = {
       status: status,
-      pageNum: this.props.matchList.current + 1,
+      pageNum: 1,
       pageSize: 10,
       sortOrder: orderby,
       isActivity: true,
       areatype: 2,
-    }).then(() => {
-      this.setState({loadingmore: false})
-    })
+    }
+    if (global.CacheManager.getInstance().CACHE_ENABLED && status != null && status == "finish") {
+      url = api.API_CACHED_MATCHES_FINISH;
+      param = null;
+    } else if (global.CacheManager.getInstance().CACHE_ENABLED && status != null && status == "unfinish") {
+      url = api.API_CACHED_MATCHES_UNFINISH;
+      param = null;
+    }
+    new Request().get(url, param).then((data: any) => {
+      const matchList = this.state.matchList;
+      data.records = matchList.records.concat(data.records);
+      this.setState({loadingmore: false, matchList: data})
+      Taro.hideLoading()
+    });
   }
+
 
   // 小程序上拉加载
   onReachBottom() {
     this.nextPage(this.state.currentTab);
   }
 
-  onScroll = (e) => {
-    if (this.scrollTop - e.detail.scrollTop <= 0) {
-      if (this.tabsY - e.detail.scrollTop < 0) {
-        this.setState({tabsClass: "qz-match__top-tabs__content--fixed"});
-      }
-    } else {
-      if (this.tabsY - e.detail.scrollTop >= 0) {
-        this.setState({tabsClass: ""});
-      }
-    }
-    this.scrollTop = e.detail.scrollTop;
-  }
+  // onScroll = (e) => {
+  //   if (this.scrollTop - e.detail.scrollTop <= 0) {
+  //     if (this.tabsY - e.detail.scrollTop < 0) {
+  //       this.setState({tabsClass: "qz-match__top-tabs__content--fixed"});
+  //     }
+  //   } else {
+  //     if (this.tabsY - e.detail.scrollTop >= 0) {
+  //       this.setState({tabsClass: ""});
+  //     }
+  //   }
+  //   this.scrollTop = e.detail.scrollTop;
+  // }
 
   render() {
-    const {matchList, bulletinConfig} = this.props
+    const {matchList} = this.state
     let tabList = [{title: '比赛中'}, {title: '完赛'}]
-    const weihu = bulletinConfig && bulletinConfig.length > 0 && bulletinConfig[0].content === "升级维护中";
-    if (weihu) {
-      tabList = [{title: '完赛'}]
-    }
+
     return (
-      <ScrollView scrollY onScroll={this.onScroll} onScrollToLower={this.onReachBottom}
-                  className='qz-match-scroll-content'>
+      <View className='qz-match-scroll-content'>
         <View className='qz-match-content'>
           <View className='qz-match-content-search' onClick={this.onSearchClick}>
             <AtSearchBar
@@ -201,38 +222,40 @@ class Match extends Component<PageOwnProps, PageState> {
           </View>
           <View className='qz-match-tabs'>
             <AtTabs current={this.state.currentTab}
-                    className={`qz-match__top-tabs__content qz-custom-tabs ${this.state.tabsClass}`}
+                    className="qz-match__top-tabs__content qz-custom-tabs qz-match__top-tabs__content--fixed"
                     tabList={tabList}
                     onClick={this.switchTab.bind(this)}>
-              {!weihu && <AtTabsPane current={this.state.currentTab} index={0}>
+              <AtTabsPane current={this.state.currentTab} index={0}>
                 <MatchList
                   matchList={matchList}
                   loading={this.state.loading}
                   loadingmore={this.state.loadingmore}
                   visible={this.state.currentTab == 0}
                   nextPage={this.nextPage}/>
-              </AtTabsPane>}
-              <AtTabsPane current={this.state.currentTab} index={weihu ? 0 : 1}>
+              </AtTabsPane>
+              <AtTabsPane current={this.state.currentTab} index={1}>
                 <MatchList
                   matchList={matchList}
                   loading={this.state.loading}
                   loadingmore={this.state.loadingmore}
-                  visible={this.state.currentTab == (weihu ? 0 : 1)}
+                  visible={this.state.currentTab == 1}
                   nextPage={this.nextPage}/>
               </AtTabsPane>
             </AtTabs>
           </View>
         </View>
-      </ScrollView>
+      </View>
     )
   }
 }
 
+interface Match {
+  props: IProps;
+}
+
 const mapStateToProps = (state) => {
   return {
-    matchList: state.match.matchList,
     locationConfig: state.config.locationConfig,
-    bulletinConfig: state.config ? state.config.bulletinConfig : null,
   }
 }
 export default connect(mapStateToProps)(Match)

@@ -197,47 +197,54 @@ class Live extends Component<PageOwnProps, PageState> {
 
   // componentDidMount() {
   componentDidShow() {
-    Taro.showLoading({title: LOADING_TEXT})
-    this.$router.params && this.$router.params.id && this.getMatchInfo(this.$router.params.id).then((data) => {
-      if (data.activityId) {
-        if (data.status == FootballEventType.FINISH) {
-          this.getLiveMediaInfo(data.activityId)
+    new Request().get(api.API_CACHED_CONTROLLER, null).then((data: any) => {
+      if (data.available) {
+        CacheManager.getInstance().CACHE_ENABLED = true;
+      } else {
+        CacheManager.getInstance().CACHE_ENABLED = false;
+      }
+      Taro.showLoading({title: LOADING_TEXT})
+      this.$router.params && this.$router.params.id && this.getMatchInfo(this.$router.params.id).then((data) => {
+        if (data.activityId) {
+          if (data.status == FootballEventType.FINISH) {
+            this.getLiveMediaInfo(data.activityId)
+            if (data.type.indexOf(4) >= 0) {
+              this.getMatchDanmu(data.id, this.state.currentMedia);
+            }
+          }
+          const activityId = data.activityId;
+          this.setState({liveLoading: true})
+          this.getLiveInfo(activityId).then((res) => {
+            if (res.isPushing) {
+              this.setState({liveLoaded: true, liveLoading: false})
+            } else {
+              this.setState({liveLoaded: false, liveLoading: false})
+            }
+            this.startTimer_liveInfo(activityId);
+          })
+          this.getMatchStatus(data.id).then((status) => {
+            this.setUpNooice(status);
+            this.startTimer_matchStatus(data.id);
+          });
+          this.getDiffTime(data)
+          this.startTimer_CountDown();
+          this.startTimer_Danmu();
+          this.getCollection(data.id);
+          this.getMatchEncryption(data.id);
           if (data.type.indexOf(4) >= 0) {
-            this.getMatchDanmu(data.id, this.state.currentMedia);
+            this.initSocket(data.id);
           }
+          data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
         }
-        const activityId = data.activityId;
-        this.setState({liveLoading: true})
-        this.getLiveInfo(activityId).then((res) => {
-          if (res.isPushing) {
-            this.setState({liveLoaded: true, liveLoading: false})
-          } else {
-            this.setState({liveLoaded: false, liveLoading: false})
-          }
-          this.startTimer_liveInfo(activityId);
-        })
-        this.getMatchStatus(data.id).then((status) => {
-          this.setUpNooice(status);
-          this.startTimer_matchStatus(data.id);
-        });
-        this.getDiffTime(data)
-        this.startTimer_CountDown();
-        this.startTimer_Danmu();
-        this.getCollection(data.id);
-        this.getMatchEncryption(data.id);
-        if (data.type.indexOf(4) >= 0) {
-          this.initSocket(data.id);
+        Taro.hideLoading();
+      })
+      this.videoContext = Taro.createVideoContext("videoPlayer");
+      Taro.getSystemInfo().then(data => {
+        if (data.platform == 'android') {
+          this.setState({danmuUnable: true})
         }
-        data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
-      }
-      Taro.hideLoading();
-    })
-    this.videoContext = Taro.createVideoContext("videoPlayer");
-    Taro.getSystemInfo().then(data => {
-      if (data.platform == 'android') {
-        this.setState({danmuUnable: true})
-      }
-    })
+      })
+    });
   }
 
   componentWillUnmount() {
@@ -391,21 +398,26 @@ class Live extends Component<PageOwnProps, PageState> {
   startTimer_matchStatus = (id) => {
     this.clearTimer_matchStatus();
     let timeout = 60000;
-    if (CacheManager.getInstance().CACHE_ENABLED) {
-      // timeout = 300000;
-      return;
-    }
     this.timerID_matchStatus = setInterval(() => {
       const {match} = this.props;
-      this.$router.params && this.$router.params.id && this.getMatchInfo(this.$router.params.id).then((data) => {
-        if (match && match.status != FootballEventType.FINISH && data.status == FootballEventType.FINISH) {
-          this.getLiveMediaInfo(data.activityId)
-          this.getMatchDanmu(data.id, this.state.currentMedia);
-        }
-      })
-      this.getMatchStatus(id).then((status) => {
-        this.setUpNooice(status);
-      })
+      if (CacheManager.getInstance().CACHE_ENABLED) {
+        this.$router.params && this.$router.params.id && this.getMatchInfo(this.$router.params.id).then((data) => {
+          if (match && match.status != FootballEventType.FINISH && data.status == FootballEventType.FINISH) {
+            this.getLiveMediaInfo(data.activityId)
+            // this.getMatchDanmu(data.id, this.state.currentMedia);
+          }
+        })
+      } else {
+        this.$router.params && this.$router.params.id && this.getMatchInfo(this.$router.params.id).then((data) => {
+          if (match && match.status != FootballEventType.FINISH && data.status == FootballEventType.FINISH) {
+            this.getLiveMediaInfo(data.activityId)
+            this.getMatchDanmu(data.id, this.state.currentMedia);
+          }
+        })
+        this.getMatchStatus(id).then((status) => {
+          this.setUpNooice(status);
+        })
+      }
     }, timeout)
   }
   clearTimer_matchStatus = () => {
@@ -537,7 +549,7 @@ class Live extends Component<PageOwnProps, PageState> {
       if (match.status == FootballEventType.FINISH) {
         status = LiveStatus.FINISH;
       } else {
-        if (CacheManager.getInstance().CACHE_ENABLED) {
+        if (CacheManager.getInstance().CACHE_ENABLED && match.status == FootballEventType.START) {
           status = LiveStatus.ENABLED;
           return status;
         }
