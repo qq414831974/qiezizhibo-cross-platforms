@@ -66,6 +66,8 @@ import GiftPanel from "../../components/gift-panel";
 import HeatReward from "../../components/heat-reward";
 import GiftRank from "../../components/gift-rank";
 import HeatPlayer from "../../components/heat-player";
+import giftRankImg from "../../assets/gift_rank.png";
+import heatRewardImg from "../../assets/heat_reward.png";
 
 type Bulletin = {
   id: number,
@@ -146,6 +148,7 @@ type PageState = {
   currentSupportPlayer: any;
   teamHeats: any;
   playerHeats: any;
+  topPlayerHeats: any;
   playerHeatTotal: any;
   giftSendQueue: any;
   giftRanks: any;
@@ -154,6 +157,8 @@ type PageState = {
   leagueId: any;
   playerHeatRefreshFunc: any;
   playerHeatLoading: any;
+  giftRanksOpen: any,
+  heatRewardOpen: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -260,6 +265,7 @@ class Live extends Component<PageOwnProps, PageState> {
       currentSupportPlayer: null,
       teamHeats: null,
       playerHeats: null,
+      topPlayerHeats: null,
       playerHeatTotal: null,
       giftSendQueue: [],
       giftRanks: null,
@@ -268,6 +274,8 @@ class Live extends Component<PageOwnProps, PageState> {
       leagueId: null,
       playerHeatRefreshFunc: null,
       playerHeatLoading: false,
+      giftRanksOpen: false,
+      heatRewardOpen: false,
     }
   }
 
@@ -374,9 +382,10 @@ class Live extends Component<PageOwnProps, PageState> {
     new Request().get(api.API_MATCH_HEAT, {matchId: id}).then((data: any) => {
       if (data.available) {
         payAction.getGiftList({matchId: id});
-        this.setState({heatRule: data, heatType: data.type})
-        this.getTeamHeatInfo(id, data.type);
-        this.getGiftRanks(id);
+        this.setState({heatRule: data, heatType: data.type}, () => {
+          this.getTeamHeatInfo(id, data.type);
+          this.getGiftRanks(id);
+        })
         this.startTimer_Gift();
       }
     })
@@ -681,7 +690,11 @@ class Live extends Component<PageOwnProps, PageState> {
       this.setState({playerHeatLoading: true})
       new Request().get(api.API_MATCH_PLAYER_HEAT, param).then((data: any) => {
         this.setState({playerHeatLoading: false})
-        this.setState({playerHeats: data})
+        if (name) {
+          this.setState({playerHeats: data})
+        } else {
+          this.setState({playerHeats: data, topPlayerHeats: this.getTopThreeHeat(data.records)})
+        }
       })
       new Request().get(api.API_MATCH_PLAYER_HEAT_TOTAL, {matchId: this.getParamId()}).then((data: any) => {
         this.setState({playerHeatTotal: data})
@@ -691,7 +704,11 @@ class Live extends Component<PageOwnProps, PageState> {
       this.setState({playerHeatLoading: true})
       new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
         this.setState({playerHeatLoading: false})
-        this.setState({playerHeats: data})
+        if (name) {
+          this.setState({playerHeats: data})
+        } else {
+          this.setState({playerHeats: data, topPlayerHeats: this.getTopThreeHeat(data.records)})
+        }
       })
       new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.state.leagueId}).then((data: any) => {
         this.setState({playerHeatTotal: data})
@@ -734,6 +751,43 @@ class Live extends Component<PageOwnProps, PageState> {
         this.setState({playerHeats: playerHeats})
       })
     }
+  }
+  getTopThreeHeat = (playerHeats) => {
+    let sorted: any = [];
+    let index = 1;
+    for (let i = 0; i < playerHeats.length; i++) {
+      if (index <= 3) {
+        if (i == 0) {
+          index = 1;
+          playerHeats[i].index = index;
+          sorted.push(playerHeats[i]);
+          continue;
+        }
+        let heat = this.getHeat(playerHeats[i]);
+        let heatPre = this.getHeat(playerHeats[i - 1]);
+        if (heat == heatPre) {
+          playerHeats[i].index = index;
+          sorted.push(playerHeats[i]);
+        } else {
+          index = index + 1;
+          if (index <= 3) {
+            playerHeats[i].index = index;
+            sorted.push(playerHeats[i]);
+          }
+        }
+      }
+    }
+    return sorted;
+  }
+  getHeat = (playerHeat) => {
+    let heat = 0;
+    if (playerHeat.heat) {
+      heat = heat + playerHeat.heat;
+    }
+    if (playerHeat.heatBase) {
+      heat = heat + playerHeat.heatBase;
+    }
+    return heat;
   }
   getCollection = async (id) => {
     const collectMatch = await getStorage('collectMatch')
@@ -1474,18 +1528,18 @@ class Live extends Component<PageOwnProps, PageState> {
     tabList.push({title: this.state.heatType == HEAT_TYPE.TEAM_HEAT ? "有奖PK" : "赛况"})
     tabs[TABS_TYPE.matchUp] = tabIndex;
     tabIndex = tabIndex + 1;
-    //开启热度比拼
-    if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
-      tabList.push({title: '奖励'})
-      tabs[TABS_TYPE.heatReward] = tabIndex;
-      tabIndex = tabIndex + 1;
-    }
-    //开启打赏榜
-    if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
-      tabList.push({title: '打赏榜'})
-      tabs[TABS_TYPE.giftRank] = tabIndex;
-      tabIndex = tabIndex + 1;
-    }
+    // //开启热度比拼
+    // if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+    //   tabList.push({title: '奖励'})
+    //   tabs[TABS_TYPE.heatReward] = tabIndex;
+    //   tabIndex = tabIndex + 1;
+    // }
+    // //开启打赏榜
+    // if (this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+    //   tabList.push({title: '打赏榜'})
+    //   tabs[TABS_TYPE.giftRank] = tabIndex;
+    //   tabIndex = tabIndex + 1;
+    // }
     //开启统计
     if (match && match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1) {
       tabList.push({title: '统计'})
@@ -1501,7 +1555,11 @@ class Live extends Component<PageOwnProps, PageState> {
     return {tabList, tabs};
   }
 
-  showGiftPanel = () => {
+  showGiftPanel = async () => {
+    if (!await this.isUserLogin()) {
+      this.showAuth();
+      return;
+    }
     this.setState({giftOpen: true})
   }
   hideGiftPanel = () => {
@@ -1632,7 +1690,15 @@ class Live extends Component<PageOwnProps, PageState> {
 
   getGiftRanks = (id) => {
     this.setState({giftRanksLoading: true})
-    new Request().get(api.API_GIFT_RANK_MATCH(id), null).then((data: any) => {
+    let url = api.API_GIFT_RANK_MATCH(id)
+    if (this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+      if (this.state.leagueId != null) {
+        url = api.API_GIFT_RANK_LEAGUE(this.state.leagueId)
+      } else {
+        return;
+      }
+    }
+    new Request().get(url, null).then((data: any) => {
       if (Array.isArray(data)) {
         data = data.filter(res => res.charge != null && res.charge != 0);
         this.setState({giftRanks: data, giftRanksLoading: false})
@@ -1643,6 +1709,18 @@ class Live extends Component<PageOwnProps, PageState> {
     this.setState({currentSupportPlayer: player})
     this.showGiftPanel();
   }
+  onGiftRankClick = () => {
+    this.setState({giftRanksOpen: true});
+  }
+  onHeatRewardClick = () => {
+    this.setState({heatRewardOpen: true});
+  }
+  hideGfitRank = () => {
+    this.setState({giftRanksOpen: false});
+  }
+  hideReward = () => {
+    this.setState({heatRewardOpen: false});
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
@@ -1650,7 +1728,7 @@ class Live extends Component<PageOwnProps, PageState> {
       diffDayTime = {
         diffDay: "",
         diffTime: "00:00"
-      }, liveStatus, leftNooice = 0, rightNooice = 0, teamHeats = null, playerHeats = null
+      }, liveStatus, leftNooice = 0, rightNooice = 0, teamHeats = null, playerHeats = null, topPlayerHeats = null
     } = this.state;
     let {tabList, tabs} = this.getTabsList(match);
 
@@ -1763,6 +1841,7 @@ class Live extends Component<PageOwnProps, PageState> {
                     startTime={this.getHeatStartTime()}
                     endTime={this.getHeatEndTime()}
                     playerHeats={playerHeats}
+                    topPlayerHeats={topPlayerHeats}
                     onHandlePlayerSupport={this.handlePlayerSupport}
                     hidden={this.state.currentTab != tabs[TABS_TYPE.heatPlayer]}
                     onGetPlayerHeatInfo={this.getPlayerHeatInfo}
@@ -1845,18 +1924,16 @@ class Live extends Component<PageOwnProps, PageState> {
                   )}
                 </ScrollView>
               </AtTabsPane>
-              {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
-                <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatReward]}>
-                  <HeatReward heatRule={this.state.heatRule} loading={this.state.heatRule == null}
-                              hidden={this.state.currentTab != tabs[TABS_TYPE.heatReward]}/>
-                </AtTabsPane>
-                : null}
-              {this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
-                <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.giftRank]}>
-                  <GiftRank giftRanks={this.state.giftRanks} loading={this.state.giftRanksLoading}
-                            hidden={this.state.currentTab != tabs[TABS_TYPE.giftRank]}/>
-                </AtTabsPane>
-                : null}
+              {/*{this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?*/}
+              {/*  <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatReward]}>*/}
+
+              {/*  </AtTabsPane>*/}
+              {/*  : null}*/}
+              {/*{this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?*/}
+              {/*  <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.giftRank]}>*/}
+
+              {/*  </AtTabsPane>*/}
+              {/*  : null}*/}
               {match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1 &&
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.statistics]}>
                 <ScrollView scrollY className="qz-live-statistics">
@@ -1906,6 +1983,16 @@ class Live extends Component<PageOwnProps, PageState> {
           handleClose={this.onPayClose}
           handleError={this.onPayError}
           payEnabled={payEnabled}/>
+        <HeatReward
+          heatRule={this.state.heatRule}
+          loading={this.state.heatRule == null}
+          isOpened={this.state.heatRewardOpen}
+          handleCancel={this.hideReward}/>
+        <GiftRank
+          giftRanks={this.state.giftRanks}
+          loading={this.state.giftRanksLoading}
+          isOpened={this.state.giftRanksOpen}
+          handleCancel={this.hideGfitRank}/>
         <AtCurtain
           isOpened={this.state.curtainShow}
           onClose={this.onCurtainClose}
@@ -1957,6 +2044,23 @@ class Live extends Component<PageOwnProps, PageState> {
                      src={match.league && match.league.headImg ? match.league.headImg : defaultLogo}
               />
             </AtFab>
+          </View>
+          : null
+        }
+        {this.state.currentTab == tabs[TABS_TYPE.heatPlayer] || (this.state.heatType == HEAT_TYPE.TEAM_HEAT && this.state.currentTab == tabs[TABS_TYPE.matchUp]) ?
+          <View>
+            <View className="qz-live-fab qz-live-fab-square qz-live-fab-giftrank">
+              <AtFab onClick={this.onGiftRankClick}>
+                <Image className="qz-live-fab-image"
+                       src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/gift_rank.png"/>
+              </AtFab>
+            </View>
+            <View className="qz-live-fab qz-live-fab-square qz-live-fab-heatreward">
+              <AtFab onClick={this.onHeatRewardClick}>
+                <Image className="qz-live-fab-image"
+                       src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/heat_reward.png"/>
+              </AtFab>
+            </View>
           </View>
           : null
         }

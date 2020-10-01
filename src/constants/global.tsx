@@ -52,6 +52,13 @@ export const MATCH_TYPE = {
   lineUp: 3,
   chattingRoom: 4,
 }
+export const LEAGUE_TABS_TYPE = {
+  leagueRule: "leagueRule",
+  leagueMatch: "leagueMatch",
+  leagueTeam: "leagueTeam",
+  leaguePlayer: "leaguePlayer",
+  heatPlayer: "heatPlayer",
+}
 export const TABS_TYPE = {
   heatPlayer: "heatPlayer",
   matchUp: "matchUp",

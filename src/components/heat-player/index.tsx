@@ -19,6 +19,7 @@ type PageDispatchProps = {
 
 type PageOwnProps = {
   playerHeats?: any;
+  topPlayerHeats?: any;
   startTime?: any;
   endTime?: any;
   hidden?: any;
@@ -64,7 +65,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
   }
 
   refresh = () => {
-    this.props.onGetPlayerHeatInfo(1, 20, this.state.searchText);
+    this.props.onGetPlayerHeatInfo(1, 40, this.state.searchText);
   }
   getStartDiffTime = () => {
     const time = this.props.startTime;
@@ -146,15 +147,18 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     })
   }
   onSearch = () => {
-    this.props.onGetPlayerHeatInfo(1, 20, this.state.searchText);
+    this.props.onGetPlayerHeatInfo(1, 40, this.state.searchText);
   }
   onClear = () => {
     this.setState({
       searchText: "",
     })
-    this.props.onGetPlayerHeatInfo(1, 20, null);
+    this.props.onGetPlayerHeatInfo(1, 40, null);
   }
   onPlayerClick = (playerHeat) => {
+    if (this.state.currentPlayerHeat && this.state.currentPlayerHeat.id == playerHeat.id) {
+      this.handleSupport();
+    }
     this.setState({currentPlayerHeat: playerHeat})
   }
   getHeat = (currentPlayerHeat) => {
@@ -175,7 +179,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     }
     this.setState({loadingMore: true})
     Taro.showLoading({title: global.LOADING_TEXT})
-    this.props.onGetPlayerHeatInfoAdd(this.props.playerHeats.current + 1, 20, this.state.searchText);
+    this.props.onGetPlayerHeatInfoAdd(this.props.playerHeats.current + 1, 40, this.state.searchText);
     Taro.hideLoading();
     this.setState({loadingMore: false})
   }
@@ -195,10 +199,23 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     });
   }
 
+  isTopPlayerHeat = (playerHeat, topPlayerHeat) => {
+    if (topPlayerHeat && playerHeat) {
+      for (let topPlayer of topPlayerHeat) {
+        if (topPlayer.id == playerHeat.id) {
+          return topPlayer.index;
+        }
+      }
+    }
+    return null;
+  }
+
   render() {
     const {startDiffDayTime, endDiffDayTime, currentPlayerHeat = null, pulldownRefresh = false} = this.state
     const {hidden = false, heatType, totalHeat} = this.props
     let playerHeats = this.props.playerHeats;
+    let topPlayerHeats = this.props.topPlayerHeats;
+    let isTopPlayerHeat = this.isTopPlayerHeat;
     const onPlayerClick = this.onPlayerClick;
     const getHeat = this.getHeat;
     if (hidden) {
@@ -215,7 +232,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
               onActionClick={this.onSearch}
               onConfirm={this.onSearch}
               onClear={this.onClear}
-              placeholder="请输入姓名"
+              placeholder="输入姓名/序号查找球员"
             />
           </View>
           <View className="qz-heat-player-header__status">
@@ -259,7 +276,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
             {pulldownRefresh ? <View className="qz-heat-player__loading">
               <AtActivityIndicator mode="center" content="加载中..."/>
             </View> : null}
-            {playerHeats && playerHeats.records.map((data: any, index) => (
+            {playerHeats && playerHeats.records.map((data: any) => (
                 <View key={data.id}
                       className={`qz-heat-player__grid-item ${currentPlayerHeat && currentPlayerHeat.id == data.id ? "qz-heat-player__grid-item-active" : ""}`}
                       onClick={onPlayerClick.bind(this, data)}>
@@ -269,8 +286,9 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                       <Image src={flame}/>
                       <Text className="qz-heat-player__grid-item-heat-value">{getHeat(data)}</Text>
                     </View>
-                    {index <= 3 ?
-                      <View className={`qz-heat-player__grid-item-rank qz-heat-player__grid-item-rank-${data.index}`}>
+                    {isTopPlayerHeat(data, topPlayerHeats) ?
+                      <View
+                        className={`qz-heat-player__grid-item-rank qz-heat-player__grid-item-rank-${isTopPlayerHeat(data, topPlayerHeats)}`}>
                       </View> : null}
                   </View>
                   <View className="qz-heat-player__grid-item-name">

@@ -113,7 +113,7 @@
 
 .qz-league-manager-fab-giftrank {
   position: fixed;
-  bottom: 30%;
+  bottom: 35%;
   right: 16px;
 }
 
@@ -121,13 +121,16 @@
   position: fixed;
   bottom: 20%;
   right: 16px;
+  animation: zoom ease-in-out 1s infinite;
 }
 
 .qz-league-manager-fab {
-  background-color: $color-bg-transparent;
+  background: $color-bg-transparent;
 
   .at-fab {
-    background-color: $color-bg;
+    background: $color-bg-transparent;
+    color: $color-bg-transparent;
+    box-shadow: none;
   }
 
   &-image {
@@ -136,5 +139,42 @@
     width: 100%;
     min-width: 50px;
     border-radius: 50%;
+    background: $color-bg-transparent;
+  }
+}
+
+.qz-league-manager-fab-square {
+  .at-fab {
+    border-radius: 5px;
+  }
+
+  .qz-league-manager-fab-image {
+    border-radius: 5px;
+  }
+}
+
+@keyframes zoom {
+  0% {
+    transform: scale(1);
+  }
+
+  20% {
+    transform: scale(0.9);
+  }
+
+  40% {
+    transform: scale(1.1);
+  }
+
+  60% {
+    transform: scale(0.9);
+  }
+
+  80% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

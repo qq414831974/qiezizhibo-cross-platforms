@@ -330,7 +330,7 @@
   &__league {
     position: fixed;
     bottom: 20%;
-    right: 16px;
+    left: 16px;
     background-color: $color-bg-transparent;
 
     .at-fab {
@@ -366,6 +366,47 @@
     &-arrow {
       float: right;
     }
+  }
+}
+
+.qz-live-fab-giftrank {
+  position: fixed;
+  bottom: 35%;
+  right: 16px;
+}
+
+.qz-live-fab-heatreward {
+  position: fixed;
+  bottom: 20%;
+  right: 16px;
+  animation: zoom ease-in-out 1s infinite;
+}
+
+.qz-live-fab-square {
+  .at-fab {
+    border-radius: 5px;
+  }
+  .qz-live-fab-image{
+    border-radius: 5px;
+  }
+}
+
+.qz-live-fab {
+  background: $color-bg-transparent;
+
+  .at-fab {
+    background: $color-bg-transparent;
+    color: $color-bg-transparent;
+    box-shadow: none;
+  }
+
+  &-image {
+    height: 100%;
+    min-height: 50px;
+    width: 100%;
+    min-width: 50px;
+    border-radius: 50%;
+    background: $color-bg-transparent;
   }
 }
 
@@ -420,6 +461,31 @@
 
   100% {
     transform: scale(0.9) rotate(0deg);
+  }
+}
+@keyframes zoom {
+  0% {
+    transform: scale(1);
+  }
+
+  20% {
+    transform: scale(0.9);
+  }
+
+  40% {
+    transform: scale(1.1);
+  }
+
+  60% {
+    transform: scale(0.9);
+  }
+
+  80% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }
 

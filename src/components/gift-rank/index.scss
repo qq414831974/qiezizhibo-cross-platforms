@@ -36,11 +36,15 @@
   }
 }
 
+.mini-gray {
+  color: $color-grey-3;
+}
+
 .qz-giftrank {
-  padding: $spacing-v-sm $spacing-v-lg;
+  //padding: $spacing-v-sm $spacing-v-lg;
 
   &-scroll-content {
-    height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px); //减去tab的高度
+    height: 100%; //减去tab的高度
   }
 
   &-content-loading {
@@ -49,12 +53,13 @@
     position: relative;
     margin-top: $spacing-v-md;
   }
+
   &-text-small {
-    font-size: $font-size-base !important;
+    font-size: $font-size-sm !important;
   }
 
   &-text-mini {
-    font-size: $font-size-sm !important;
+    font-size: $font-size-xs !important;
   }
 }
 
@@ -73,7 +78,7 @@
     position: relative;
     box-sizing: border-box;
     color: $at-list-text-color;
-    font-size: $font-size-lg;
+    font-size: $font-size-base;
     line-height: $line-height-zh;
     @include active;
     @include hairline-bottom-relative($left: $spacing-h-sm);
@@ -87,7 +92,8 @@
       &-r1 {
         background: url("../../assets/live/medal.png");
         background-size: 100% 100%;
-        .qz-giftrank-list__item-rank-text{
+
+        .qz-giftrank-list__item-rank-text {
           display: none;
         }
       }
@@ -95,7 +101,8 @@
       &-r2 {
         background: url("../../assets/live/medal-2.png");
         background-size: 100% 100%;
-        .qz-giftrank-list__item-rank-text{
+
+        .qz-giftrank-list__item-rank-text {
           display: none;
         }
       }
@@ -103,7 +110,8 @@
       &-r3 {
         background: url("../../assets/live/medal-3.png");
         background-size: 100% 100%;
-        .qz-giftrank-list__item-rank-text{
+
+        .qz-giftrank-list__item-rank-text {
           display: none;
         }
       }
@@ -112,15 +120,15 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        font-size: $font-size-base;
+        font-size: $font-size-sm;
         color: $color-text-paragraph;
         transform: translate(-50%, -50%);
       }
     }
 
     &-avatar {
-      width: $at-avatar-size-sm;
-      height: $at-avatar-size-sm;
+      width: 60px;
+      height: 60px;
       margin-right: $spacing-v-xl;
 
       image {
@@ -144,7 +152,7 @@
 
       &-note {
         color: $at-list-content-color;
-        font-size: $font-size-base;
+        font-size: $font-size-sm;
         line-height: $line-height-zh;
       }
     }
@@ -165,7 +173,7 @@
       display: inline-block;
       vertical-align: middle;
       margin-right: $spacing-v-xl;
-      font-size: $font-size-base;
+      font-size: $font-size-sm;
       color: $color-grey-2;
       white-space: nowrap;
     }
