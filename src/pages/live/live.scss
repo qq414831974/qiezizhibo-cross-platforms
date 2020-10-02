@@ -329,7 +329,7 @@
 
   &__league {
     position: fixed;
-    bottom: 20%;
+    bottom: 5%;
     left: 16px;
     background-color: $color-bg-transparent;
 
@@ -371,13 +371,13 @@
 
 .qz-live-fab-giftrank {
   position: fixed;
-  bottom: 35%;
+  bottom: 18%;
   right: 16px;
 }
 
 .qz-live-fab-heatreward {
   position: fixed;
-  bottom: 20%;
+  bottom: 5%;
   right: 16px;
   animation: zoom ease-in-out 1s infinite;
 }

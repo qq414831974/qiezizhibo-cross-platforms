@@ -88,7 +88,7 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
           </View>}
           <View className="qz-chatting-room__chat-content__container">
             <View className="qz-chatting-room__chat-item-hint">
-              直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约直播公约
+              茄子TV禁止任何传播违法、违规、低俗等信息的行为，一经发现将予以封禁处理。请勿轻信以任何方式的私下交易等行为，以防人身或财产损失。
             </View>
             {this.getCommentsList(comments).map((item: any) => (
               item.broadcast ?

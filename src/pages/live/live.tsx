@@ -314,18 +314,16 @@ class Live extends Component<PageOwnProps, PageState> {
           this.startTimer_Danmu();
           this.getMatchDanmu(data.id, this.state.currentMedia);
         } else {
-          this.getLiveInfo(data.activityId);
+          this.getLiveInfo(data.activityId, () => {
+            this.getDiffTime(data)
+          });
         }
         this.getMatchStatus(data.id).then((status) => {
           this.setUpNooice(status);
           this.startTimer_matchStatus(data.id);
         });
-        this.getDiffTime(data)
-        if (data.startTime) {
-          if (Date.parse(data.startTime) - new Date().getTime() > 0) {
-            this.startTimer_CountDown();
-          }
-        }
+
+        this.startTimer_CountDown();
         this.getCollection(data.id);
         this.initSocket(data.id);
         data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
@@ -572,14 +570,15 @@ class Live extends Component<PageOwnProps, PageState> {
         if (match && match.status != FootballEventType.FINISH && data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
           this.getMatchDanmu(data.id, this.state.currentMedia);
+        } else {
+          if (match && match.status != FootballEventType.FINISH) {
+            this.getLiveInfo(data.activityId);
+          }
         }
       })
       this.getMatchStatus(id).then((status) => {
         this.setUpNooice(status);
       })
-      if (match && match.status != FootballEventType.FINISH) {
-        this.getLiveInfo(id);
-      }
       this.getTeamHeatInfo(id, null);
       this.getGiftRanks(id);
     }, 60000)
@@ -645,14 +644,18 @@ class Live extends Component<PageOwnProps, PageState> {
   getLiveMediaInfo = (id) => {
     return liveAction.getLiveMediaList(id)
   }
-  getLiveInfo = (id) => {
+  getLiveInfo = (id, callback?) => {
     this.setState({liveLoading: true})
     // liveAction.livePing(id).then((res) => {
     new Request().get(api.API_ACTIVITY_PING(id), null, false).then((res: any) => {
       if (res.isPushing) {
-        this.setState({ping: res, liveLoaded: true, liveLoading: false})
+        this.setState({ping: res, liveLoaded: true, liveLoading: false}, () => {
+          callback && callback()
+        })
       } else {
-        this.setState({ping: res, liveLoaded: false, liveLoading: false})
+        this.setState({ping: res, liveLoaded: false, liveLoading: false}, () => {
+          callback && callback()
+        })
       }
     })
     // })
@@ -1566,7 +1569,7 @@ class Live extends Component<PageOwnProps, PageState> {
   hideGiftPanel = () => {
     this.setState({giftOpen: false})
   }
-  getHeatStartTime = () => {
+  getLeagueHeatStartTime = () => {
     const {match = null} = this.props;
     const {league = null} = match;
     const {heatRule = null} = this.state;
@@ -1577,13 +1580,33 @@ class Live extends Component<PageOwnProps, PageState> {
     }
     return null
   }
-  getHeatEndTime = () => {
+  getLeagueHeatEndTime = () => {
     const {match = null} = this.props;
     const {league = null} = match;
     const {heatRule = null} = this.state;
     if (league && league.dateEnd && heatRule && heatRule.endInterval) {
       let endTime = new Date(league.dateEnd)
       endTime.setMinutes(endTime.getMinutes() + heatRule.endInterval);
+      return endTime;
+    }
+    return null
+  }
+  getMatchHeatStartTime = () => {
+    const {match = null} = this.props;
+    const {heatRule = null} = this.state;
+    if (match && match.startTime && heatRule && heatRule.startInterval) {
+      let startTime = new Date(match.startTime)
+      startTime.setMinutes(startTime.getMinutes() + heatRule.startInterval);
+      return startTime;
+    }
+    return null
+  }
+  getMatchHeatEndTime = () => {
+    const {match = null} = this.props;
+    const {heatRule = null} = this.state;
+    if (match && match.startTime && match.duration && heatRule && heatRule.endInterval) {
+      let endTime = new Date(match.startTime)
+      endTime.setMinutes(endTime.getMinutes() + match.duration + heatRule.endInterval);
       return endTime;
     }
     return null
@@ -1839,8 +1862,8 @@ class Live extends Component<PageOwnProps, PageState> {
                     heatType={this.state.heatType}
                     onPlayerHeatRefresh={this.onPlayerHeatRefresh}
                     totalHeat={this.state.playerHeatTotal}
-                    startTime={this.getHeatStartTime()}
-                    endTime={this.getHeatEndTime()}
+                    startTime={this.state.heatType == HEAT_TYPE.PLAYER_HEAT ? this.getMatchHeatStartTime() : this.getLeagueHeatStartTime()}
+                    endTime={this.state.heatType == HEAT_TYPE.PLAYER_HEAT ? this.getMatchHeatEndTime() : this.getLeagueHeatEndTime()}
                     playerHeats={playerHeats}
                     topPlayerHeats={topPlayerHeats}
                     onHandlePlayerSupport={this.handlePlayerSupport}
@@ -1896,8 +1919,8 @@ class Live extends Component<PageOwnProps, PageState> {
                               teamHeats={teamHeats}
                               onHandleLeftSupport={this.handleLeftSupport}
                               onHandleRightSupport={this.handleRightSupport}
-                              startTime={this.getHeatStartTime()}
-                              endTime={this.getHeatEndTime()}
+                              startTime={this.getMatchHeatStartTime()}
+                              endTime={this.getMatchHeatEndTime()}
                             />
                             :
                             <NooiceBar

@@ -29,7 +29,6 @@ import HeatReward from "../../components/heat-reward";
 type PageStateProps = {
   leagueTeams: any;
   leaguePlayers: any;
-  league: any;
   locationConfig: { city: string, province: string }
   shareSentence: any;
   userInfo: any;
@@ -64,6 +63,7 @@ type PageState = {
   playerHeatLoading: any,
   giftRanksOpen: any,
   heatRewardOpen: any,
+  league: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -121,17 +121,18 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       playerHeatLoading: false,
       giftRanksOpen: false,
       heatRewardOpen: false,
+      league: {},
     }
   }
 
-  $setSharePath = () => `/pages/home/home?id=${this.props.league.id}&page=leagueManager`
+  $setSharePath = () => `/pages/home/home?id=${this.state.league.id}&page=leagueManager`
 
   $setShareTitle = () => {
     const shareSentence = random_weight(this.props.shareSentence.filter(value => value.type == global.SHARE_SENTENCE_TYPE.league).map(value => {
       return {...value, weight: value.weight + "%"}
     }));
     if (shareSentence == null) {
-      return this.props.league.name
+      return this.state.league.name
     }
     return shareSentence.sentence;
   }
@@ -140,10 +141,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   componentDidMount() {
-    this.getParamId() && this.getLeagueList(this.getParamId());
-    let {tabs} = this.getTabsList();
-    this.switchTab(tabs[global.LEAGUE_TABS_TYPE.leagueMatch]);
-    this.initHeatCompetition(this.getParamId());
+    this.getParamId() && this.getLeagueInfo(this.getParamId());
     const query = Taro.createSelectorQuery();
     query.select('.qz-league-manager-tabs').boundingClientRect(rect => {
       this.tabsY = (rect as {
@@ -188,8 +186,10 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
         payAction.getGiftList({});
         this.setState({heatRule: data, heatType: data.type}, () => {
           this.getGiftRanks(id);
-          let {tabs} = this.getTabsList();
-          this.switchTab(tabs[global.LEAGUE_TABS_TYPE.heatPlayer]);
+          if (data.type == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+            let {tabs} = this.getTabsList();
+            this.switchTab(tabs[global.LEAGUE_TABS_TYPE.heatPlayer]);
+          }
         })
         this.startTimer_Gift();
         // this.initSocket(id);
@@ -298,7 +298,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   onPlayerHeatRefresh = (func) => {
     this.setState({playerHeatRefreshFunc: func});
   }
-  getPlayerHeatInfo = (pageNum, pageSize, name, first) => {
+  getPlayerHeatInfo = (pageNum, pageSize, name) => {
     if (this.state.playerHeatLoading) {
       return;
     }
@@ -547,8 +547,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     this.setState({giftOpen: false})
   }
   getHeatStartTime = () => {
-    const {league = null} = this.props;
-    const {heatRule = null} = this.state;
+    const {heatRule = null, league = null} = this.state;
     if (league && league.dateBegin && heatRule && heatRule.startInterval) {
       let startTime = new Date(league.dateBegin)
       startTime.setMinutes(startTime.getMinutes() + heatRule.startInterval);
@@ -557,8 +556,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     return null
   }
   getHeatEndTime = () => {
-    const {league = null} = this.props;
-    const {heatRule = null} = this.state;
+    const {heatRule = null, league = null} = this.state;
     if (league && league.dateEnd && heatRule && heatRule.endInterval) {
       let endTime = new Date(league.dateEnd)
       endTime.setMinutes(endTime.getMinutes() + heatRule.endInterval);
@@ -663,11 +661,20 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     this.setState({currentSupportPlayer: player})
     this.showGiftPanel();
   }
-  getLeagueList = (id) => {
+  getLeagueInfo = (id) => {
     this.setState({loading: true})
     Taro.showLoading({title: global.LOADING_TEXT})
+    new Request().get(api.API_LEAGUE(id), {detailRound: true}).then((data: any) => {
+      this.setState({league: data}, () => {
+        this.getLeagueList(id);
+        let {tabs} = this.getTabsList();
+        this.switchTab(tabs[global.LEAGUE_TABS_TYPE.leagueMatch]);
+        this.initHeatCompetition(this.getParamId());
+      })
+    })
+  }
+  getLeagueList = (id) => {
     Promise.all([
-      leagueAction.getLeagueInfo({id: id, detailRound: true}),
       leagueAction.getLeagueTeam({leagueId: id}),
       leagueAction.getLeaguePlayer({leagueId: id, goal: true}),
       leagueAction.getLeagueReport(id),
@@ -677,15 +684,9 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     });
   }
   switchTab = (tab) => {
-    // const onSearch = this.onSearch;
     this.setState({
       currentTab: tab
-    }, () => {
-      // onSearch();
     })
-    // this.setState({
-    //   currentTab: tab
-    // });
   }
   onGiftRankClick = () => {
     this.setState({giftRanksOpen: true});
@@ -700,7 +701,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     this.setState({heatRewardOpen: false});
   }
   getTabsList = () => {
-    const {league} = this.props
+    const {league} = this.state
     let tabList: any = []
     const tabs: any = {};
     let tabIndex = 0;
@@ -734,7 +735,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {leaguePlayers, leagueTeams, league} = this.props
+    const {leaguePlayers, leagueTeams} = this.props
+    const {league} = this.state
     let {tabList, tabs} = this.getTabsList();
 
     if (this.state.loading) {
@@ -887,7 +889,6 @@ const mapStateToProps = (state) => {
     userInfo: state.user.userInfo,
     leaguePlayers: state.league.leaguePlayers,
     leagueTeams: state.league.leagueTeams,
-    league: state.league.league,
     locationConfig: state.config.locationConfig,
     shareSentence: state.config ? state.config.shareSentence : [],
     giftList: state.pay ? state.pay.gifts : [],
