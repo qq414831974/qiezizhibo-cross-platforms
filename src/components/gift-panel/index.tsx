@@ -5,7 +5,7 @@ import './index.scss'
 import * as global from '../../constants/global';
 import {getJiao, isInteger} from '../../utils/utils';
 import GiftModal from '../../components/modal-gift';
-import flame from '../../assets/live/flame.png';
+import flame from '../../assets/live/left-support.png';
 
 type PageStateProps = {}
 
@@ -22,6 +22,8 @@ type PageOwnProps = {
   onHandlePayError: any;
   hidden: any;
   leagueId: any;
+  giftWatchPrice?: any;
+  giftWatchEternalPrice?: any;
 }
 
 type PageState = {
@@ -144,6 +146,13 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     return value;
   }
   onGiftSendClick = () => {
+    if (this.state.currentGift == null) {
+      Taro.showToast({
+        'title': "请选择礼物",
+        'icon': 'none',
+      })
+      return;
+    }
     this.setState({giftConfirmOpen: true})
   }
   onGiftConfrimCancel = () => {
@@ -175,7 +184,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     const {currentGift = null, currentNum = 0} = this.state
     const discountPrice = this.getGiftDiscountPriceByNum(currentGift, currentNum);
     const realPrice = this.getGiftRealPriceByNum(currentGift, currentNum);
-    const heat = this.getGiftGrowthByType(this.state.currentGift, heatType == global.HEAT_TYPE.TEAM_HEAT ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, currentNum)
+    const heat = this.getGiftGrowthByType(this.state.currentGift, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, currentNum)
     const exp = this.getGiftGrowthByType(this.state.currentGift, global.GROWTH_TYPE.USER_EXP, currentNum)
     const onGiftClick = this.onGiftClick;
 
@@ -201,7 +210,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
                           <Text>{getJiao(data.price)}茄币</Text>
                         </View> :
                         <View className="qz-gifts__grid-item-price">
-                          <Text>免费(余{data.limitRemain})</Text>
+                          <Text>{data.limitRemain > 0 ? `免费(余${data.limitRemain})` : "分享群得茄子"}</Text>
                         </View>}
                     </View>
                   )
@@ -220,7 +229,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
                       <View className="qz-gifts__bottom-discount">(原价{realPrice})</View>
                       : null}
                     {heat ?
-                      <View className="qz-gifts__bottom-heat"><Image src={flame}/><Text>+{heat}</Text></View> : null}
+                      <View className="qz-gifts__bottom-heat"><Image src={flame}/><Text>+{heat}票</Text></View> : null}
                     {/*{exp ?*/}
                     {/*  <View className="qz-gifts__bottom-exp">+{exp}经验</View> : null}*/}
                   </View>
@@ -260,12 +269,14 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
               </View>
             </View>
             <GiftModal
+              giftWatchPrice={this.props.giftWatchPrice}
+              giftWatchEternalPrice={this.props.giftWatchEternalPrice}
               isOpened={this.state.giftConfirmOpen}
               gift={this.state.currentGift}
               num={this.state.currentNum}
               matchId={this.props.matchInfo ? this.props.matchInfo.id : null}
               leagueId={this.props.leagueId ? this.props.leagueId : null}
-              externalId={this.props.heatType == global.HEAT_TYPE.TEAM_HEAT && this.props.supportTeam ? this.props.supportTeam.id : ((this.props.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.props.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.props.supportPlayer ? this.props.supportPlayer.id : null)}
+              externalId={(this.props.heatType == global.HEAT_TYPE.TEAM_HEAT || this.props.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.props.supportTeam ? this.props.supportTeam.id : ((this.props.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.props.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.props.supportPlayer ? this.props.supportPlayer.id : null)}
               giftInfo={{price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp}}
               heatType={this.props.heatType}
               handleCancel={this.onGiftConfrimCancel}

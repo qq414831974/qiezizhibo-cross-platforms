@@ -58,9 +58,11 @@ export const LEAGUE_TABS_TYPE = {
   leagueTeam: "leagueTeam",
   leaguePlayer: "leaguePlayer",
   heatPlayer: "heatPlayer",
+  heatTeam: "heatLeagueTeam",
 }
 export const TABS_TYPE = {
   heatPlayer: "heatPlayer",
+  heatLeagueTeam: "heatLeagueTeam",
   matchUp: "matchUp",
   heatReward: "heatReward",
   giftRank: "giftRank",
@@ -99,6 +101,7 @@ export const HEAT_TYPE = {
   TEAM_HEAT: 0,
   PLAYER_HEAT: 1,
   LEAGUE_PLAYER_HEAT: 2,
+  LEAGUE_TEAM_HEAT: 3,
 }
 export const GROWTH_TYPE = {
   USER_EXP: 1,

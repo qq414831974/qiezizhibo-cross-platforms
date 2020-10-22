@@ -113,13 +113,13 @@
 
 .qz-league-manager-fab-giftrank {
   position: fixed;
-  bottom: 35%;
+  bottom: 20%;
   right: 16px;
 }
 
 .qz-league-manager-fab-heatreward {
   position: fixed;
-  bottom: 20%;
+  bottom: 35%;
   right: 16px;
   animation: zoom ease-in-out 1s infinite;
 }
@@ -152,7 +152,30 @@
     border-radius: 5px;
   }
 }
+.qz-gift-float {
+  .layout-header__title{
+    font-size: $font-size-sm;
+    white-space: pre;
+  }
+  .at-float-layout__container {
+    height: 590px;
+    min-height: 590px;
+    max-height: 590px;
+  }
 
+  .layout-body {
+    height: 506px;
+    min-height: 506px;
+    max-height: 506px;
+    padding: 0;
+  }
+
+  .layout-body__content {
+    height: 506px;
+    min-height: 506px;
+    max-height: 506px;
+  }
+}
 @keyframes zoom {
   0% {
     transform: scale(1);

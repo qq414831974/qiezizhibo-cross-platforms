@@ -56,6 +56,7 @@ export const getRecommendMatch: any = createApiAction(match.MATCH_RECOMMEND, (pa
 export const getRecommendMatch_add: any = createApiAction(match.MATCH_RECOMMEND_ADD, (params: MatchRecommendParams) => new Request().get(api.API_MATCH_RECOMMEND, params))
 export const addMatchNooice: any = createApiAction(match.MATCH_NOOICE, (params: MathNooiceParams) => new Request().get(api.API_MATCH_NOOICE, params))
 export const getMatchComment: any = createApiAction(match.MATCH_COMMENT, (params: CommentParams) => new Request().get(api.API_MATCH_COMMENT, params))
+export const getMatchComment_clear: any = createAction(match.MATCH_COMMENT_CLEAR)
 export const getMatchComment_add: any = createApiAction(match.MATCH_COMMENT_ADD, (params: CommentParams) => new Request().get(api.API_MATCH_COMMENT, params))
 export const getMatchComment_Count: any = createApiAction(match.MATCH_COMMENT_COUNT, (params: CommentCountParams) => new Request().get(api.API_MATCH_COMMENT_COUNT, params))
 export const getMatchDanmu: any = createApiAction(match.MATCH_COMMENT_DANMU, (params: DanmuParams) => new Request().get(api.API_MATCH_COMMENT_DANMU, params))
@@ -71,6 +72,7 @@ export default bindActionCreators({
   getRecommendMatch_add,
   addMatchNooice,
   getMatchComment,
+  getMatchComment_clear,
   getMatchComment_add,
   getMatchComment_Count,
   getMatchDanmu,

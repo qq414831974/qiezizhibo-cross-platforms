@@ -52,6 +52,8 @@ type PageOwnProps = {
   externalId: any,
   heatType: any,
   leagueId: any,
+  giftWatchPrice?: any,
+  giftWatchEternalPrice?: any,
 }
 
 type PageState = {
@@ -190,33 +192,36 @@ class ModalGift extends Component<PageOwnProps, PageState> {
       return;
     }
     this.setState({isPaying: true})
-    new Request().get(api.API_GIFT_SEND_FREE_LIMIT, {userNo: userNo, giftId: gift.id}).then((limit: any) => {
-      if (limit + num > gift.limited) {
+    // new Request().get(api.API_GIFT_SEND_FREE_LIMIT, {userNo: userNo, giftId: gift.id}).then((limit: any) => {
+    if (num > gift.limitRemain) {
+      Taro.hideLoading();
+      Taro.showToast({title: "今日免费礼物次数已用完", icon: "none"})
+      this.setState({isPaying: false})
+    } else {
+      new Request().post(api.API_GIFT_SEND_FREE, {
+        userNo: userNo,
+        giftId: gift.id,
+        matchId: this.props.matchId,
+        leagueId: this.props.leagueId,
+        targetType: this.props.heatType,
+        externalId: this.props.externalId,
+      }).then((res: any) => {
         Taro.hideLoading();
-        Taro.showToast({title: "今日免费礼物次数已用完", icon: "none"})
         this.setState({isPaying: false})
-      } else {
-        new Request().post(api.API_GIFT_SEND_FREE, {
-          userNo: userNo,
-          giftId: gift.id,
-          matchId: this.props.matchId,
-          leagueId: this.props.leagueId,
-          targetType: this.props.heatType,
-          externalId: this.props.externalId,
-        }).then((res: any) => {
-          Taro.hideLoading();
-          this.setState({isPaying: false})
-          if (res) {
-            handleConfirm(global.GIFT_TYPE.FREE);
-            setTimeout(() => {
-              contxt.setState({enabledFreeGift: true});
-            }, 61000);
-          } else {
-            handleError(error.ERROR_SEND_GIFT_ERROR);
-          }
-        });
-      }
-    })
+        if (res) {
+          handleConfirm(global.GIFT_TYPE.FREE);
+          contxt.setState({enabledFreeGift: false});
+          setTimeout(() => {
+            contxt.setState({enabledFreeGift: true});
+          }, 61000);
+        } else {
+          handleError(error.ERROR_SEND_GIFT_ERROR);
+        }
+      }).catch(()=>{
+        this.setState({isPaying: false})
+      });
+    }
+    // })
   }
   changeCaptcha = () => {
     let code = '';
@@ -236,7 +241,7 @@ class ModalGift extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {isOpened = false, handleCancel, gift, num = 0, giftInfo = null} = this.props;
+    const {isOpened = false, handleCancel, gift, num = 0, giftInfo = null, giftWatchPrice = null, giftWatchEternalPrice = null} = this.props;
     return (
       <View>
         <AtModal isOpened={isOpened} onClose={handleCancel}>
@@ -261,6 +266,16 @@ class ModalGift extends Component<PageOwnProps, PageState> {
             {giftInfo && giftInfo.expValue ?
               <View className="light-gray qz-gift-modal-content_tip">
                 • 经验 +{giftInfo.expValue}
+              </View>
+              : null}
+            {(giftWatchPrice != null || giftWatchEternalPrice != null) && giftInfo != null && giftInfo.price != null && giftInfo.price * 10 >= giftWatchPrice ?
+              <View className="gray qz-gift-modal-content_tip">
+                • <View className="qz-gift-modal-content_tip-highlight">本场比赛录像免费观看{giftInfo.price * 10 >= giftWatchEternalPrice ? "永久" : "一个月"}</View>
+              </View>
+              : null}
+            {giftInfo && (giftInfo.price == null || giftInfo.price == 0) ?
+              <View className="qz-gift-modal-content_tip">
+                • 每日分享可得免费礼物，上限三个
               </View>
               : null}
             {giftInfo && gift && gift.type == global.GIFT_TYPE.FREE ?

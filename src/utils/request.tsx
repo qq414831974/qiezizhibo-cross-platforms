@@ -133,7 +133,7 @@ const request = async (options) => {
               await updateStorage(data.data)
             }
             showLoading && Taro.hideNavigationBarLoading();
-            resolve(data.data || data)
+            resolve(data.data != null ? data.data : data)
           }
         }
       }

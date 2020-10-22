@@ -36,6 +36,7 @@ $color-grey-4: #E5E5E5 !default;
 $color-grey-5: #F0F0F0 !default;
 $color-grey-6: #F7F7F7 !default;
 $color-grey-2-opaque-75: rgba(153, 153, 153, 0.75) !default;
+$color-highlight: #f74a4a !default;
 
 $color-white: #FFF !default;
 
@@ -610,6 +611,6 @@ $at-timeline-line-color: $color-border-lighter !default;
 
   .at-modal__content {
     min-height: 180px;
-    max-height: 950px;
+    max-height: 1080px;
   }
 }

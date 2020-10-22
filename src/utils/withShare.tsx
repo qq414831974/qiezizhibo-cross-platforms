@@ -17,6 +17,8 @@ class Index extends Component {
 
   // $setShareImageUrl = () => '可设置分享图片路径(优先级最高)'
 
+  // $setOnShareCallback = () => '可设置分享图片路径(优先级最高)'
+
   render() {
      return <View />
   }
@@ -74,10 +76,19 @@ function withShare(opts: optsType) {
         // 如果path不带参数，分享出去后解析的params里面会带一个{''： ''}
         // const sharePath = `${path}&shareFromUser=${userInfo.shareId}`;
 
+        // 从继承的组件获取配置
+        if (this.$setOnShareCallback && typeof this.$setOnShareCallback === 'function') {
+          const callback = this.$setOnShareCallback;
+          setTimeout(()=>{
+            callback();
+          },5000)
+        }
+
         return {
           title: title || defalutTitle,
           path: path,
-          imageUrl: imageUrl
+          imageUrl: imageUrl,
+
         };
       }
 

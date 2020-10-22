@@ -48,7 +48,7 @@ export const formatDayTime = date => {
   const minute = date.getMinutes()
   return [hour, minute].map(formatNumber).join(':')
 }
-export const getTimeDifference = (time) => {
+export const getTimeDifference = (time, isChinese?) => {
   let diff = '';
   let diff_hour_minute_sencod = '';
   let day = '';
@@ -69,20 +69,20 @@ export const getTimeDifference = (time) => {
   const dayHours = Math.floor(leave1 / (3600 * 1000)) + (days > 0 ? days * 24 : 0);
   if (hours > 0) {
     // diff += hours + '小时';
-    diff += (hours < 10 ? "0" + hours.toString() : hours) + ':';
+    diff += (hours < 10 ? "0" + hours.toString() : hours) + (isChinese ? '时' : ':');
   } else {
     if (diff !== '') {
       // diff += hours + '小时';
-      diff += (hours < 10 ? "0" + hours.toString() : hours) + ':';
+      diff += (hours < 10 ? "0" + hours.toString() : hours) + (isChinese ? '时' : ':');
     }
   }
   if (dayHours > 0) {
     // diff += hours + '小时';
-    diff_hour_minute_sencod += (dayHours < 10 ? "0" + dayHours.toString() : dayHours) + ':';
+    diff_hour_minute_sencod += (dayHours < 10 ? "0" + dayHours.toString() : dayHours) + (isChinese ? '时' : ':');
   } else {
     if (diff !== '') {
       // diff += hours + '小时';
-      diff_hour_minute_sencod += (dayHours < 10 ? "0" + dayHours.toString() : dayHours) + ':';
+      diff_hour_minute_sencod += (dayHours < 10 ? "0" + dayHours.toString() : dayHours) + (isChinese ? '时' : ':');
     }
   }
   //计算相差分钟数
@@ -90,13 +90,13 @@ export const getTimeDifference = (time) => {
   const minutes = Math.floor(leave2 / (60 * 1000));
   if (minutes > 0) {
     // diff += minutes + '分';
-    diff += (minutes < 10 ? "0" + minutes.toString() : minutes) + ':';
-    diff_hour_minute_sencod += (minutes < 10 ? "0" + minutes.toString() : minutes) + ':';
+    diff += (minutes < 10 ? "0" + minutes.toString() : minutes) + (isChinese ? '分' : ':');
+    diff_hour_minute_sencod += (minutes < 10 ? "0" + minutes.toString() : minutes) + (isChinese ? '分' : ':');
   } else {
     if (diff !== '') {
       // diff += minutes + '分';
-      diff += (minutes < 10 ? "0" + minutes.toString() : hours) + ':';
-      diff_hour_minute_sencod += (minutes < 10 ? "0" + minutes.toString() : hours) + ':';
+      diff += (minutes < 10 ? "0" + minutes.toString() : hours) + (isChinese ? '分' : ':');
+      diff_hour_minute_sencod += (minutes < 10 ? "0" + minutes.toString() : hours) + (isChinese ? '分' : ':');
     }
   }
   //计算相差秒数
@@ -104,13 +104,13 @@ export const getTimeDifference = (time) => {
   const seconds = Math.round(leave3 / 1000);
   if (seconds > 0) {
     // diff += seconds + '秒';
-    diff += (seconds < 10 ? "0" + seconds.toString() : seconds);
-    diff_hour_minute_sencod += (seconds < 10 ? "0" + seconds.toString() : seconds);
+    diff += (seconds < 10 ? "0" + seconds.toString() : seconds) + (isChinese ? '秒' : '');
+    diff_hour_minute_sencod += (seconds < 10 ? "0" + seconds.toString() : seconds) + (isChinese ? '秒' : '');
   } else {
     if (diff !== '') {
       // diff += seconds + '秒';
-      diff += (seconds < 10 ? "0" + seconds.toString() : seconds);
-      diff_hour_minute_sencod += (seconds < 10 ? "0" + seconds.toString() : seconds);
+      diff += (seconds < 10 ? "0" + seconds.toString() : seconds) + (isChinese ? '秒' : '');
+      diff_hour_minute_sencod += (seconds < 10 ? "0" + seconds.toString() : seconds) + (isChinese ? '秒' : '');
     }
   }
   return {

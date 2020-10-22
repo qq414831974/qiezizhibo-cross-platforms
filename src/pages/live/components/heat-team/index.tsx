@@ -1,5 +1,5 @@
 import Taro, {Component} from '@tarojs/taro'
-import {View, Text,Image} from '@tarojs/components'
+import {View, Text, Image} from '@tarojs/components'
 import './index.scss'
 
 import {getTimeDifference} from "../../../../utils/utils";
@@ -20,6 +20,7 @@ type PageOwnProps = {
 }
 
 type PageState = {
+  timerID_CountDown: any;
   startDiffDayTime: any;
   endDiffDayTime: any;
   leftAnimation: any;
@@ -41,7 +42,6 @@ const STATUS = {
 
 class HeatTeam extends Component<PageOwnProps, PageState> {
   static defaultProps = {}
-  timerID_CountDown: any = null;
 
   componentDidMount() {
     this.startTimer_CountDown();
@@ -71,7 +71,7 @@ class HeatTeam extends Component<PageOwnProps, PageState> {
   }
   startTimer_CountDown = () => {
     this.clearTimer_CountDown();
-    this.timerID_CountDown = setInterval(() => {
+    const timerID_CountDown = setInterval(() => {
       const status = this.getStatus();
       if (status == STATUS.unopen) {
         this.getStartDiffTime()
@@ -79,10 +79,12 @@ class HeatTeam extends Component<PageOwnProps, PageState> {
         this.getEndDiffTime()
       }
     }, 1000)
+    this.setState({timerID_CountDown: timerID_CountDown})
   }
   clearTimer_CountDown = () => {
-    if (this.timerID_CountDown) {
-      clearInterval(this.timerID_CountDown)
+    if (this.state.timerID_CountDown) {
+      clearInterval(this.state.timerID_CountDown)
+      this.setState({timerID_CountDown: null})
     }
   }
   getStatus = () => {

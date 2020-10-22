@@ -5,6 +5,7 @@ import {
   MATCHES_ADD,
   MATCHES_CLEAR,
   MATCH_COMMENT,
+  MATCH_COMMENT_CLEAR,
   MATCH_COMMENT_ADD,
   MATCH_COMMENT_COUNT,
   MATCH_NOOICE,
@@ -67,6 +68,9 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
         ...state,
         comment: action.payload
       }
+    case MATCH_COMMENT_CLEAR:
+      state.comment = [];
+      return state;
     case MATCH_COMMENT_ADD:
       if (action.payload == null) {
         return state;

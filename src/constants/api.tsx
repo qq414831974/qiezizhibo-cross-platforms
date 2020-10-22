@@ -26,6 +26,7 @@ export const API_VISIT = `${user_service}/user/visit`;
 export const API_GET_WXACODE = `${system_service}/system/getWxacode`;
 export const API_GET_SHARE_SENTENCE = `${system_service}/system/share/sentence`;
 export const API_GET_SHARE_PICTURE = `${system_service}/system/share/picture`;
+export const API_GET_HEAT_COMPETITION_SHARE = `${system_service}/system/heatcompetition/picture`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth/wechat`;
@@ -98,3 +99,5 @@ export const API_MATCH_PLAYER_HEAT_TOTAL = `${football_service}/heat/match/playe
 export const API_LEAUGE_HEAT = `${football_service}/heat/league`;
 export const API_LEAGUE_PLAYER_HEAT = `${football_service}/heat/league/player`;
 export const API_LEAGUE_PLAYER_HEAT_TOTAL = `${football_service}/heat/league/player/total`;
+export const API_LEAGUE_TEAM_HEAT = `${football_service}/heat/league/team`;
+export const API_LEAGUE_TEAM_HEAT_TOTAL = `${football_service}/heat/league/team/total`;

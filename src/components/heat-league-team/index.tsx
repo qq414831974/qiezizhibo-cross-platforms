@@ -1,38 +1,38 @@
 import Taro, {Component} from '@tarojs/taro'
 import {View, Text, Image, ScrollView} from '@tarojs/components'
 import {AtSearchBar, AtDivider, AtButton, AtActivityIndicator, AtLoadMore} from 'taro-ui'
-import RoundButton from '../../components/round-button'
 
 import './index.scss'
 import {getTimeDifference} from "../../utils/utils";
 import noperson from '../../assets/no-person.png';
 import flame from '../../assets/live/left-support.png';
-import share from '../../assets/live/share.png';
-import moment from '../../assets/live/moment.png';
 import * as global from "../../constants/global";
+import RoundButton from "../round-button";
+import share from "../../assets/live/share.png";
+import moment from "../../assets/live/moment.png";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
 
 type PageStateProps = {}
 
 type PageDispatchProps = {
-  onHandlePlayerSupport?: any;
-  onGetPlayerHeatInfo?: any;
-  onGetPlayerHeatInfoAdd?: any;
-  onPlayerHeatRefresh?: any;
+  onHandleTeamSupport?: any;
+  onGetTeamHeatInfo?: any;
+  onGetTeamHeatInfoAdd?: any;
+  onTeamHeatRefresh?: any;
   onPictureDownLoading?: any;
   onPictureDownLoaded?: any;
 }
 
 type PageOwnProps = {
-  playerHeats?: any;
-  topPlayerHeats?: any;
+  teamHeats?: any;
+  topTeamHeats?: any;
   startTime?: any;
   endTime?: any;
   hidden?: any;
   heatType?: any;
   totalHeat?: any;
-  isLeauge?: any;
+  isLeague?: any;
   leagueId?: any;
   matchId?: any;
 }
@@ -42,14 +42,14 @@ type PageState = {
   startDiffDayTime: any;
   endDiffDayTime: any;
   searchText: any;
-  currentPlayerHeat: any;
+  currentTeamHeat: any;
   loadingMore: any;
   pulldownRefresh: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
-interface HeatPlayer {
+interface HeatLeagueTeam {
   props: IProps;
 }
 
@@ -60,11 +60,11 @@ const STATUS = {
   finish: 2,
 }
 
-class HeatPlayer extends Component<PageOwnProps, PageState> {
+class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
   static defaultProps = {}
 
   componentDidMount() {
-    this.props.onPlayerHeatRefresh && this.props.onPlayerHeatRefresh(this.refresh);
+    this.props.onTeamHeatRefresh && this.props.onTeamHeatRefresh(this.refresh);
     this.refresh();
     this.startTimer_CountDown();
   }
@@ -74,8 +74,8 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
   }
 
   refresh = () => {
-    this.props.onGetPlayerHeatInfo(1, 40, this.state.searchText).then(() => {
-      this.refreshCurrentPlayer();
+    this.props.onGetTeamHeatInfo(1, 40, this.state.searchText).then(() => {
+      this.refreshCurrentTeam();
     });
   }
   getStartDiffTime = () => {
@@ -145,14 +145,14 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
       })
       return;
     }
-    if (this.state.currentPlayerHeat == null) {
+    if (this.state.currentTeamHeat == null) {
       Taro.showToast({
-        title: "请选择球员",
+        title: "请选择球队",
         icon: "none"
       })
       return;
     }
-    this.props.onHandlePlayerSupport(this.state.currentPlayerHeat.player);
+    this.props.onHandleTeamSupport(this.state.currentTeamHeat.team);
   }
   onSearchChange = (value) => {
     this.setState({
@@ -160,28 +160,28 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     })
   }
   onSearch = () => {
-    this.props.onGetPlayerHeatInfo(1, 40, this.state.searchText);
+    this.props.onGetTeamHeatInfo(1, 40, this.state.searchText);
   }
   onClear = () => {
     this.setState({
       searchText: "",
     })
-    this.props.onGetPlayerHeatInfo(1, 40, null);
+    this.props.onGetTeamHeatInfo(1, 40, null);
   }
-  onPlayerClick = (playerHeat) => {
-    if (this.state.currentPlayerHeat && this.state.currentPlayerHeat.id == playerHeat.id) {
+  onTeamClick = (teamHeat) => {
+    if (this.state.currentTeamHeat && this.state.currentTeamHeat.id == teamHeat.id) {
       this.handleSupport();
     }
-    this.setState({currentPlayerHeat: playerHeat})
+    this.setState({currentTeamHeat: teamHeat})
   }
-  getHeat = (currentPlayerHeat) => {
+  getHeat = (currentTeamHeat) => {
     let heat = 0;
-    if (currentPlayerHeat) {
-      if (currentPlayerHeat.heat) {
-        heat = heat + currentPlayerHeat.heat
+    if (currentTeamHeat) {
+      if (currentTeamHeat.heat) {
+        heat = heat + currentTeamHeat.heat
       }
-      if (currentPlayerHeat.heatBase) {
-        heat = heat + currentPlayerHeat.heatBase
+      if (currentTeamHeat.heatBase) {
+        heat = heat + currentTeamHeat.heatBase
       }
     }
     return heat;
@@ -192,7 +192,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     }
     this.setState({loadingMore: true})
     Taro.showLoading({title: global.LOADING_TEXT})
-    this.props.onGetPlayerHeatInfoAdd(this.props.playerHeats.current + 1, 40, this.state.searchText);
+    this.props.onGetTeamHeatInfoAdd(this.props.teamHeats.current + 1, 40, this.state.searchText);
     Taro.hideLoading();
     this.setState({loadingMore: false})
   }
@@ -212,11 +212,11 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     });
   }
 
-  isTopPlayerHeat = (playerHeat, topPlayerHeat) => {
-    if (topPlayerHeat && playerHeat) {
-      for (let topPlayer of topPlayerHeat) {
-        if (topPlayer.id == playerHeat.id) {
-          return topPlayer.index;
+  isTopTeamHeat = (teamHeat, topTeamHeat) => {
+    if (topTeamHeat && teamHeat) {
+      for (let topTeam of topTeamHeat) {
+        if (topTeam.id == teamHeat.id) {
+          return topTeam.index;
         }
       }
     }
@@ -226,9 +226,9 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
 
   }
   handleShareMoment = () => {
-    if (this.state.currentPlayerHeat == null) {
+    if (this.state.currentTeamHeat == null) {
       Taro.showToast({
-        title: "请选择球员",
+        title: "请选择球队",
         icon: "none"
       })
       return;
@@ -236,7 +236,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     this.props.onPictureDownLoading && this.props.onPictureDownLoading();
     let params: any = {
       leagueId: this.props.leagueId,
-      playerId: this.state.currentPlayerHeat.playerId,
+      teamId: this.state.currentTeamHeat.teamId,
       heatType: this.props.heatType,
     }
     if (this.props.matchId) {
@@ -245,70 +245,70 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     new Request().get(api.API_GET_HEAT_COMPETITION_SHARE, params).then((imageUrl: string) => {
       if (imageUrl == null) {
         Taro.showToast({title: "获取图片失败", icon: "none"});
-        this.props.onPictureDownLoaded && this.props.onPictureDownLoaded(null);
+        this.props.onPictureDownLoaded && this.props.onPictureDownLoaded();
         return;
       }
       this.props.onPictureDownLoaded && this.props.onPictureDownLoaded(imageUrl);
     })
   }
-  refreshCurrentPlayer = () => {
-    const {currentPlayerHeat = null} = this.state;
-    let playerHeats = this.props.playerHeats;
-    playerHeats && playerHeats.records.forEach((data: any) => {
-      if (currentPlayerHeat && currentPlayerHeat.id == data.id) {
-        this.setState({currentPlayerHeat: data})
+  refreshCurrentTeam = () => {
+    const {currentTeamHeat = null} = this.state;
+    let teamHeats = this.props.teamHeats;
+    teamHeats && teamHeats.records.forEach((data: any) => {
+      if (currentTeamHeat && currentTeamHeat.id == data.id) {
+        this.setState({currentTeamHeat: data})
       }
     })
   }
 
   render() {
-    const {startDiffDayTime, endDiffDayTime, currentPlayerHeat = null, pulldownRefresh = false} = this.state
-    const {hidden = false, heatType, totalHeat} = this.props
-    let playerHeats = this.props.playerHeats;
-    let topPlayerHeats = this.props.topPlayerHeats;
-    let isTopPlayerHeat = this.isTopPlayerHeat;
-    const onPlayerClick = this.onPlayerClick;
+    const {startDiffDayTime, endDiffDayTime, currentTeamHeat = null, pulldownRefresh = false} = this.state
+    const {hidden = false, totalHeat} = this.props
+    let teamHeats = this.props.teamHeats;
+    let topTeamHeats = this.props.topTeamHeats;
+    let isTopTeamHeat = this.isTopTeamHeat;
+    const onTeamClick = this.onTeamClick;
     const getHeat = this.getHeat;
     if (hidden) {
       return <View/>
     }
 
     return (
-      <View className={`${this.props.isLeauge ? "qz-heat-player-container-league" : "qz-heat-player-container"}`}>
-        <View className="qz-heat-player-header">
-          <View className="qz-heat-player-header__search">
+      <View className={`${this.props.isLeague ? "qz-heat-team-container-league" : "qz-heat-team-container"}`}>
+        <View className="qz-heat-team-header">
+          <View className="qz-heat-team-header__search">
             <AtSearchBar
               value={this.state.searchText}
               onChange={this.onSearchChange}
               onActionClick={this.onSearch}
               onConfirm={this.onSearch}
               onClear={this.onClear}
-              placeholder="输入姓名/序号查找球员"
+              placeholder="输入名字查找球队"
             />
           </View>
-          <View className="qz-heat-player-header__status">
+          <View className="qz-heat-team-header__status">
             <View className="at-row">
               <View className="at-col at-col-4">
-                <View className="w-full center qz-heat-player-header__status-title">
-                  参赛选手
+                <View className="w-full center qz-heat-team-header__status-title">
+                  参赛球队
                 </View>
-                <View className="w-full center qz-heat-player-header__status-value">
-                  {playerHeats && playerHeats.total ? playerHeats.total : 0}
+                <View className="w-full center qz-heat-team-header__status-value">
+                  {teamHeats && teamHeats.total ? teamHeats.total : 0}
                 </View>
               </View>
               <View className="at-col at-col-4">
-                <View className="w-full center qz-heat-player-header__status-title">
+                <View className="w-full center qz-heat-team-header__status-title">
                   累计人气值
                 </View>
-                <View className="w-full center qz-heat-player-header__status-value">
+                <View className="w-full center qz-heat-team-header__status-value">
                   {totalHeat ? totalHeat : 0}
                 </View>
               </View>
               <View className="at-col at-col-4">
-                <View className="w-full center qz-heat-player-header__status-title">
+                <View className="w-full center qz-heat-team-header__status-title">
                   活动结束倒计时
                 </View>
-                <View className="w-full center qz-heat-player-header__status-value">
+                <View className="w-full center qz-heat-team-header__status-value">
                   {this.getStatus() == STATUS.unopen ? `${startDiffDayTime ? `${startDiffDayTime.diffTime ? startDiffDayTime.diffDay + startDiffDayTime.diffTime : ""}` : ""}后开始PK` : ""}
                   {this.getStatus() == STATUS.open ? `PK中 ${endDiffDayTime ? `${endDiffDayTime.diffTime ? endDiffDayTime.diffDay + endDiffDayTime.diffTime : ""}` : ""}` : ""}
                   {this.getStatus() == STATUS.finish ? `PK已结束` : ""}
@@ -318,79 +318,79 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
           </View>
         </View>
         <AtDivider height={12} lineColor="#E5E5E5"/>
-        <ScrollView scrollY className="qz-heat-player-content"
+        <ScrollView scrollY className="qz-heat-team-content"
                     upperThreshold={20}
                     lowerThreshold={20}
                     onScrollToUpper={this.onPullDownRefresh}
                     onScrollToLower={this.onReachBottom}>
-          <View className="qz-heat-player__grid">
-            {pulldownRefresh ? <View className="qz-heat-player__loading">
+          <View className="qz-heat-team__list">
+            {pulldownRefresh ? <View className="qz-heat-team__loading">
               <AtActivityIndicator mode="center" content="加载中..."/>
             </View> : null}
-            {playerHeats && playerHeats.records.map((data: any) => (
+            {teamHeats && teamHeats.records.map((data: any, index) => (
                 <View key={data.id}
-                      className={`qz-heat-player__grid-item ${currentPlayerHeat && currentPlayerHeat.id == data.id ? "qz-heat-player__grid-item-active" : ""}`}
-                      onClick={onPlayerClick.bind(this, data)}>
-                  <View className="qz-heat-player__grid-item-img-container">
-                    <Image src={data.player && data.player.headImg ? data.player.headImg : noperson}/>
-                    <View className="qz-heat-player__grid-item-heat">
-                      <Image src={flame}/>
-                      <Text className="qz-heat-player__grid-item-heat-value">{getHeat(data)}票</Text>
-                    </View>
-                    {isTopPlayerHeat(data, topPlayerHeats) ?
-                      <View
-                        className={`qz-heat-player__grid-item-rank qz-heat-player__grid-item-rank-${isTopPlayerHeat(data, topPlayerHeats)}`}>
-                      </View> : null}
+                      className={`qz-heat-team__list-item ${currentTeamHeat && currentTeamHeat.id == data.id ? "qz-heat-team__list-item-active" : ""}`}
+                      onClick={onTeamClick.bind(this, data)}>
+                  {isTopTeamHeat(data, topTeamHeats) ?
+                    <View
+                      className={`qz-heat-team__list-item-rank qz-heat-team__list-item-rank-${isTopTeamHeat(data, topTeamHeats)}`}>
+                    </View> : <View className="qz-heat-team__list-item-rank">{index + 1}.</View>}
+                  <View className="qz-heat-team__list-item-img-container">
+                    <Image src={data.team && data.team.headImg ? data.team.headImg : noperson}/>
                   </View>
-                  <View className="qz-heat-player__grid-item-name">
-                    <Text>{data.player && data.player.name ? data.player.name : "球员"}</Text>
+                  <View className="qz-heat-team__list-item-name">
+                    <Text>{data.team && data.team.name ? data.team.name : "球队"}</Text>
                   </View>
-                  {/*<View className="qz-heat-player__grid-item-shirt">*/}
-                  {/*  <Text>{data.player && data.player.shirtNum ? data.player.shirtNum : "0"}</Text>*/}
-                  {/*</View>*/}
-                  {heatType && heatType == global.HEAT_TYPE.PLAYER_HEAT ?
-                    <View className="qz-heat-player__grid-item-shirtNum">
-                      <Text>{data.player && data.player.shirtNum ? data.player.shirtNum : "0"}号</Text>
-                    </View> : null}
-                  {heatType && heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
-                    <View className="qz-heat-player__grid-item-shirtNum">
-                      <Text>{data.sequence ? data.sequence : "0"}号</Text>
-                    </View> : null}
+                  <View className="qz-heat-team__list-item-right-share">
+                    <RoundButton
+                      animation
+                      margin="0 0 0 10px"
+                      size={25}
+                      img={share}
+                      openType="share"
+                      onClick={() => {
+                      }}/>
+                    <RoundButton
+                      animation
+                      margin="0 0 0 10px"
+                      size={25}
+                      img={moment}
+                      onClick={this.handleShareMoment}/>
+                  </View>
+                  <View className="qz-heat-team__list-item-heat">
+                    <Image src={flame}/>
+                    <Text className="qz-heat-team__list-item-heat-value">{getHeat(data)}票</Text>
+                  </View>
                 </View>
               )
             )}
-            {playerHeats && playerHeats.total <= playerHeats.records.length ? <View className="qz-heat-player__nomore">
+            {teamHeats && teamHeats.total <= teamHeats.records.length ? <View className="qz-heat-team__nomore">
               <AtLoadMore status="noMore" noMoreText="没有更多了"/>
             </View> : null}
           </View>
         </ScrollView>
-        <View className="qz-heat-player-footer">
+        <View className="qz-heat-team-footer">
           <View className="at-row">
-            <View className="at-col at-col-9 qz-heat-player-footer-left">
-              {currentPlayerHeat ?
-                <View className="qz-heat-player-footer-left-info">
-                  <View className="qz-heat-player-footer-user">
+            <View className="at-col at-col-9 qz-heat-team-footer-left">
+              {currentTeamHeat ?
+                <View className="qz-heat-team-footer-left-info">
+                  <View className="qz-heat-team-footer-user">
                     <Image
-                      src={currentPlayerHeat.player && currentPlayerHeat.player.headImg ? currentPlayerHeat.player.headImg : noperson}/>
-                    <Text>{currentPlayerHeat.player && currentPlayerHeat.player.name ? currentPlayerHeat.player.name : "球员"}</Text>
-                    {heatType && heatType == global.HEAT_TYPE.PLAYER_HEAT ?
-                      <Text>({currentPlayerHeat.player && currentPlayerHeat.player.shirtNum ? currentPlayerHeat.player.shirtNum : "0"}号)</Text>
-                      : null}
-                    {heatType && heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
-                      <Text>({currentPlayerHeat.sequence ? currentPlayerHeat.sequence : "0"}号)</Text> : null}
+                      src={currentTeamHeat.team && currentTeamHeat.team.headImg ? currentTeamHeat.team.headImg : noperson}/>
+                    <Text>{currentTeamHeat.team && currentTeamHeat.team.name ? currentTeamHeat.team.name : "球队"}</Text>
                   </View>
-                  <View className="qz-heat-player-footer-heat">
+                  <View className="qz-heat-team-footer-heat">
                     <Image src={flame}/>
-                    <Text>{getHeat(currentPlayerHeat)}票</Text>
-                    {/*<Text>(第{currentPlayerHeat.index}名)</Text>*/}
+                    <Text>{getHeat(currentTeamHeat)}票</Text>
+                    {/*<Text>(第{currentTeamHeat.index}名)</Text>*/}
                   </View>
                 </View>
                 :
-                <View className="qz-heat-player-footer-heat">
-                  请选择球员
+                <View className="qz-heat-team-footer-heat">
+                  请选择球队
                 </View>
               }
-              <View className="qz-heat-player-footer-left-share">
+              <View className="qz-heat-team-footer-left-share">
                 <RoundButton
                   animation
                   margin="0 0 0 10px"
@@ -407,7 +407,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                   onClick={this.handleShareMoment}/>
               </View>
             </View>
-            <View className="at-col at-col-3 qz-heat-player-footer-right">
+            <View className="at-col at-col-3 qz-heat-team-footer-right">
               <AtButton
                 className="vertical-middle"
                 size="small"
@@ -426,4 +426,4 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
   }
 }
 
-export default HeatPlayer
+export default HeatLeagueTeam

@@ -3,6 +3,7 @@ import {View, Image, Button} from '@tarojs/components'
 import {AtModal, AtModalContent, AtModalAction} from "taro-ui"
 import './index.scss'
 import NoUser from '../../assets/no-user.png'
+import {getJiao} from "../../utils/utils";
 
 
 type PageStateProps = {}
@@ -52,6 +53,9 @@ class GiftRank extends Component<PageOwnProps, PageState> {
           {isOpened ? <AtModalContent>
             <View className="qz-giftrank">
               <View className="qz-giftrank-scroll-content">
+                {giftRanks == null || giftRanks.length == 0 ?
+                  <View className="qz-giftrank-content-nomore">暂无</View>
+                  : null}
                 {giftRanks && giftRanks.map((item: any) => (
                   <View key={item.id} className='qz-giftrank-content'>
                     <View className='qz-giftrank-list'>
@@ -75,7 +79,7 @@ class GiftRank extends Component<PageOwnProps, PageState> {
                           </View>
                           <View className='qz-giftrank-list__item-extra item-extra'>
                             <View className='item-extra__text'>
-                              {item.charge ? item.charge : 0}茄币
+                              {item.charge ? getJiao(item.charge) : 0}茄币
                             </View>
                           </View>
                         </View>

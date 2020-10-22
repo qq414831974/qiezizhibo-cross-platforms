@@ -3,6 +3,9 @@
   width: 100%;
   height: 100%;
 }
+.qz-round-button-content-animation{
+  animation: zoom ease-in-out 1s infinite;
+}
 .qz-round-button-text-content{
   width: 100%;
   display: flex;
@@ -45,5 +48,30 @@
   }
   100% {
     box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, 0.15);
+  }
+}
+@keyframes zoom {
+  0% {
+    transform: scale(1);
+  }
+
+  20% {
+    transform: scale(0.9);
+  }
+
+  40% {
+    transform: scale(1.1);
+  }
+
+  60% {
+    transform: scale(0.9);
+  }
+
+  80% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

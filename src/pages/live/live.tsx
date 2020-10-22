@@ -66,6 +66,8 @@ import GiftPanel from "../../components/gift-panel";
 import HeatReward from "../../components/heat-reward";
 import GiftRank from "../../components/gift-rank";
 import HeatPlayer from "../../components/heat-player";
+import HeatLeagueTeam from "../../components/heat-league-team";
+import ShareMoment from "../../components/share-moment";
 
 type Bulletin = {
   id: number,
@@ -102,6 +104,12 @@ type PageDispatchProps = {}
 type PageOwnProps = {}
 
 type PageState = {
+  timerID_CountDown: any;
+  timerID_matchStatus: any;
+  timerID_socketHeartBeat: any;
+  timerID_danmu: any;
+  timerID_giftController: any;
+  timeoutID_playCountDown: any;
   loading: boolean;
   diffDayTime: any;
   liveStatus: LiveStatus;
@@ -147,6 +155,9 @@ type PageState = {
   playerHeats: any;
   topPlayerHeats: any;
   playerHeatTotal: any;
+  leagueTeamHeats: any,
+  topLeagueTeamHeats: any,
+  leagueTeamHeatTotal: any,
   giftSendQueue: any;
   giftRanks: any;
   giftRanksLoading: any;
@@ -154,9 +165,15 @@ type PageState = {
   leagueId: any;
   playerHeatRefreshFunc: any;
   playerHeatLoading: any;
+  leagueTeamHeatRefreshFunc: any,
+  leagueTeamHeatLoading: any,
   giftRanksOpen: any,
   heatRewardOpen: any,
   ping: any;
+  needGiftLive: any;
+  shareMomentOpen: any,
+  shareMomentPoster: any,
+  shareMomentLoading: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -193,16 +210,10 @@ class Live extends Component<PageOwnProps, PageState> {
    * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
-  timerID_CountDown: any = null
-  timerID_matchStatus: any = null
-  timerID_socketHeartBeat: any = null
-  timerID_danmu: any = null
-  timerID_giftController: any = null
-  timeoutID_playCountDown: any = null;
   socketTask: Taro.SocketTask | null
   videoContext: Taro.VideoContext | null
-  timeout_danmu: any = {};
   animElemIds: any = {};
+  timeout_danmu: any = {};
   timeout_gift: any = {};
   timeout_gift_show: any = {};
   danmuRow: any = [[], [], [], [], []];
@@ -220,6 +231,12 @@ class Live extends Component<PageOwnProps, PageState> {
     super(props)
     const diff = getTimeDifference(new Date());
     this.state = {
+      timerID_CountDown: null,
+      timerID_matchStatus: null,
+      timerID_socketHeartBeat: null,
+      timerID_danmu: null,
+      timerID_giftController: null,
+      timeoutID_playCountDown: null,
       loading: false,
       diffDayTime: diff,
       liveStatus: LiveStatus.LOADING,
@@ -265,6 +282,9 @@ class Live extends Component<PageOwnProps, PageState> {
       playerHeats: null,
       topPlayerHeats: null,
       playerHeatTotal: null,
+      leagueTeamHeats: null,
+      topLeagueTeamHeats: null,
+      leagueTeamHeatTotal: null,
       giftSendQueue: [],
       giftRanks: null,
       giftRanksLoading: false,
@@ -272,9 +292,15 @@ class Live extends Component<PageOwnProps, PageState> {
       leagueId: null,
       playerHeatRefreshFunc: null,
       playerHeatLoading: false,
+      leagueTeamHeatRefreshFunc: null,
+      leagueTeamHeatLoading: false,
       giftRanksOpen: false,
       heatRewardOpen: false,
       ping: {isPushing: false},
+      needGiftLive: false,
+      shareMomentOpen: false,
+      shareMomentPoster: null,
+      shareMomentLoading: false,
     }
   }
 
@@ -292,8 +318,39 @@ class Live extends Component<PageOwnProps, PageState> {
 
   $setShareImageUrl = () => this.state.sharePictureUrl ? this.state.sharePictureUrl : null
 
+  $setOnShareCallback = () => {
+    Taro.showToast({title: "分享成功", icon: "none"});
+    if (this.state.heatType != null) {
+      let freeGift: any = null;
+      this.props.giftList && this.props.giftList.forEach((data: any) => {
+        if (data.type == GIFT_TYPE.FREE) {
+          freeGift = data;
+        }
+      });
+      if (freeGift != null && this.props.userInfo && this.props.userInfo.userNo) {
+        new Request().get(api.API_GIFT_SEND_FREE_LIMIT, {
+          userNo: this.props.userInfo.userNo,
+          giftId: freeGift.id,
+        }).then((limit: any) => {
+          if (limit < freeGift.limited * 2) {
+            new Request().post(api.API_GIFT_SEND_FREE_LIMIT, {
+              userNo: this.props.userInfo.userNo,
+              giftId: freeGift.id,
+              times: 1,
+            }).then((result) => {
+              if (result) {
+                payAction.getGiftList({matchId: this.getParamId()});
+              }
+            })
+          }
+        });
+      }
+    }
+  }
+
   componentWillMount() {
     matchAction.getMatchInfo_clear()
+    matchAction.getMatchComment_clear()
     liveAction.getLiveMediaList_clear()
   }
 
@@ -301,6 +358,7 @@ class Live extends Component<PageOwnProps, PageState> {
     // componentDidShow() {
     this.iphoneXAdjust();
     matchAction.getMatchInfo_clear()
+    matchAction.getMatchComment_clear()
     liveAction.getLiveMediaList_clear()
     Taro.showLoading({title: LOADING_TEXT})
     this.getParamId() && this.initCurtain(this.getParamId());
@@ -328,10 +386,11 @@ class Live extends Component<PageOwnProps, PageState> {
         this.initSocket(data.id);
         data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
         this.getMatchPayInfo(data, false);
+        this.getMatchNeedGift(data);
         this.getSharePicture(data);
         this.enterTime = formatTimeSecond(new Date());
 
-        // this.getCommentList(this.props.match.id);
+        this.getCommentList(this.props.match.id);
         this.initHeatCompetition(data.id);
       }
       Taro.hideLoading();
@@ -514,59 +573,68 @@ class Live extends Component<PageOwnProps, PageState> {
     })
   }
   clearTimer_playCountDown = () => {
-    if (this.timeoutID_playCountDown) {
-      clearTimeout(this.timeoutID_playCountDown)
+    if (this.state.timeoutID_playCountDown) {
+      clearTimeout(this.state.timeoutID_playCountDown)
     }
   }
   startTimer_Danmu = () => {
     this.clearTimer_Danmu();
-    this.timerID_danmu = setInterval(() => {
+    const timerID_danmu = setInterval(() => {
       this.refreshDanmu();
     }, 100)
+    this.setState({timerID_danmu: timerID_danmu})
   }
   clearTimer_Danmu = () => {
-    if (this.timerID_danmu) {
-      clearInterval(this.timerID_danmu)
+    if (this.state.timerID_danmu) {
+      clearInterval(this.state.timerID_danmu)
+      this.setState({timerID_danmu: null})
     }
   }
   startTimer_Gift = () => {
     this.clearTimer_Gift();
-    this.timerID_giftController = setInterval(() => {
+    const timerID_giftController = setInterval(() => {
       this.addUnsetToGiftSendQueue();
     }, 1000)
+    this.setState({timerID_giftController: timerID_giftController})
   }
   clearTimer_Gift = () => {
-    if (this.timerID_giftController) {
-      clearInterval(this.timerID_giftController)
+    if (this.state.timerID_giftController) {
+      clearInterval(this.state.timerID_giftController)
+      this.setState({timerID_giftController: null})
     }
   }
   startTimer_HeartBeat = () => {
     this.clearTimer_HeartBeat();
-    this.timerID_socketHeartBeat = setInterval(() => {
+    const timerID_socketHeartBeat = setInterval(() => {
       this.socketTask && this.socketTask.send({data: "success"});
     }, 5000)
+    this.setState({timerID_socketHeartBeat: timerID_socketHeartBeat})
   }
   clearTimer_HeartBeat = () => {
-    if (this.timerID_socketHeartBeat) {
-      clearInterval(this.timerID_socketHeartBeat)
+    if (this.state.timerID_socketHeartBeat) {
+      clearInterval(this.state.timerID_socketHeartBeat)
+      this.setState({timerID_socketHeartBeat: null})
     }
   }
   startTimer_CountDown = () => {
     this.clearTimer_CountDown();
-    this.timerID_CountDown = setInterval(() => {
+    const timerID_CountDown = setInterval(() => {
       this.getDiffTime()
     }, 1000)
+    this.setState({timerID_CountDown: timerID_CountDown});
   }
   clearTimer_CountDown = () => {
-    if (this.timerID_CountDown) {
-      clearInterval(this.timerID_CountDown)
+    if (this.state.timerID_CountDown) {
+      clearInterval(this.state.timerID_CountDown)
+      this.setState({timerID_CountDown: null});
     }
   }
   startTimer_matchStatus = (id) => {
     this.clearTimer_matchStatus();
-    this.timerID_matchStatus = setInterval(() => {
+    const timerID_matchStatus = setInterval(() => {
       const {match} = this.props;
       this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
+        this.getMatchNeedGift(data);
         if (match && match.status != FootballEventType.FINISH && data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
           this.getMatchDanmu(data.id, this.state.currentMedia);
@@ -582,10 +650,12 @@ class Live extends Component<PageOwnProps, PageState> {
       this.getTeamHeatInfo(id, null);
       this.getGiftRanks(id);
     }, 60000)
+    this.setState({timerID_matchStatus: timerID_matchStatus});
   }
   clearTimer_matchStatus = () => {
-    if (this.timerID_matchStatus) {
-      clearInterval(this.timerID_matchStatus)
+    if (this.state.timerID_matchStatus) {
+      clearInterval(this.state.timerID_matchStatus)
+      this.setState({timerID_matchStatus: null});
     }
   }
 
@@ -681,43 +751,53 @@ class Live extends Component<PageOwnProps, PageState> {
     this.setState({playerHeatRefreshFunc: func});
   }
   getPlayerHeatInfo = (pageNum, pageSize, name) => {
-    if (this.state.playerHeatLoading) {
-      return;
-    }
-    let heatType = this.state.heatType;
-    let param: any = {pageNum: pageNum, pageSize: pageSize}
-    if (name) {
-      param.name = name;
-    }
-    if (heatType == HEAT_TYPE.PLAYER_HEAT) {
-      param.matchId = this.getParamId();
-      this.setState({playerHeatLoading: true})
-      new Request().get(api.API_MATCH_PLAYER_HEAT, param).then((data: any) => {
-        this.setState({playerHeatLoading: false})
-        if (name) {
-          this.setState({playerHeats: data})
-        } else {
-          this.setState({playerHeats: data, topPlayerHeats: this.getTopThreeHeat(data.records)})
-        }
-      })
-      new Request().get(api.API_MATCH_PLAYER_HEAT_TOTAL, {matchId: this.getParamId()}).then((data: any) => {
-        this.setState({playerHeatTotal: data})
-      })
-    } else if (heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
-      param.leagueId = this.state.leagueId;
-      this.setState({playerHeatLoading: true})
-      new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
-        this.setState({playerHeatLoading: false})
-        if (name) {
-          this.setState({playerHeats: data})
-        } else {
-          this.setState({playerHeats: data, topPlayerHeats: this.getTopThreeHeat(data.records)})
-        }
-      })
-      new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.state.leagueId}).then((data: any) => {
-        this.setState({playerHeatTotal: data})
-      })
-    }
+    return new Promise((resolve) => {
+      if (this.state.playerHeatLoading) {
+        return;
+      }
+      let heatType = this.state.heatType;
+      let param: any = {pageNum: pageNum, pageSize: pageSize}
+      if (name) {
+        param.name = name;
+      }
+      if (heatType == HEAT_TYPE.PLAYER_HEAT) {
+        param.matchId = this.getParamId();
+        this.setState({playerHeatLoading: true})
+        new Request().get(api.API_MATCH_PLAYER_HEAT, param).then((data: any) => {
+          this.setState({playerHeatLoading: false})
+          if (name) {
+            this.setState({playerHeats: data}, () => {
+              resolve();
+            })
+          } else {
+            this.setState({playerHeats: data, topPlayerHeats: this.getTopThreeHeat(data.records)}, () => {
+              resolve();
+            })
+          }
+        })
+        new Request().get(api.API_MATCH_PLAYER_HEAT_TOTAL, {matchId: this.getParamId()}).then((data: any) => {
+          this.setState({playerHeatTotal: data})
+        })
+      } else if (heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+        param.leagueId = this.state.leagueId;
+        this.setState({playerHeatLoading: true})
+        new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
+          this.setState({playerHeatLoading: false})
+          if (name) {
+            this.setState({playerHeats: data}, () => {
+              resolve();
+            })
+          } else {
+            this.setState({playerHeats: data, topPlayerHeats: this.getTopThreeHeat(data.records)}, () => {
+              resolve();
+            })
+          }
+        })
+        new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.state.leagueId}).then((data: any) => {
+          this.setState({playerHeatTotal: data})
+        })
+      }
+    });
   }
   getPlayerHeatInfoAdd = (pageNum, pageSize, name) => {
     if (this.state.playerHeatLoading) {
@@ -756,40 +836,101 @@ class Live extends Component<PageOwnProps, PageState> {
       })
     }
   }
-  getTopThreeHeat = (playerHeats) => {
+  onLeagueTeamHeatRefresh = (func) => {
+    this.setState({leagueTeamHeatRefreshFunc: func});
+  }
+  getLeagueTeamHeatInfo = (pageNum, pageSize, name) => {
+    return new Promise((resolve) => {
+      if (this.state.leagueTeamHeatLoading) {
+        return;
+      }
+      let heatType = this.state.heatType;
+      let param: any = {pageNum: pageNum, pageSize: pageSize}
+      if (name) {
+        param.name = name;
+      }
+      if (heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+        param.leagueId = this.state.leagueId;
+        this.setState({leagueTeamHeatLoading: true})
+        new Request().get(api.API_LEAGUE_TEAM_HEAT, param).then((data: any) => {
+          this.setState({leagueTeamHeatLoading: false})
+          if (name) {
+            this.setState({leagueTeamHeats: data}, () => {
+              resolve();
+            })
+          } else {
+            this.setState({leagueTeamHeats: data, topLeagueTeamHeats: this.getTopThreeHeat(data.records)}, () => {
+              resolve();
+            })
+          }
+        })
+        new Request().get(api.API_LEAGUE_TEAM_HEAT_TOTAL, {leagueId: this.state.leagueId}).then((data: any) => {
+          this.setState({leagueTeamHeatTotal: data})
+        })
+      }
+    })
+  }
+  getLeagueTeamHeatInfoAdd = (pageNum, pageSize, name) => {
+    if (this.state.leagueTeamHeatLoading) {
+      return;
+    }
+    let heatType = this.state.heatType;
+    let param: any = {pageNum: pageNum, pageSize: pageSize}
+    if (name) {
+      param.name = name;
+    }
+    if (heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+      param.leagueId = this.state.leagueId;
+      this.setState({leagueTeamHeatLoading: true})
+      new Request().get(api.API_LEAGUE_TEAM_HEAT, param).then((data: any) => {
+        this.setState({leagueTeamHeatLoading: false})
+        const teamHeats = this.state.leagueTeamHeats;
+        teamHeats.records = teamHeats.records.concat(data.records);
+        teamHeats.current = data.current;
+        if (teamHeats.current > data.pages) {
+          teamHeats.current = data.pages;
+        }
+        this.setState({leagueTeamHeats: teamHeats})
+      })
+    }
+  }
+  getTopThreeHeat = (heatObjects) => {
     let sorted: any = [];
     let index = 1;
-    for (let i = 0; i < playerHeats.length; i++) {
+    for (let i = 0; i < heatObjects.length; i++) {
+      let heat = this.getHeat(heatObjects[i]);
+      if (heat == 0) {
+        continue;
+      }
       if (index <= 3) {
         if (i == 0) {
           index = 1;
-          playerHeats[i].index = index;
-          sorted.push(playerHeats[i]);
+          heatObjects[i].index = index;
+          sorted.push(heatObjects[i]);
           continue;
         }
-        let heat = this.getHeat(playerHeats[i]);
-        let heatPre = this.getHeat(playerHeats[i - 1]);
+        let heatPre = this.getHeat(heatObjects[i - 1]);
         if (heat == heatPre) {
-          playerHeats[i].index = index;
-          sorted.push(playerHeats[i]);
+          heatObjects[i].index = index;
+          sorted.push(heatObjects[i]);
         } else {
           index = index + 1;
           if (index <= 3) {
-            playerHeats[i].index = index;
-            sorted.push(playerHeats[i]);
+            heatObjects[i].index = index;
+            sorted.push(heatObjects[i]);
           }
         }
       }
     }
     return sorted;
   }
-  getHeat = (playerHeat) => {
+  getHeat = (heatObject) => {
     let heat = 0;
-    if (playerHeat.heat) {
-      heat = heat + playerHeat.heat;
+    if (heatObject.heat) {
+      heat = heat + heatObject.heat;
     }
-    if (playerHeat.heatBase) {
-      heat = heat + playerHeat.heatBase;
+    if (heatObject.heatBase) {
+      heat = heat + heatObject.heatBase;
     }
     return heat;
   }
@@ -869,7 +1010,12 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   getCommentList = (matchId) => {
     this.setState({chatLoading: true})
-    matchAction.getMatchComment({pageNum: 1, pageSize: 10, matchId: matchId, startTime: this.enterTime}).then(() => {
+    matchAction.getMatchComment({
+      pageNum: 1,
+      pageSize: 10,
+      matchId: matchId,
+      // startTime: this.enterTime
+    }).then(() => {
       // this.setState({commentIntoView: `message-${this.props.commentList.list.length}`})
       const commentList: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
       // setTimeout(() => {
@@ -896,7 +1042,7 @@ class Live extends Component<PageOwnProps, PageState> {
         pageNum: this.props.commentList.current ? this.props.commentList.current + 1 : 1,
         pageSize: 10,
         matchId: this.props.match.id,
-        startTime: this.enterTime
+        // startTime: this.enterTime
       }).then(() => {
         const commentList_next: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
         let index = commentList_next.indexOf(commentList[0]) - 1;
@@ -1212,6 +1358,10 @@ class Live extends Component<PageOwnProps, PageState> {
       this.getParamId() && this.getTeamHeatInfo(this.getParamId(), null);
       this.getParamId() && payAction.getGiftList({matchId: this.getParamId()});
       this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
+      this.state.leagueTeamHeatRefreshFunc && this.state.leagueTeamHeatRefreshFunc();
+      this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
+        this.getMatchNeedGift(data);
+      })
     } else {
       this.getOrderStatus(orderId, ORDER_TYPE.gift);
     }
@@ -1231,6 +1381,10 @@ class Live extends Component<PageOwnProps, PageState> {
         if (type != null && type == ORDER_TYPE.gift) {
           this.getParamId() && this.getTeamHeatInfo(this.getParamId(), null);
           this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
+          this.state.leagueTeamHeatRefreshFunc && this.state.leagueTeamHeatRefreshFunc();
+          this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
+            this.getMatchNeedGift(data);
+          })
         } else {
           this.setState({needPay: false})
           this.getParamId() && this.getMatchInfo(this.getParamId());
@@ -1238,6 +1392,26 @@ class Live extends Component<PageOwnProps, PageState> {
         }
       }
     });
+  }
+  getMatchNeedGift = async (data) => {
+    if (data) {
+      this.setState({needGiftLive: data.needGiftLive})
+      let needPayRecord = data.needPayRecord;
+      let needPayLive = data.needPayLive;
+      if (data.status == FootballEventType.FINISH) {
+        if ((data.isRecordCharge && needPayRecord)) {
+          this.setState({needPay: true})
+        } else {
+          this.setState({needPay: false})
+        }
+      } else {
+        if ((data.isLiveCharge && needPayLive)) {
+          this.setState({needPay: true})
+        } else {
+          this.setState({needPay: false})
+        }
+      }
+    }
   }
   getMatchPayInfo = async (data, monopolyOnly) => {
     let needPayRecord = data.needPayRecord;
@@ -1340,7 +1514,7 @@ class Live extends Component<PageOwnProps, PageState> {
     this.setState({firstplay: false})
     if (!await this.isUserLogin()) {
       this.clearTimer_playCountDown();
-      this.timeoutID_playCountDown = setTimeout(async () => {
+      const timeoutID_playCountDown = setTimeout(async () => {
         if (this.props.match && this.props.match.status == FootballEventType.FINISH) {
           if (!await this.isUserLogin()) {
             this.setState({tryplayed: true})
@@ -1354,6 +1528,7 @@ class Live extends Component<PageOwnProps, PageState> {
           }
         }
       }, 10000)
+      this.setState({timeoutID_playCountDown: timeoutID_playCountDown})
     }
   }
 
@@ -1527,6 +1702,11 @@ class Live extends Component<PageOwnProps, PageState> {
     if (this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
       tabList.push({title: '人气榜'})
       tabs[TABS_TYPE.heatPlayer] = tabIndex;
+      tabIndex = tabIndex + 1;
+    }
+    if (this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+      tabList.push({title: '人气榜'})
+      tabs[TABS_TYPE.heatLeagueTeam] = tabIndex;
       tabIndex = tabIndex + 1;
     }
     tabList.push({title: this.state.heatType == HEAT_TYPE.TEAM_HEAT ? "有奖PK" : "赛况"})
@@ -1733,6 +1913,10 @@ class Live extends Component<PageOwnProps, PageState> {
     this.setState({currentSupportPlayer: player})
     this.showGiftPanel();
   }
+  handleLeagueTeamSupport = (team) => {
+    this.setState({currentSupportTeam: team})
+    this.showGiftPanel();
+  }
   onGiftRankClick = () => {
     this.setState({giftRanksOpen: true});
   }
@@ -1744,6 +1928,36 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   hideReward = () => {
     this.setState({heatRewardOpen: false});
+  }
+  showDownLoading = () => {
+    this.setState({downLoading: true})
+  }
+  showShareMoment = (imgUrl) => {
+    this.setState({downLoading: false})
+    if (imgUrl) {
+      this.setState({shareMomentPoster: imgUrl, shareMomentOpen: true})
+    }
+  }
+  onShareMomentConfirm = () => {
+    this.setState({shareMomentLoading: true})
+    Taro.downloadFile({
+      url: this.state.shareMomentPoster,
+      success: (res) => {
+        if (res.statusCode === 200) {
+          Taro.saveImageToPhotosAlbum({filePath: res.tempFilePath}).then(saveres => {
+            console.log(saveres)
+            this.showMessage("图片保存到相册成功，快去发朋友圈吧", "success")
+            this.setState({shareMomentLoading: false})
+          }, () => {
+            this.showMessage("图片保存到相册失败", "error")
+            this.setState({shareMomentLoading: false, permissionShow: true})
+          })
+        }
+      }
+    });
+  }
+  onShareMomentCancel = () => {
+    this.setState({shareMomentOpen: false})
   }
 
   render() {
@@ -1759,98 +1973,108 @@ class Live extends Component<PageOwnProps, PageState> {
     return (
       <View className='qz-live-content'>
         <View className='qz-live-match__content'>
-          {this.state.needPay ? <View className='qz-live-match__video'>
-            <Image src={match.poster} className="qz-live-match__video-poster-img"/>
-            {match && <AtButton onClick={this.onPayClick} type='primary'
-                                className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
-          </View> : <Video
-            id="videoPlayer"
-            className='qz-live-match__video'
-            src={this.getPlayPath(match)}
-            title={match.name}
-            playBtnPosition="center"
-            onFullscreenChange={this.bindFullScreen}
-            onEnded={this.bindPlayEnd}
-            onPlay={this.bindPlayStart}
-            onError={this.bindPlayError}
-            autoplay
-            // enableDanmu
-            // danmuList={danmuList}
-            onTimeUpdate={this.handleVideoTime}
-            // autoplay
-          >
-            {liveStatus != LiveStatus.FINISH && liveStatus != LiveStatus.ENABLED ?
-              <View className="qz-live-match__video-poster">
+          {this.state.needPay ?
+            <View className='qz-live-match__video'>
+              <Image src={match.poster} className="qz-live-match__video-poster-img"/>
+              {match && <AtButton onClick={this.onPayClick} type='primary'
+                                  className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
+            </View>
+            :
+            (this.state.needGiftLive && match.status != FootballEventType.FINISH && this.state.heatRule && this.state.heatRule.available ?
+              <View className='qz-live-match__video'>
                 <Image src={match.poster} className="qz-live-match__video-poster-img"/>
-                {liveStatus == LiveStatus.UNOPEN ?
-                  <View className="qz-live-match__video-poster-time">
-                    <View className='qz-live-match__video-poster-time__title'>
-                      <View>距比赛开始还有{diffDayTime.diffDay}</View>
-                    </View>
-                    <View className='qz-live-match__video-poster-time__time'>
-                      <View>{diffDayTime.diffTime}</View>
-                    </View>
+                {match && <AtButton type='primary'
+                                    className="qz-live-match__video-poster-pay">投一票 看直播</AtButton>}
+              </View>
+              :
+              <Video
+                id="videoPlayer"
+                className='qz-live-match__video'
+                src={this.getPlayPath(match)}
+                title={match.name}
+                playBtnPosition="center"
+                onFullscreenChange={this.bindFullScreen}
+                onEnded={this.bindPlayEnd}
+                onPlay={this.bindPlayStart}
+                onError={this.bindPlayError}
+                autoplay
+                // enableDanmu
+                // danmuList={danmuList}
+                onTimeUpdate={this.handleVideoTime}
+                // autoplay
+              >
+                {liveStatus != LiveStatus.FINISH && liveStatus != LiveStatus.ENABLED ?
+                  <View className="qz-live-match__video-poster">
+                    <Image src={match.poster} className="qz-live-match__video-poster-img"/>
+                    {liveStatus == LiveStatus.UNOPEN ?
+                      <View className="qz-live-match__video-poster-time">
+                        <View className='qz-live-match__video-poster-time__title'>
+                          <View>距比赛开始还有{diffDayTime.diffDay}</View>
+                        </View>
+                        <View className='qz-live-match__video-poster-time__time'>
+                          <View>{diffDayTime.diffTime}</View>
+                        </View>
+                      </View>
+                      :
+                      <View className="qz-live-match__video-poster-text">
+                        <View className='qz-live-match__video-poster-text__text'>
+                          {liveStatus == LiveStatus.ONTIME ? <View>比赛还未开始请耐心等待...</View> : null}
+                          {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status == 14) ?
+                            <View>中场休息中...</View> : null}
+                          {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status != 14) ?
+                            <View>信号中断...</View> : null}
+                          {liveStatus == LiveStatus.LOADING ? <View>载入中...</View> : null}
+                        </View>
+                      </View>
+                    }
                   </View>
-                  :
-                  <View className="qz-live-match__video-poster-text">
-                    <View className='qz-live-match__video-poster-text__text'>
-                      {liveStatus == LiveStatus.ONTIME ? <View>比赛还未开始请耐心等待...</View> : null}
-                      {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status == 14) ?
-                        <View>中场休息中...</View> : null}
-                      {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status != 14) ?
-                        <View>信号中断...</View> : null}
-                      {liveStatus == LiveStatus.LOADING ? <View>载入中...</View> : null}
+                  : <View
+                    className={`qz-live-match__video-controllers ${this.state.danmuUnable != true ? "qz-live-match__video-controllers-full" : ""}`}>
+                    {this.state.danmuUnable != true && this.state.danmuCurrent.map(item => (
+                      <View
+                        key={`danmu-${item.id}`}
+                        className="qz-live-match__video-controllers__danmu-container"
+                        style={{top: `${21 * (item.row + 1) + item.row * 8}px`}}>
+                        <View className="qz-live-match__video-controllers__danmu">
+                          <View className="qz-live-match__video-controllers__danmu-inner">
+                            <View className="qz-live-match__video-controllers__danmu-inner-container">
+                              <Image src={item.user && item.user.avatar ? item.user.avatar : defaultLogo}/>
+                              <Text>{item.text}</Text>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                    <View className="qz-live-match__video-controllers__views">
+                      <Image className="qz-live-match__video-controllers__views-img" src={views_icon}/>
+                      {this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
+                    </View>
+                    <View
+                      className={`qz-live-match__video-controllers__right ${this.state.videoShowMore ? "qz-live-matc1h__video-controllers__right-more" : ""}`}>
+                      <View
+                        className={`qz-live-match__video-controllers__right-arrow ${this.state.videoShowMore ? "qz-live-match__video-controllers__right-arrow-right" : "qz-live-match__video-controllers__right-arrow-left"}`}
+                        onClick={this.handleVideoArrowClick}>
+                        <AtIcon value={this.state.videoShowMore ? "chevron-right" : "chevron-left"}/>
+                      </View>
+                      {this.state.videoShowMore ?
+                        <View className="qz-live-match__video-controllers__right-item-container">
+                          {this.props.mediaList.map((item, index) => (
+                            <View key={item.id}
+                                  className={`qz-live-match__video-controllers__right-item ${this.state.currentMedia == index ? "qz-live-match__video-controllers__right-item-selected" : ""}`}
+                                  onClick={this.handleMediaFragmentClick.bind(this, index)}>
+                              <Text
+                                className="qz-live-match__video-controllers__right-item-text">
+                                {`片段${index + 1}`}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                        : null
+                      }
                     </View>
                   </View>
                 }
-              </View>
-              : <View
-                className={`qz-live-match__video-controllers ${this.state.danmuUnable != true ? "qz-live-match__video-controllers-full" : ""}`}>
-                {this.state.danmuUnable != true && this.state.danmuCurrent.map(item => (
-                  <View
-                    key={`danmu-${item.id}`}
-                    className="qz-live-match__video-controllers__danmu-container"
-                    style={{top: `${21 * (item.row + 1) + item.row * 8}px`}}>
-                    <View className="qz-live-match__video-controllers__danmu">
-                      <View className="qz-live-match__video-controllers__danmu-inner">
-                        <View className="qz-live-match__video-controllers__danmu-inner-container">
-                          <Image src={item.user && item.user.avatar ? item.user.avatar : defaultLogo}/>
-                          <Text>{item.text}</Text>
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-                ))}
-                <View className="qz-live-match__video-controllers__views">
-                  <Image className="qz-live-match__video-controllers__views-img" src={views_icon}/>
-                  {this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
-                </View>
-                <View
-                  className={`qz-live-match__video-controllers__right ${this.state.videoShowMore ? "qz-live-matc1h__video-controllers__right-more" : ""}`}>
-                  <View
-                    className={`qz-live-match__video-controllers__right-arrow ${this.state.videoShowMore ? "qz-live-match__video-controllers__right-arrow-right" : "qz-live-match__video-controllers__right-arrow-left"}`}
-                    onClick={this.handleVideoArrowClick}>
-                    <AtIcon value={this.state.videoShowMore ? "chevron-right" : "chevron-left"}/>
-                  </View>
-                  {this.state.videoShowMore ?
-                    <View className="qz-live-match__video-controllers__right-item-container">
-                      {this.props.mediaList.map((item, index) => (
-                        <View key={item.id}
-                              className={`qz-live-match__video-controllers__right-item ${this.state.currentMedia == index ? "qz-live-match__video-controllers__right-item-selected" : ""}`}
-                              onClick={this.handleMediaFragmentClick.bind(this, index)}>
-                          <Text
-                            className="qz-live-match__video-controllers__right-item-text">
-                            {`片段${index + 1}`}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                    : null
-                  }
-                </View>
-              </View>
-            }
-          </Video>}
+              </Video>)}
           <View className='qz-live-tabs'>
             <AtTabs current={this.state.currentTab}
                     className="qz-live__top-tabs__content"
@@ -1859,6 +2083,8 @@ class Live extends Component<PageOwnProps, PageState> {
               {this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
                   <HeatPlayer
+                    matchId={this.getParamId()}
+                    leagueId={this.state.leagueId}
                     heatType={this.state.heatType}
                     onPlayerHeatRefresh={this.onPlayerHeatRefresh}
                     totalHeat={this.state.playerHeatTotal}
@@ -1870,6 +2096,29 @@ class Live extends Component<PageOwnProps, PageState> {
                     hidden={this.state.currentTab != tabs[TABS_TYPE.heatPlayer]}
                     onGetPlayerHeatInfo={this.getPlayerHeatInfo}
                     onGetPlayerHeatInfoAdd={this.getPlayerHeatInfoAdd}
+                    onPictureDownLoading={this.showDownLoading}
+                    onPictureDownLoaded={this.showShareMoment}
+                  />
+                </AtTabsPane>
+                : null}
+              {this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT ?
+                <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatLeagueTeam]}>
+                  <HeatLeagueTeam
+                    matchId={this.getParamId()}
+                    leagueId={this.state.leagueId}
+                    heatType={this.state.heatType}
+                    onTeamHeatRefresh={this.onLeagueTeamHeatRefresh}
+                    totalHeat={this.state.leagueTeamHeatTotal}
+                    topTeamHeats={this.state.topLeagueTeamHeats}
+                    startTime={this.getLeagueHeatStartTime()}
+                    endTime={this.getLeagueHeatEndTime()}
+                    teamHeats={this.state.leagueTeamHeats}
+                    onHandleTeamSupport={this.handleLeagueTeamSupport}
+                    hidden={this.state.currentTab != tabs[TABS_TYPE.heatLeagueTeam]}
+                    onGetTeamHeatInfo={this.getLeagueTeamHeatInfo}
+                    onGetTeamHeatInfoAdd={this.getLeagueTeamHeatInfoAdd}
+                    onPictureDownLoading={this.showDownLoading}
+                    onPictureDownLoaded={this.showShareMoment}
                   />
                 </AtTabsPane>
                 : null}
@@ -2000,6 +2249,8 @@ class Live extends Component<PageOwnProps, PageState> {
           handleClose={this.onPhoneClose}
           handleError={this.onPhoneError}/>
         <PayModal
+          giftDiscount={match && match.giftWatchRecordEnable ? match.giftWatchRecordPrice != null : false}
+          giftDiscountPrice={match && match.giftWatchRecordEnable ? match.giftWatchRecordPrice : null}
           charge={this.state.charge}
           isOpened={this.state.payOpen}
           handleConfirm={this.onPaySuccess}
@@ -2036,10 +2287,12 @@ class Live extends Component<PageOwnProps, PageState> {
           handleClose={this.onPremissionClose}/>
         <AtFloatLayout
           className="qz-gift-float"
-          title={`礼物送给${this.state.heatType == HEAT_TYPE.TEAM_HEAT && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
+          title={`礼物送给${(this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}       1茄币=0.1元`}
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}>
           <GiftPanel
+            giftWatchPrice={match && match.giftWatchRecordEnable && match.giftWatchRecordPrice ? match.giftWatchRecordPrice : null}
+            giftWatchEternalPrice={match && match.giftWatchRecordEnable && match.giftWatchRecordEternalPrice ? match.giftWatchRecordEternalPrice : null}
             leagueId={this.state.leagueId}
             matchInfo={match}
             supportTeam={this.state.currentSupportTeam}
@@ -2051,6 +2304,13 @@ class Live extends Component<PageOwnProps, PageState> {
             onHandlePayError={this.onGiftPayError}
             hidden={!this.state.giftOpen}/>
         </AtFloatLayout>
+        <ShareMoment
+          isOpened={this.state.shareMomentOpen}
+          loading={this.state.shareMomentLoading}
+          poster={this.state.shareMomentPoster}
+          handleConfirm={this.onShareMomentConfirm}
+          handleCancel={this.onShareMomentCancel}
+        />
         {this.state.giftSendQueue && this.state.giftSendQueue.map((data: any) => (
           <GiftNotify
             active={data.active}
@@ -2061,7 +2321,7 @@ class Live extends Component<PageOwnProps, PageState> {
             num={data.num}
             row={data.row}/>
         ))}
-        {match.league && this.state.currentTab == tabs[TABS_TYPE.matchUp] ?
+        {match.league ?
           <View className="qz-live-match-up__league">
             <AtFab size="small" onClick={this.onLeagueClick.bind(this, match.league)}>
               <Image className="qz-live-match-up__league-image"
@@ -2071,7 +2331,7 @@ class Live extends Component<PageOwnProps, PageState> {
           </View>
           : null
         }
-        {this.state.currentTab == tabs[TABS_TYPE.heatPlayer] || (this.state.heatType == HEAT_TYPE.TEAM_HEAT && this.state.currentTab == tabs[TABS_TYPE.matchUp]) ?
+        {this.state.currentTab == tabs[TABS_TYPE.heatPlayer] || this.state.currentTab == tabs[TABS_TYPE.heatLeagueTeam] || (this.state.heatType == HEAT_TYPE.TEAM_HEAT && this.state.currentTab == tabs[TABS_TYPE.matchUp]) ?
           <View>
             <View className="qz-live-fab qz-live-fab-square qz-live-fab-giftrank">
               <AtFab onClick={this.onGiftRankClick}>

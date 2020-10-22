@@ -329,7 +329,7 @@
 
   &__league {
     position: fixed;
-    bottom: 5%;
+    bottom: 8%;
     left: 16px;
     background-color: $color-bg-transparent;
 
@@ -371,13 +371,13 @@
 
 .qz-live-fab-giftrank {
   position: fixed;
-  bottom: 18%;
+  bottom: 8%;
   right: 16px;
 }
 
 .qz-live-fab-heatreward {
   position: fixed;
-  bottom: 5%;
+  bottom: 18%;
   right: 16px;
   animation: zoom ease-in-out 1s infinite;
 }
@@ -411,6 +411,10 @@
 }
 
 .qz-gift-float {
+  .layout-header__title{
+    font-size: $font-size-sm;
+    white-space: pre;
+  }
   .at-float-layout__container {
     height: 590px;
     min-height: 590px;

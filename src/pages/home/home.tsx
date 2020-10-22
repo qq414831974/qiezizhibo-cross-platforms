@@ -47,6 +47,7 @@ type PageDispatchProps = {}
 type PageOwnProps = {}
 
 type PageState = {
+  timerID_bulletin: any,
   locationShow: boolean,
   bulletin: Bulletin | null,
   curtain: Bulletin | null,
@@ -68,7 +69,6 @@ class Home extends Component<PageOwnProps, PageState> {
     wechatConfig: {},
     locationConfig: null,
   }
-  timerID_bulletin: any = null
   bulletinIndex: number = 0;
   qqmapsdk: qqmapjs;
   /**
@@ -88,6 +88,7 @@ class Home extends Component<PageOwnProps, PageState> {
   constructor(props) {
     super(props)
     this.state = {
+      timerID_bulletin: null,
       locationShow: false,
       bulletin: null,
       curtain: null,
@@ -173,14 +174,16 @@ class Home extends Component<PageOwnProps, PageState> {
 
   startTimer_bulletin = () => {
     this.clearTimer_bulletin();
-    this.timerID_bulletin = setInterval(() => {
+    const timerID_bulletin = setInterval(() => {
       this.bulletinIndex = this.bulletinIndex + 1;
       this.setBulletin(this.bulletinIndex);
     }, 20000)
+    this.setState({timerID_bulletin: timerID_bulletin})
   }
   clearTimer_bulletin = () => {
-    if (this.timerID_bulletin) {
-      clearInterval(this.timerID_bulletin)
+    if (this.state.timerID_bulletin) {
+      clearInterval(this.state.timerID_bulletin)
+      this.setState({timerID_bulletin: null})
     }
   }
   setBulletin = (index) => {

@@ -32,9 +32,16 @@
 }
 
 .qz-gift-modal-content_tip {
+  display: flex;
   text-align: left;
   padding: 0 $spacing-h-md;
   font-size: $font-size-xs;
+}
+
+.qz-gift-modal-content_tip-highlight {
+  background: $color-highlight;
+  color: $color-text-base-inverse;
+  border-radius: 5px;
 }
 
 .qz-gift-modal-content_captcha-container {
