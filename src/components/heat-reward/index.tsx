@@ -32,7 +32,7 @@ class HeatReward extends Component<PageOwnProps, PageState> {
   constructor(props) {
     super(props)
     this.state = {
-      current: 0
+      current: 0,
     }
   }
 
@@ -41,7 +41,7 @@ class HeatReward extends Component<PageOwnProps, PageState> {
 
     return (
       <View>
-        <AtModal className="at-modal-big" isOpened={isOpened} onClose={handleCancel}>
+        <AtModal className="at-modal-huge" isOpened={isOpened} onClose={handleCancel}>
           {isOpened ? <AtModalContent>
             <View className="qz-heatreward">
               {loading ?

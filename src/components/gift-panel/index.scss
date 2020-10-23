@@ -148,6 +148,10 @@
         width: 100%;
         font-size: $font-size-xs;
         color: $color-grey-2;
+        &__image{
+          width: $font-size-xs !important;
+          height: $font-size-xs !important;
+        }
       }
 
       image {

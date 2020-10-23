@@ -3,7 +3,7 @@ import {View, ScrollView, Text, Image, Picker} from '@tarojs/components'
 import {AtActivityIndicator, AtButton, AtInputNumber} from 'taro-ui'
 import './index.scss'
 import * as global from '../../constants/global';
-import {getJiao, isInteger} from '../../utils/utils';
+import {getYuan, isInteger} from '../../utils/utils';
 import GiftModal from '../../components/modal-gift';
 import flame from '../../assets/live/left-support.png';
 
@@ -79,9 +79,9 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     if (gift != null) {
       const discount = this.getDiscountValue(gift, num);
       if (discount != null) {
-        return getJiao(gift.price * num * discount / 100);
+        return getYuan(gift.price * num * discount / 100);
       } else {
-        return getJiao(gift.price * num);
+        return getYuan(gift.price * num);
       }
     }
     return null;
@@ -90,7 +90,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     if (gift != null) {
       const discount = this.getDiscountValue(gift, num);
       if (discount != null) {
-        return getJiao(gift.price * num);
+        return getYuan(gift.price * num);
       } else {
         return null;
       }
@@ -207,11 +207,15 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
                         <Text>{data.name}</Text>
                       </View>
                       {data.type == global.GIFT_TYPE.CHARGE ? <View className="qz-gifts__grid-item-price">
-                          <Text>{getJiao(data.price)}茄币</Text>
+                          <View>{getYuan(data.price)}茄币</View>
                         </View> :
                         <View className="qz-gifts__grid-item-price">
                           <Text>{data.limitRemain > 0 ? `免费(余${data.limitRemain})` : "分享群得茄子"}</Text>
                         </View>}
+                      <View className="qz-gifts__grid-item-price">
+                        <Image className="qz-gifts__grid-item-price__image" src={flame}/>
+                        <Text>+{this.getGiftGrowthByType(data, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, 1)}票</Text>
+                      </View>
                     </View>
                   )
                 )}

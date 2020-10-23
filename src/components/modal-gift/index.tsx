@@ -96,7 +96,7 @@ class ModalGift extends Component<PageOwnProps, PageState> {
   handleConfirm = async () => {
     const {gift, giftInfo} = this.props;
     if (giftInfo && gift && gift.type == global.GIFT_TYPE.FREE) {
-      if (this.state.captchaInput && this.state.captcha && this.state.captchaInput.toLowerCase() != this.state.captcha.toLowerCase()) {
+      if (this.state.captchaInput == null || (this.state.captchaInput && this.state.captcha && this.state.captchaInput.toLowerCase() != this.state.captcha.toLowerCase())) {
         Taro.showToast({title: "验证码错误", icon: "none"});
         return;
       } else {
@@ -217,7 +217,7 @@ class ModalGift extends Component<PageOwnProps, PageState> {
         } else {
           handleError(error.ERROR_SEND_GIFT_ERROR);
         }
-      }).catch(()=>{
+      }).catch(() => {
         this.setState({isPaying: false})
       });
     }
@@ -270,7 +270,8 @@ class ModalGift extends Component<PageOwnProps, PageState> {
               : null}
             {(giftWatchPrice != null || giftWatchEternalPrice != null) && giftInfo != null && giftInfo.price != null && giftInfo.price * 10 >= giftWatchPrice ?
               <View className="gray qz-gift-modal-content_tip">
-                • <View className="qz-gift-modal-content_tip-highlight">本场比赛录像免费观看{giftInfo.price * 10 >= giftWatchEternalPrice ? "永久" : "一个月"}</View>
+                • <View
+                className="qz-gift-modal-content_tip-highlight">本场比赛录像免费观看{giftInfo.price * 10 >= giftWatchEternalPrice ? "永久" : "一个月"}</View>
               </View>
               : null}
             {giftInfo && (giftInfo.price == null || giftInfo.price == 0) ?

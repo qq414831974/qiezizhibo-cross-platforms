@@ -8,6 +8,7 @@
   width: 100%;
   display: block;
   height: 100%;
+  overflow: scroll;
 
   &-title {
     background-color: $color-bg-grey;
@@ -20,6 +21,8 @@
 
   &-img {
     width: 100%;
+    max-width: 200vw;
+    max-height: 200vh;
   }
 
   &-loading {

@@ -614,3 +614,15 @@ $at-timeline-line-color: $color-border-lighter !default;
     max-height: 1080px;
   }
 }
+
+.at-modal-huge {
+  .at-modal__container {
+    width: 100%;
+  }
+
+  .at-modal__content {
+    min-height: 180px;
+    max-height: 1100px;
+    padding: 0;
+  }
+}
