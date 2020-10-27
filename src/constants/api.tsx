@@ -101,3 +101,6 @@ export const API_LEAGUE_PLAYER_HEAT = `${football_service}/heat/league/player`;
 export const API_LEAGUE_PLAYER_HEAT_TOTAL = `${football_service}/heat/league/player/total`;
 export const API_LEAGUE_TEAM_HEAT = `${football_service}/heat/league/team`;
 export const API_LEAGUE_TEAM_HEAT_TOTAL = `${football_service}/heat/league/team/total`;
+
+//subscribe
+export const API_SUBSCRIBE = `${system_service}/subscribe`;

@@ -255,7 +255,7 @@ class ModalGift extends Component<PageOwnProps, PageState> {
             <AtDivider height={36} lineColor="#E5E5E5"/>
             {giftInfo && giftInfo.price ?
               <View className="black qz-gift-modal-content_tip">
-                • {giftInfo.price / 10}元{giftInfo && giftInfo.realPrice ? `(原价${giftInfo.realPrice / 10}元)` : ""}
+                • {giftInfo.price}元{giftInfo && giftInfo.realPrice ? `(原价${giftInfo.realPrice}元)` : ""}
               </View>
               : null}
             {giftInfo && giftInfo.heatValue ?
@@ -268,10 +268,10 @@ class ModalGift extends Component<PageOwnProps, PageState> {
                 • 经验 +{giftInfo.expValue}
               </View>
               : null}
-            {(giftWatchPrice != null || giftWatchEternalPrice != null) && giftInfo != null && giftInfo.price != null && giftInfo.price * 10 >= giftWatchPrice ?
+            {(giftWatchPrice != null || giftWatchEternalPrice != null) && giftInfo != null && giftInfo.price != null && giftInfo.price * 100 >= giftWatchPrice ?
               <View className="gray qz-gift-modal-content_tip">
                 • <View
-                className="qz-gift-modal-content_tip-highlight">本场比赛录像免费观看{giftInfo.price * 10 >= giftWatchEternalPrice ? "永久" : "一个月"}</View>
+                className="qz-gift-modal-content_tip-highlight">本场比赛录像免费观看{giftInfo.price * 100 >= giftWatchEternalPrice ? "永久" : "一个月"}</View>
               </View>
               : null}
             {giftInfo && (giftInfo.price == null || giftInfo.price == 0) ?

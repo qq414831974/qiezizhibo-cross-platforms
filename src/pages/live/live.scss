@@ -95,6 +95,16 @@
           font-size: $font-size-xxxxl;
           letter-spacing: $spacing-v-xs;
         }
+        &__hint {
+          color: $color-text-base-inverse;
+          text-align: center;
+          background: $color-bg-blue-main;
+          height: 1.5 * $font-size-base;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: $font-size-base;
+        }
       }
     }
 

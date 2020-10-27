@@ -1,13 +1,18 @@
 import Taro, {Component} from '@tarojs/taro'
 import {View, ScrollView, Text, Image, Picker} from '@tarojs/components'
 import {AtActivityIndicator, AtButton, AtInputNumber} from 'taro-ui'
+import {connect} from '@tarojs/redux'
 import './index.scss'
 import * as global from '../../constants/global';
-import {getYuan, isInteger} from '../../utils/utils';
+import * as api from '../../constants/api';
+import {getStorage, getYuan, isInteger} from '../../utils/utils';
 import GiftModal from '../../components/modal-gift';
 import flame from '../../assets/live/left-support.png';
+import Request from "../../utils/request";
 
-type PageStateProps = {}
+type PageStateProps = {
+  userInfo: any;
+}
 
 type PageDispatchProps = {}
 
@@ -38,11 +43,10 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface GiftPanel {
-  props: IProps;
+  props: IProps | any;
 }
 
-class GiftPanel extends Component<PageOwnProps, PageState> {
-  static defaultProps = {}
+class GiftPanel extends Component<PageOwnProps | any, PageState> {
 
   numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100];
 
@@ -145,7 +149,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
     this.setState({currentNum: value})
     return value;
   }
-  onGiftSendClick = () => {
+  onGiftSendClick = async () => {
     if (this.state.currentGift == null) {
       Taro.showToast({
         'title': "请选择礼物",
@@ -153,7 +157,33 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
       })
       return;
     }
-    this.setState({giftConfirmOpen: true})
+    const openid = await getStorage('wechatOpenid');
+    let param: any = {
+      userNo: this.props.userInfo.userNo,
+      openId: openid,
+      leagueId: this.props.leagueId,
+      targetId: this.getTargetId(),
+      targetType: this.props.heatType,
+    };
+    let tmplIds: any = [];
+    if (this.props.matchInfo && this.props.matchInfo.status == -1) {
+      tmplIds.push(global.SUBSCRIBE_TEMPLATES.MATCH_START);
+      param.matchId = this.props.matchInfo ? this.props.matchInfo.id : null;
+    }
+    tmplIds.push(global.SUBSCRIBE_TEMPLATES.HEAT_SURPASS);
+    tmplIds.push(global.SUBSCRIBE_TEMPLATES.HEAT_COUNTDOWN);
+
+    Taro.requestSubscribeMessage({tmplIds: tmplIds}).then((res: any) => {
+      this.setState({giftConfirmOpen: true})
+      if (res.errMsg == "requestSubscribeMessage:ok") {
+        delete res.errMsg
+        new Request().post(api.API_SUBSCRIBE, {templateIds: res, ...param}).then((data: any) => {
+          if (data) {
+            Taro.showToast({title: "订阅成功", icon: "none"});
+          }
+        })
+      }
+    })
   }
   onGiftConfrimCancel = () => {
     this.setState({giftConfirmOpen: false})
@@ -177,6 +207,18 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
       }
     }
     this.setState({numSelectorValue: values, numSelector: this.numbers});
+  }
+  getTargetId = () => {
+    if (this.props.heatType == global.HEAT_TYPE.TEAM_HEAT || this.props.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+      if (this.props.supportTeam) {
+        return this.props.supportTeam.id;
+      }
+    } else if (this.props.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.props.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+      if (this.props.supportPlayer) {
+        return this.props.supportPlayer.id;
+      }
+    }
+    return null;
   }
 
   render() {
@@ -280,7 +322,7 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
               num={this.state.currentNum}
               matchId={this.props.matchInfo ? this.props.matchInfo.id : null}
               leagueId={this.props.leagueId ? this.props.leagueId : null}
-              externalId={(this.props.heatType == global.HEAT_TYPE.TEAM_HEAT || this.props.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.props.supportTeam ? this.props.supportTeam.id : ((this.props.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.props.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.props.supportPlayer ? this.props.supportPlayer.id : null)}
+              externalId={this.getTargetId()}
               giftInfo={{price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp}}
               heatType={this.props.heatType}
               handleCancel={this.onGiftConfrimCancel}
@@ -294,4 +336,9 @@ class GiftPanel extends Component<PageOwnProps, PageState> {
   }
 }
 
-export default GiftPanel
+const mapStateToProps = (state) => {
+  return {
+    userInfo: state.user.userInfo,
+  }
+}
+export default connect(mapStateToProps)(GiftPanel)

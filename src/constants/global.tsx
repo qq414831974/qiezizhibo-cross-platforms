@@ -47,6 +47,7 @@ export class FootballEventType {
 
   static TEXT = 1000;//1000:文字描述
 }
+
 export const MATCH_TYPE = {
   timeLine: 1,
   lineUp: 3,
@@ -111,4 +112,9 @@ export const GROWTH_TYPE = {
 export const GIFT_TYPE = {
   FREE: 0,
   CHARGE: 1,
+}
+export const SUBSCRIBE_TEMPLATES = {
+  MATCH_START: "Sh-UGpahk_q0RiXLtY1N1NAvPjO_10rh_vkimwC-Xi0",
+  HEAT_SURPASS: "y8VV0Wp1ndS4phfhSUgrA9QyTwgadZ2VJtmjAOMLx3M",
+  HEAT_COUNTDOWN: "2rDzauHgfdE55lncK3jgCuZuoKyNBeYj6gj4UG03S50"
 }

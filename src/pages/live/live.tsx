@@ -33,7 +33,8 @@ import {
   ORDER_TYPE,
   REPOST_TEXT,
   SHARE_SENTENCE_TYPE,
-  TABS_TYPE
+  TABS_TYPE,
+  SUBSCRIBE_TEMPLATES
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import star from '../../assets/live/star.png'
@@ -1959,6 +1960,29 @@ class Live extends Component<PageOwnProps, PageState> {
   onShareMomentCancel = () => {
     this.setState({shareMomentOpen: false})
   }
+  onSubscribeClick = async () => {
+    // let tmplIds: any = [];
+    // const openid = await getStorage('wechatOpenid');
+    // let param: any = {
+    //   userNo: this.props.userInfo.userNo,
+    //   openId: openid,
+    //   leagueId: this.state.leagueId,
+    // };
+    // if (this.props.match && this.props.match.status == -1) {
+    //   tmplIds.push(SUBSCRIBE_TEMPLATES.MATCH_START);
+    //   param.matchId = this.props.match ? this.props.match.id : null;
+    // }
+    // Taro.requestSubscribeMessage({tmplIds: tmplIds}).then((res: any) => {
+    //   if (res.errMsg == "requestSubscribeMessage:ok") {
+    //     delete res.errMsg
+    //     new Request().post(api.API_SUBSCRIBE, {templateIds: res, ...param}).then((data: any) => {
+    //       if (data) {
+    //         Taro.showToast({title: "订阅成功", icon: "none"});
+    //       }
+    //     })
+    //   }
+    // })
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
@@ -2007,13 +2031,16 @@ class Live extends Component<PageOwnProps, PageState> {
                   <View className="qz-live-match__video-poster">
                     <Image src={match.poster} className="qz-live-match__video-poster-img"/>
                     {liveStatus == LiveStatus.UNOPEN ?
-                      <View className="qz-live-match__video-poster-time">
+                      <View className="qz-live-match__video-poster-time" onClick={this.onSubscribeClick}>
                         <View className='qz-live-match__video-poster-time__title'>
                           <View>距比赛开始还有{diffDayTime.diffDay}</View>
                         </View>
                         <View className='qz-live-match__video-poster-time__time'>
                           <View>{diffDayTime.diffTime}</View>
                         </View>
+                        {/*<View className='qz-live-match__video-poster-time__hint'>*/}
+                        {/*  <View><View className='at-icon at-icon-bell'/>提醒我开始</View>*/}
+                        {/*</View>*/}
                       </View>
                       :
                       <View className="qz-live-match__video-poster-text">
