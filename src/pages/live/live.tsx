@@ -175,6 +175,8 @@ type PageState = {
   shareMomentOpen: any,
   shareMomentPoster: any,
   shareMomentLoading: any,
+  heatStartTime: any,
+  heatEndTime: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -302,6 +304,8 @@ class Live extends Component<PageOwnProps, PageState> {
       shareMomentOpen: false,
       shareMomentPoster: null,
       shareMomentLoading: false,
+      heatStartTime: null,
+      heatEndTime: null,
     }
   }
 
@@ -438,8 +442,22 @@ class Live extends Component<PageOwnProps, PageState> {
   initHeatCompetition = (id) => {
     new Request().get(api.API_MATCH_HEAT, {matchId: id}).then((data: any) => {
       if (data.available) {
+        let heatStartTime: any = null;
+        let heatEndTime: any = null;
+        if (data.type == HEAT_TYPE.LEAGUE_PLAYER_HEAT || data.type == HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+          heatStartTime = this.getLeagueHeatStartTime();
+          heatEndTime = this.getLeagueHeatEndTime();
+        } else {
+          heatStartTime = this.getMatchHeatStartTime();
+          heatEndTime = this.getMatchHeatEndTime();
+        }
         payAction.getGiftList({matchId: id});
-        this.setState({heatRule: data, heatType: data.type}, () => {
+        this.setState({
+          heatRule: data,
+          heatType: data.type,
+          heatStartTime: heatStartTime,
+          heatEndTime: heatEndTime
+        }, () => {
           this.getTeamHeatInfo(id, data.type);
           this.getGiftRanks(id);
         })
@@ -2115,8 +2133,8 @@ class Live extends Component<PageOwnProps, PageState> {
                     heatType={this.state.heatType}
                     onPlayerHeatRefresh={this.onPlayerHeatRefresh}
                     totalHeat={this.state.playerHeatTotal}
-                    startTime={this.state.heatType == HEAT_TYPE.PLAYER_HEAT ? this.getMatchHeatStartTime() : this.getLeagueHeatStartTime()}
-                    endTime={this.state.heatType == HEAT_TYPE.PLAYER_HEAT ? this.getMatchHeatEndTime() : this.getLeagueHeatEndTime()}
+                    startTime={this.state.heatStartTime}
+                    endTime={this.state.heatEndTime}
                     playerHeats={playerHeats}
                     topPlayerHeats={topPlayerHeats}
                     onHandlePlayerSupport={this.handlePlayerSupport}
@@ -2137,8 +2155,8 @@ class Live extends Component<PageOwnProps, PageState> {
                     onTeamHeatRefresh={this.onLeagueTeamHeatRefresh}
                     totalHeat={this.state.leagueTeamHeatTotal}
                     topTeamHeats={this.state.topLeagueTeamHeats}
-                    startTime={this.getLeagueHeatStartTime()}
-                    endTime={this.getLeagueHeatEndTime()}
+                    startTime={this.state.heatStartTime}
+                    endTime={this.state.heatEndTime}
                     teamHeats={this.state.leagueTeamHeats}
                     onHandleTeamSupport={this.handleLeagueTeamSupport}
                     hidden={this.state.currentTab != tabs[TABS_TYPE.heatLeagueTeam]}
@@ -2195,8 +2213,8 @@ class Live extends Component<PageOwnProps, PageState> {
                               teamHeats={teamHeats}
                               onHandleLeftSupport={this.handleLeftSupport}
                               onHandleRightSupport={this.handleRightSupport}
-                              startTime={this.getMatchHeatStartTime()}
-                              endTime={this.getMatchHeatEndTime()}
+                              startTime={this.state.heatStartTime}
+                              endTime={this.state.heatEndTime}
                             />
                             :
                             <NooiceBar

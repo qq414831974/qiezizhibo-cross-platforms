@@ -79,6 +79,8 @@ type PageState = {
   shareMomentOpen: any,
   shareMomentPoster: any,
   shareMomentLoading: any,
+  heatStartTime: any,
+  heatEndTime: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -147,6 +149,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       shareMomentOpen: false,
       shareMomentPoster: null,
       shareMomentLoading: false,
+      heatStartTime: null,
+      heatEndTime: null,
     }
   }
 
@@ -239,7 +243,18 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     new Request().get(api.API_LEAUGE_HEAT, {leagueId: id}).then(async (data: any) => {
       if (data.available) {
         payAction.getGiftList({});
-        this.setState({heatRule: data, heatType: data.type}, () => {
+        let heatStartTime: any = null;
+        let heatEndTime: any = null;
+        if (data.type == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT || data.type == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+          heatStartTime = this.getHeatStartTime(data, this.state.league);
+          heatEndTime = this.getHeatEndTime(data, this.state.league);
+        }
+        this.setState({
+          heatRule: data,
+          heatType: data.type,
+          heatStartTime: heatStartTime,
+          heatEndTime: heatEndTime
+        }, () => {
           this.getGiftRanks(id);
           if (data.type == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
             let {tabs} = this.getTabsList();
@@ -677,8 +692,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   hideGiftPanel = () => {
     this.setState({giftOpen: false})
   }
-  getHeatStartTime = () => {
-    const {heatRule, league} = this.state;
+  getHeatStartTime = (heatRule, league) => {
     if (league && league.dateBegin && heatRule && heatRule.startInterval) {
       let startTime = new Date(league.dateBegin)
       startTime.setMinutes(startTime.getMinutes() + heatRule.startInterval);
@@ -686,8 +700,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     }
     return null
   }
-  getHeatEndTime = () => {
-    const {heatRule, league} = this.state;
+  getHeatEndTime = (heatRule, league) => {
     if (league && league.dateEnd && heatRule && heatRule.endInterval) {
       let endTime = new Date(league.dateEnd)
       endTime.setMinutes(endTime.getMinutes() + heatRule.endInterval);
@@ -972,8 +985,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
                 onPlayerHeatRefresh={this.onPlayerHeatRefresh}
                 totalHeat={this.state.playerHeatTotal}
                 topPlayerHeats={this.state.topPlayerHeats}
-                startTime={this.getHeatStartTime()}
-                endTime={this.getHeatEndTime()}
+                startTime={this.state.heatStartTime}
+                endTime={this.state.heatEndTime}
                 playerHeats={this.state.playerHeats}
                 onHandlePlayerSupport={this.handlePlayerSupport}
                 hidden={this.state.currentTab != tabs[global.LEAGUE_TABS_TYPE.heatPlayer]}
@@ -992,8 +1005,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
                 onTeamHeatRefresh={this.onTeamHeatRefresh}
                 totalHeat={this.state.teamHeatTotal}
                 topTeamHeats={this.state.topTeamHeats}
-                startTime={this.getHeatStartTime()}
-                endTime={this.getHeatEndTime()}
+                startTime={this.state.heatStartTime}
+                endTime={this.state.heatEndTime}
                 teamHeats={this.state.teamHeats}
                 onHandleTeamSupport={this.handleTeamSupport}
                 hidden={this.state.currentTab != tabs[global.LEAGUE_TABS_TYPE.heatTeam]}
