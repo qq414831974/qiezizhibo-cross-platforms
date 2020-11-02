@@ -81,6 +81,7 @@ type PageState = {
   shareMomentLoading: any,
   heatStartTime: any,
   heatEndTime: any,
+  onHandleShareSuccess: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -151,6 +152,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       shareMomentLoading: false,
       heatStartTime: null,
       heatEndTime: null,
+      onHandleShareSuccess: null,
     }
   }
 
@@ -167,6 +169,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   $setOnShareCallback = () => {
+    this.state.onHandleShareSuccess && this.state.onHandleShareSuccess();
     Taro.showToast({title: "分享成功", icon: "none"});
     if (this.state.heatType != null) {
       let freeGift: any = null;
@@ -934,7 +937,9 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   onShareMomentCancel = () => {
     this.setState({shareMomentOpen: false})
   }
-
+  onHandleShareSuccess = (func: any) => {
+    this.setState({onHandleShareSuccess: func});
+  }
   render() {
     const {leaguePlayers, leagueTeams} = this.props
     const {league} = this.state
@@ -1062,6 +1067,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             loading={this.props.giftList == null || this.props.giftList.length == 0}
             onHandlePaySuccess={this.onGiftPaySuccess}
             onHandlePayError={this.onGiftPayError}
+            onHandleShareSuccess={this.onHandleShareSuccess}
             hidden={!this.state.giftOpen}/>
         </AtFloatLayout>
         {this.state.giftSendQueue && this.state.giftSendQueue.map((data: any) => (

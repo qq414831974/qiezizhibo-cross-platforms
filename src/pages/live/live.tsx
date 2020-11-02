@@ -34,7 +34,7 @@ import {
   REPOST_TEXT,
   SHARE_SENTENCE_TYPE,
   TABS_TYPE,
-  SUBSCRIBE_TEMPLATES
+  SUBSCRIBE_TEMPLATES,
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import star from '../../assets/live/star.png'
@@ -177,6 +177,7 @@ type PageState = {
   shareMomentLoading: any,
   heatStartTime: any,
   heatEndTime: any,
+  onHandleShareSuccess: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -306,6 +307,7 @@ class Live extends Component<PageOwnProps, PageState> {
       shareMomentLoading: false,
       heatStartTime: null,
       heatEndTime: null,
+      onHandleShareSuccess: null,
     }
   }
 
@@ -324,6 +326,7 @@ class Live extends Component<PageOwnProps, PageState> {
   $setShareImageUrl = () => this.state.sharePictureUrl ? this.state.sharePictureUrl : null
 
   $setOnShareCallback = () => {
+    this.state.onHandleShareSuccess && this.state.onHandleShareSuccess();
     Taro.showToast({title: "分享成功", icon: "none"});
     if (this.state.heatType != null) {
       let freeGift: any = null;
@@ -396,7 +399,7 @@ class Live extends Component<PageOwnProps, PageState> {
         this.enterTime = formatTimeSecond(new Date());
 
         this.getCommentList(this.props.match.id);
-        this.initHeatCompetition(data.id);
+        this.initHeatCompetition(data);
       }
       Taro.hideLoading();
     })
@@ -439,17 +442,18 @@ class Live extends Component<PageOwnProps, PageState> {
     let bottom = Taro.getSystemInfoSync().safeArea.bottom
     this.setState({isIphoneX: screenHeight != bottom})
   }
-  initHeatCompetition = (id) => {
+  initHeatCompetition = (match) => {
+    const id = match.id;
     new Request().get(api.API_MATCH_HEAT, {matchId: id}).then((data: any) => {
       if (data.available) {
         let heatStartTime: any = null;
         let heatEndTime: any = null;
         if (data.type == HEAT_TYPE.LEAGUE_PLAYER_HEAT || data.type == HEAT_TYPE.LEAGUE_TEAM_HEAT) {
-          heatStartTime = this.getLeagueHeatStartTime();
-          heatEndTime = this.getLeagueHeatEndTime();
+          heatStartTime = this.getLeagueHeatStartTime(data, match);
+          heatEndTime = this.getLeagueHeatEndTime(data, match);
         } else {
-          heatStartTime = this.getMatchHeatStartTime();
-          heatEndTime = this.getMatchHeatEndTime();
+          heatStartTime = this.getMatchHeatStartTime(data, match);
+          heatEndTime = this.getMatchHeatEndTime(data, match);
         }
         payAction.getGiftList({matchId: id});
         this.setState({
@@ -517,16 +521,16 @@ class Live extends Component<PageOwnProps, PageState> {
           if (comment && comment.broadcast) {
             const giftOrder = JSON.parse(comment.content);
             context.addToGiftSendQueue(giftOrder);
-            let broadcastList = context.state.broadcastList;
-            let broadcastText = '';
-            if (giftOrder && giftOrder.user && giftOrder.user.name) {
-              broadcastText = broadcastText + giftOrder.user.name + "送出";
-            }
-            if (giftOrder && giftOrder.gift && giftOrder.gift.name) {
-              broadcastText = broadcastText + giftOrder.gift.name + giftOrder.num + "个";
-            }
-            broadcastList.push({broadcast: true, content: broadcastText, id: giftOrder.id, date: new Date()})
-            context.setState({broadcastList: broadcastList})
+            // let broadcastList = context.state.broadcastList;
+            // let broadcastText = '';
+            // if (giftOrder && giftOrder.user && giftOrder.user.name) {
+            //   broadcastText = broadcastText + giftOrder.user.name + "送出";
+            // }
+            // if (giftOrder && giftOrder.gift && giftOrder.gift.name) {
+            //   broadcastText = broadcastText + giftOrder.gift.name + giftOrder.num + "个";
+            // }
+            // broadcastList.push({broadcast: true, content: broadcastText, id: giftOrder.id, date: new Date()})
+            // context.setState({broadcastList: broadcastList})
             context.getCommentList(context.props.match.id);
           } else {
             if (context.props.matchStatus.status < FootballEventType.FINISH) {
@@ -1036,7 +1040,8 @@ class Live extends Component<PageOwnProps, PageState> {
       // startTime: this.enterTime
     }).then(() => {
       // this.setState({commentIntoView: `message-${this.props.commentList.list.length}`})
-      const commentList: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
+      // const commentList: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
+      const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
       // setTimeout(() => {
       if (commentList && commentList.length > 0) {
         this.setState({
@@ -1063,7 +1068,8 @@ class Live extends Component<PageOwnProps, PageState> {
         matchId: this.props.match.id,
         // startTime: this.enterTime
       }).then(() => {
-        const commentList_next: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
+        // const commentList_next: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
+        const commentList_next: Array<any> = this.getCommentsList(this.props.commentList.records);
         let index = commentList_next.indexOf(commentList[0]) - 1;
         if (index < 0) {
           index = 0
@@ -1768,10 +1774,8 @@ class Live extends Component<PageOwnProps, PageState> {
   hideGiftPanel = () => {
     this.setState({giftOpen: false})
   }
-  getLeagueHeatStartTime = () => {
-    const {match = null} = this.props;
+  getLeagueHeatStartTime = (heatRule, match) => {
     const {league = null} = match;
-    const {heatRule = null} = this.state;
     if (league && league.dateBegin && heatRule && heatRule.startInterval) {
       let startTime = new Date(league.dateBegin)
       startTime.setMinutes(startTime.getMinutes() + heatRule.startInterval);
@@ -1779,10 +1783,8 @@ class Live extends Component<PageOwnProps, PageState> {
     }
     return null
   }
-  getLeagueHeatEndTime = () => {
-    const {match = null} = this.props;
+  getLeagueHeatEndTime = (heatRule, match) => {
     const {league = null} = match;
-    const {heatRule = null} = this.state;
     if (league && league.dateEnd && heatRule && heatRule.endInterval) {
       let endTime = new Date(league.dateEnd)
       endTime.setMinutes(endTime.getMinutes() + heatRule.endInterval);
@@ -1790,9 +1792,7 @@ class Live extends Component<PageOwnProps, PageState> {
     }
     return null
   }
-  getMatchHeatStartTime = () => {
-    const {match = null} = this.props;
-    const {heatRule = null} = this.state;
+  getMatchHeatStartTime = (heatRule, match) => {
     if (match && match.startTime && heatRule && heatRule.startInterval) {
       let startTime = new Date(match.startTime)
       startTime.setMinutes(startTime.getMinutes() + heatRule.startInterval);
@@ -1800,9 +1800,7 @@ class Live extends Component<PageOwnProps, PageState> {
     }
     return null
   }
-  getMatchHeatEndTime = () => {
-    const {match = null} = this.props;
-    const {heatRule = null} = this.state;
+  getMatchHeatEndTime = (heatRule, match) => {
     if (match && match.startTime && match.duration && heatRule && heatRule.endInterval) {
       let endTime = new Date(match.startTime)
       endTime.setMinutes(endTime.getMinutes() + match.duration + heatRule.endInterval);
@@ -1914,7 +1912,7 @@ class Live extends Component<PageOwnProps, PageState> {
   getGiftRanks = (id) => {
     this.setState({giftRanksLoading: true})
     let url = api.API_GIFT_RANK_MATCH(id)
-    if (this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+    if (this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) {
       if (this.state.leagueId != null) {
         url = api.API_GIFT_RANK_LEAGUE(this.state.leagueId)
       } else {
@@ -1979,27 +1977,41 @@ class Live extends Component<PageOwnProps, PageState> {
     this.setState({shareMomentOpen: false})
   }
   onSubscribeClick = async () => {
-    // let tmplIds: any = [];
-    // const openid = await getStorage('wechatOpenid');
-    // let param: any = {
-    //   userNo: this.props.userInfo.userNo,
-    //   openId: openid,
-    //   leagueId: this.state.leagueId,
-    // };
-    // if (this.props.match && this.props.match.status == -1) {
-    //   tmplIds.push(SUBSCRIBE_TEMPLATES.MATCH_START);
-    //   param.matchId = this.props.match ? this.props.match.id : null;
-    // }
-    // Taro.requestSubscribeMessage({tmplIds: tmplIds}).then((res: any) => {
-    //   if (res.errMsg == "requestSubscribeMessage:ok") {
-    //     delete res.errMsg
-    //     new Request().post(api.API_SUBSCRIBE, {templateIds: res, ...param}).then((data: any) => {
-    //       if (data) {
-    //         Taro.showToast({title: "订阅成功", icon: "none"});
-    //       }
-    //     })
-    //   }
-    // })
+    let tmplIds: any = [];
+    const openid = await getStorage('wechatOpenid');
+    let param: any = {
+      userNo: this.props.userInfo.userNo,
+      openId: openid,
+      leagueId: this.state.leagueId,
+    };
+    if (this.props.match && this.props.match.status == -1) {
+      tmplIds.push(SUBSCRIBE_TEMPLATES.MATCH_START);
+      param.matchId = this.props.match ? this.props.match.id : null;
+    }
+    Taro.requestSubscribeMessage({tmplIds: tmplIds}).then((res: any) => {
+      if (res.errMsg == "requestSubscribeMessage:ok") {
+        delete res.errMsg
+        new Request().post(api.API_SUBSCRIBE, {templateIds: res, ...param}).then((data: any) => {
+          if (data) {
+            Taro.showToast({title: "订阅成功", icon: "none"});
+          }
+        })
+      }
+    })
+  }
+  switchToGiftSend = () => {
+    let {tabs} = this.getTabsList(this.props.match);
+    if (this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT) {
+      this.switchTab(tabs[TABS_TYPE.heatPlayer]);
+    } else if (this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+      this.switchTab(tabs[TABS_TYPE.heatLeagueTeam]);
+    } else if (this.state.heatType == HEAT_TYPE.TEAM_HEAT) {
+      this.switchTab(tabs[TABS_TYPE.matchUp]);
+    }
+    this.onPayCancel();
+  }
+  onHandleShareSuccess = (func: any) => {
+    this.setState({onHandleShareSuccess: func});
   }
 
   render() {
@@ -2022,10 +2034,10 @@ class Live extends Component<PageOwnProps, PageState> {
                                   className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
             </View>
             :
-            (this.state.needGiftLive && match.status != FootballEventType.FINISH && this.state.heatRule && this.state.heatRule.available ?
+            (this.state.needGiftLive && match.status != FootballEventType.FINISH && liveStatus != LiveStatus.UNOPEN  && this.state.heatRule && this.state.heatRule.available ?
               <View className='qz-live-match__video'>
                 <Image src={match.poster} className="qz-live-match__video-poster-img"/>
-                {match && <AtButton type='primary'
+                {match && <AtButton type='primary' onClick={this.switchToGiftSend}
                                     className="qz-live-match__video-poster-pay">投一票 看直播</AtButton>}
               </View>
               :
@@ -2056,9 +2068,9 @@ class Live extends Component<PageOwnProps, PageState> {
                         <View className='qz-live-match__video-poster-time__time'>
                           <View>{diffDayTime.diffTime}</View>
                         </View>
-                        {/*<View className='qz-live-match__video-poster-time__hint'>*/}
-                        {/*  <View><View className='at-icon at-icon-bell'/>提醒我开始</View>*/}
-                        {/*</View>*/}
+                        <View className='qz-live-match__video-poster-time__hint'>
+                          <View><View className='at-icon at-icon-bell'/>提醒我开始</View>
+                        </View>
                       </View>
                       :
                       <View className="qz-live-match__video-poster-text">
@@ -2302,6 +2314,7 @@ class Live extends Component<PageOwnProps, PageState> {
           handleCancel={this.onPayCancel}
           handleClose={this.onPayClose}
           handleError={this.onPayError}
+          handleToGiftSend={this.switchToGiftSend}
           payEnabled={payEnabled}/>
         <HeatReward
           heatRule={this.state.heatRule}
@@ -2347,6 +2360,7 @@ class Live extends Component<PageOwnProps, PageState> {
             loading={this.props.giftList == null || this.props.giftList.length == 0}
             onHandlePaySuccess={this.onGiftPaySuccess}
             onHandlePayError={this.onGiftPayError}
+            onHandleShareSuccess={this.onHandleShareSuccess}
             hidden={!this.state.giftOpen}/>
         </AtFloatLayout>
         <ShareMoment

@@ -49,6 +49,7 @@ type PageDispatchProps = {
   handleCancel: () => any,
   handleClose: (event?: any) => any,
   handleError: (event?: any) => any
+  handleToGiftSend: () => any
 }
 
 type PageOwnProps = {
@@ -183,7 +184,7 @@ class ModalPay extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {isOpened = false, handleCancel, charge, payEnabled, giftDiscount} = this.props;
+    const {isOpened = false, handleCancel, handleToGiftSend, charge, payEnabled, giftDiscount} = this.props;
     const {isChargeOpen = false, isMonopolyOpen = false} = this.state;
 
     if (!payEnabled) {
@@ -216,6 +217,11 @@ class ModalPay extends Component<PageOwnProps, PageState> {
               {/*<View className="gray qz-pay-modal-content_tip">*/}
               {/*  • 本场比赛需要付费观看*/}
               {/*</View>*/}
+              {(charge && charge.monopolyOnly) || !giftDiscount ? null : <View>
+                <View className="gray qz-pay-modal-content_tip-highlight">
+                  • <View className="highlight">投票观看，{this.getGiftDiscount()}折优惠（推荐）</View>
+                </View>
+              </View>}
               {charge && charge.monopolyOnly ? null : <View>
                 <View className="gray qz-pay-modal-content_tip">
                   • 本场比赛限时观看一个月 价格{charge ? getYuan(charge.secondPrice) : 0}（元）
@@ -227,11 +233,6 @@ class ModalPay extends Component<PageOwnProps, PageState> {
               {charge && charge.isMonopolyCharge ? <View className="gray qz-pay-modal-content_tip">
                 • 本场比赛请大家围观 价格{charge ? getYuan(charge.monopolyPrice) : 0}（元）
               </View> : null}
-              {(charge && charge.monopolyOnly) || !giftDiscount ? null : <View>
-                <View className="gray qz-pay-modal-content_tip-highlight">
-                  • <View className="highlight">投票观看，{this.getGiftDiscount()}折优惠（推荐）</View>
-                </View>
-              </View>}
               {charge && charge.monopolyOnly ? null : <View className="light-gray qz-pay-modal-content_tip">
                 • 购买永久后，本场比赛可无限次数观看
               </View>}
@@ -275,9 +276,9 @@ class ModalPay extends Component<PageOwnProps, PageState> {
                 :
                 (<AtModalAction>
                   <Button className="black" onClick={this.handleChargeOpen}>购买(本场)</Button>
-                  <Button className="black qz-pay-modal-support" onClick={handleCancel}>
+                  <Button className="black qz-pay-modal-support" onClick={handleToGiftSend}>
                     <Image className="qz-pay-modal-support-image" src={flame}/>
-                    <View className="qz-pay-modal-support-text">去投票</View>
+                    <View className="qz-pay-modal-support-text">去投票购买</View>
                   </Button>
                 </AtModalAction>)
             )

@@ -41,11 +41,13 @@
       margin-left: $spacing-v-sm;
       display: flex;
       align-items: center;
-      image{
+
+      image {
         width: $font-size-xs;
         height: $font-size-xs;
       }
-      text{
+
+      text {
         margin-left: $spacing-v-xxs;
       }
     }
@@ -124,6 +126,7 @@
       border-radius: 10px;
       box-sizing: border-box;
       height: min-content;
+      position: relative;
 
       &-img-container {
         display: flex;
@@ -141,6 +144,17 @@
         color: $color-text-title;
       }
 
+      &-freewatch {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: $font-size-xxs;
+        padding: $spacing-v-xxs $spacing-v-xs;
+        background: $color-highlight;
+        color: $color-text-base-inverse;
+        border-radius: 5px;
+      }
+
       &-price {
         display: flex;
         justify-content: center;
@@ -148,7 +162,8 @@
         width: 100%;
         font-size: $font-size-xs;
         color: $color-grey-2;
-        &__image{
+
+        &__image {
           width: $font-size-xs !important;
           height: $font-size-xs !important;
         }

@@ -45,6 +45,7 @@ type PageState = {
   currentTeamHeat: any;
   loadingMore: any;
   pulldownRefresh: any;
+  heatStatus: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -100,6 +101,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     this.clearTimer_CountDown();
     const timerID_CountDown = setInterval(() => {
       const status = this.getStatus();
+      this.setState({heatStatus: status})
       if (status == STATUS.unopen) {
         this.getStartDiffTime()
       } else if (status == STATUS.open) {
@@ -132,13 +134,13 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     }
   }
   handleSupport = () => {
-    if (this.getStatus() != STATUS.open && this.getStatus() == STATUS.unopen) {
+    if (this.state.heatStatus != STATUS.open && this.state.heatStatus == STATUS.unopen) {
       Taro.showToast({
         title: "PK还未开始",
         icon: "none"
       })
       return;
-    } else if (this.getStatus() != STATUS.open && this.getStatus() == STATUS.finish) {
+    } else if (this.state.heatStatus != STATUS.open && this.state.heatStatus == STATUS.finish) {
       Taro.showToast({
         title: "PK已结束",
         icon: "none"
@@ -269,6 +271,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     let isTopTeamHeat = this.isTopTeamHeat;
     const onTeamClick = this.onTeamClick;
     const getHeat = this.getHeat;
+    const heatStatus = this.state.heatStatus;
     if (hidden) {
       return <View/>
     }
@@ -309,9 +312,9 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
                   活动结束倒计时
                 </View>
                 <View className="w-full center qz-heat-team-header__status-value">
-                  {this.getStatus() == STATUS.unopen ? `${startDiffDayTime ? `${startDiffDayTime.diffTime ? startDiffDayTime.diffDay + startDiffDayTime.diffTime : ""}` : ""}后开始PK` : ""}
-                  {this.getStatus() == STATUS.open ? `PK中 ${endDiffDayTime ? `${endDiffDayTime.diffTime ? endDiffDayTime.diffDay + endDiffDayTime.diffTime : ""}` : ""}` : ""}
-                  {this.getStatus() == STATUS.finish ? `PK已结束` : ""}
+                  {heatStatus == STATUS.unopen ? `${startDiffDayTime ? `${startDiffDayTime.diffTime ? startDiffDayTime.diffDay + startDiffDayTime.diffTime : ""}` : ""}后开始PK` : ""}
+                  {heatStatus == STATUS.open ? `PK中 ${endDiffDayTime ? `${endDiffDayTime.diffTime ? endDiffDayTime.diffDay + endDiffDayTime.diffTime : ""}` : ""}` : ""}
+                  {heatStatus == STATUS.finish ? `PK已结束` : ""}
                 </View>
               </View>
             </View>

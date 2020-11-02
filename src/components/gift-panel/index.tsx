@@ -25,6 +25,7 @@ type PageOwnProps = {
   supportPlayer: any;
   onHandlePaySuccess: any;
   onHandlePayError: any;
+  onHandleShareSuccess: any;
   hidden: any;
   leagueId: any;
   giftWatchPrice?: any;
@@ -63,6 +64,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
   }
 
   componentDidMount() {
+    this.props.onHandleShareSuccess && this.props.onHandleShareSuccess(this.clearCurrentGift);
     this.setState({numSelectorValue: this.numbers, numSelector: this.numbers});
   }
 
@@ -166,12 +168,16 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
       targetType: this.props.heatType,
     };
     let tmplIds: any = [];
+    let hintString: any = "";
     if (this.props.matchInfo && this.props.matchInfo.status == -1) {
       tmplIds.push(global.SUBSCRIBE_TEMPLATES.MATCH_START);
       param.matchId = this.props.matchInfo ? this.props.matchInfo.id : null;
+      hintString = hintString + "开赛提醒，";
     }
     tmplIds.push(global.SUBSCRIBE_TEMPLATES.HEAT_SURPASS);
     tmplIds.push(global.SUBSCRIBE_TEMPLATES.HEAT_COUNTDOWN);
+    hintString = hintString + "人气榜提醒";
+
 
     Taro.requestSubscribeMessage({tmplIds: tmplIds}).then((res: any) => {
       this.setState({giftConfirmOpen: true})
@@ -179,10 +185,13 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
         delete res.errMsg
         new Request().post(api.API_SUBSCRIBE, {templateIds: res, ...param}).then((data: any) => {
           if (data) {
-            Taro.showToast({title: "订阅成功", icon: "none"});
+            Taro.showToast({title: `订阅成功，将接收到${hintString}`, icon: "none", duration: 3000});
           }
         })
       }
+    }).catch(() => {
+      this.setState({giftConfirmOpen: true})
+      Taro.showToast({title: `未订阅，则无法收到${hintString}`, icon: "none", duration: 3000});
     })
   }
   onGiftConfrimCancel = () => {
@@ -220,15 +229,19 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
     }
     return null;
   }
+  clearCurrentGift = () => {
+    this.setState({currentGift: null, currentNum: 0});
+  }
 
   render() {
-    const {gifts = [], loading = false, heatType = 0, hidden = false} = this.props
+    const {gifts = [], loading = false, heatType = 0, hidden = false, giftWatchPrice = null, giftWatchEternalPrice = null} = this.props
     const {currentGift = null, currentNum = 0} = this.state
     const discountPrice = this.getGiftDiscountPriceByNum(currentGift, currentNum);
     const realPrice = this.getGiftRealPriceByNum(currentGift, currentNum);
     const heat = this.getGiftGrowthByType(this.state.currentGift, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, currentNum)
     const exp = this.getGiftGrowthByType(this.state.currentGift, global.GROWTH_TYPE.USER_EXP, currentNum)
     const onGiftClick = this.onGiftClick;
+    const giftInfo = {price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp}
 
     return (
       <View className="qz-gifts">
@@ -258,6 +271,11 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
                         <Image className="qz-gifts__grid-item-price__image" src={flame}/>
                         <Text>+{this.getGiftGrowthByType(data, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, 1)}票</Text>
                       </View>
+                      {(giftWatchPrice != null || giftWatchEternalPrice != null) && data.price != null && data.price >= giftWatchPrice ?
+                        <View className="qz-gifts__grid-item-freewatch">
+                          送本场录像
+                        </View>
+                        : null}
                     </View>
                   )
                 )}
@@ -315,15 +333,15 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
               </View>
             </View>
             <GiftModal
-              giftWatchPrice={this.props.giftWatchPrice}
-              giftWatchEternalPrice={this.props.giftWatchEternalPrice}
+              giftWatchPrice={giftWatchPrice}
+              giftWatchEternalPrice={giftWatchEternalPrice}
               isOpened={this.state.giftConfirmOpen}
               gift={this.state.currentGift}
               num={this.state.currentNum}
               matchId={this.props.matchInfo ? this.props.matchInfo.id : null}
               leagueId={this.props.leagueId ? this.props.leagueId : null}
               externalId={this.getTargetId()}
-              giftInfo={{price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp}}
+              giftInfo={giftInfo}
               heatType={this.props.heatType}
               handleCancel={this.onGiftConfrimCancel}
               handleConfirm={this.onGiftConfrim}

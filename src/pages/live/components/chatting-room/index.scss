@@ -76,7 +76,8 @@
 
   &__chat-item-center {
     justify-content: center;
-    .qz-chatting-room__chat-text__broadcast{
+
+    .qz-chatting-room__chat-text__broadcast {
       width: 100%;
       text-align: center;
       color: $color-text-placeholder;
@@ -144,13 +145,18 @@
       word-break: break-all;
       //width: fit-content;
       //height: fit-content;
-      text {
+      &-content {
         display: flex;
         justify-content: center;
         font-size: $font-size-sm;
         color: $color-text-base-inverse;
         line-height: $line-height-en;
         letter-spacing: 1px;
+      }
+
+      &-image {
+        width: $font-size-sm;
+        height: $font-size-sm;
       }
     }
   }

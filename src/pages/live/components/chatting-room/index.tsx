@@ -1,7 +1,7 @@
 import Taro, {Component} from '@tarojs/taro'
 // import {connect} from '@tarojs/redux'
-import {View, ScrollView, Text, Image} from '@tarojs/components'
-import {AtInput, AtButton, AtActivityIndicator} from 'taro-ui'
+import {Image, ScrollView, Text, View} from '@tarojs/components'
+import {AtActivityIndicator, AtButton, AtInput} from 'taro-ui'
 import './index.scss'
 import noperson from '../../../../assets/no-person.png';
 
@@ -74,6 +74,9 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
       return date1 > date2 ? 1 : (date1 == date2 ? 0 : -1)
     });
   }
+  getGfitOrder = (content) => {
+    return JSON.parse(content);
+  }
 
   render() {
     const {comments = [], loading = false, intoView = ''} = this.props
@@ -102,10 +105,20 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
                           id={`message-${item.id}`}
                           className="qz-chatting-room__chat-item qz-chatting-room__chat-item-right">
                       <View className="qz-chatting-room__chat-text-container">
-                        <View className="qz-chatting-room__chat-text__text">
-                          {/*<Text>{`message-${index}`}</Text>*/}
-                          <Text>{item.content}</Text>
-                        </View>
+                        {item.isHint ?
+                          <View className="qz-chatting-room__chat-text__text">
+                            <View
+                              className="qz-chatting-room__chat-text__text-content">{`送给${this.getGfitOrder(item.content).targetName}`}
+                              <Image className="qz-chatting-room__chat-text__text-image"
+                                     src={this.getGfitOrder(item.content).giftPic}/>
+                              x{this.getGfitOrder(item.content).num}
+                            </View>
+                          </View>
+                          :
+                          <View className="qz-chatting-room__chat-text__text">
+                            {/*<Text>{`message-${index}`}</Text>*/}
+                            <Text className="qz-chatting-room__chat-text__text-content">{item.content}</Text>
+                          </View>}
                       </View>
                       <View className="qz-chatting-room__chat-avatar-container">
                         <View className="qz-chatting-room__chat-avatar__avatar">
@@ -133,10 +146,20 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
                         </View>
                       </View>
                       <View className="qz-chatting-room__chat-text-container">
-                        <View className="qz-chatting-room__chat-text__text">
-                          {/*<Text>{`message-${index}`}</Text>*/}
-                          <Text>{item.content}</Text>
-                        </View>
+                        {item.isHint ?
+                          <View className="qz-chatting-room__chat-text__text">
+                            <View
+                              className="qz-chatting-room__chat-text__text-content">{`送给${this.getGfitOrder(item.content).targetName}`}
+                              <Image className="qz-chatting-room__chat-text__text-image"
+                                     src={this.getGfitOrder(item.content).giftPic}/>
+                              x{this.getGfitOrder(item.content).num}
+                            </View>
+                          </View>
+                          :
+                          <View className="qz-chatting-room__chat-text__text">
+                            {/*<Text>{`message-${index}`}</Text>*/}
+                            <Text className="qz-chatting-room__chat-text__text-content">{item.content}</Text>
+                          </View>}
                       </View>
                     </View>
                 )))}
