@@ -227,8 +227,12 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
   handleShare = () => {
 
   }
-  handleShareMoment = () => {
-    if (this.state.currentTeamHeat == null) {
+  handleShareMoment = (teamHeat) => {
+    let currentTeamHeat = this.state.currentTeamHeat;
+    if (teamHeat != null) {
+      currentTeamHeat = teamHeat;
+    }
+    if (currentTeamHeat == null) {
       Taro.showToast({
         title: "请选择球队",
         icon: "none"
@@ -238,7 +242,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     this.props.onPictureDownLoading && this.props.onPictureDownLoading();
     let params: any = {
       leagueId: this.props.leagueId,
-      teamId: this.state.currentTeamHeat.teamId,
+      teamId: currentTeamHeat.teamId,
       heatType: this.props.heatType,
     }
     if (this.props.matchId) {
@@ -358,11 +362,11 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
                       margin="0 0 0 10px"
                       size={25}
                       img={moment}
-                      onClick={this.handleShareMoment}/>
+                      onClick={this.handleShareMoment.bind(this, data)}/>
                   </View>
                   <View className="qz-heat-team__list-item-heat">
                     <Image src={flame}/>
-                    <Text className="qz-heat-team__list-item-heat-value">{getHeat(data)}票</Text>
+                    <Text className="qz-heat-team__list-item-heat-value">{getHeat(data)}</Text>
                   </View>
                 </View>
               )
@@ -384,7 +388,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
                   </View>
                   <View className="qz-heat-team-footer-heat">
                     <Image src={flame}/>
-                    <Text>{getHeat(currentTeamHeat)}票</Text>
+                    <Text>{getHeat(currentTeamHeat)}</Text>
                     {/*<Text>(第{currentTeamHeat.index}名)</Text>*/}
                   </View>
                 </View>
@@ -419,7 +423,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
                 circle
                 onClick={this.handleSupport}
               >
-                投票
+                点赞
               </AtButton>
             </View>
           </View>

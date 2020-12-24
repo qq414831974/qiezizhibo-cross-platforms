@@ -79,7 +79,7 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                       {`${onlytime ? formatMonthDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))} ${eventType[matchStatus.status != null ? matchStatus.status : -1].text}`}
                     </Text>
                     <Text
-                      className={matchStatus.penaltyscore ? 'qz-match-up-item__vs-match-score qz-match-up-item__vs-match-score-small' : 'qz-match-up-item__vs-match-score'}>
+                      className={matchStatus.penaltyscore || matchStatus.score.length > 5 ? 'qz-match-up-item__vs-match-score qz-match-up-item__vs-match-score-small' : 'qz-match-up-item__vs-match-score'}>
                       {matchStatus.status == -1 ? "VS" : matchStatus.score}
                     </Text>
                     {matchStatus.penaltyscore ?

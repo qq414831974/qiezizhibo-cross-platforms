@@ -2,6 +2,8 @@ import "taro-ui/dist/style/components/article.scss";
 import Taro, {Component} from '@tarojs/taro'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button, Input} from '@tarojs/components'
+import {connect} from '@tarojs/redux'
+
 import Request from '../../utils/request'
 import {getStorage, toLogin} from '../../utils/utils'
 import * as api from '../../constants/api'
@@ -15,6 +17,7 @@ type GiftInfo = {
   realPrice: number | null,
   heatValue: number | null,
   expValue: number | null,
+  freeBetTime: number | null,
 }
 
 type UnifiedJSAPIOrderResult = {
@@ -36,12 +39,17 @@ interface SignType {
 
 type PageStateProps = {
   isOpened: boolean,
+  payEnabled: boolean;
+  userInfo: any;
+  deposit: number;
 }
 
 type PageDispatchProps = {
   handleConfirm: (data?: any) => any,
   handleCancel: () => any,
-  handleError: (event?: any) => any
+  handleError: (event?: any) => any,
+  onPayConfirm: (callback: any, price: any) => any,
+  onPayClose: () => any,
 }
 
 type PageOwnProps = {
@@ -69,15 +77,7 @@ interface ModalGift {
   props: IProps;
 }
 
-class ModalGift extends Component<PageOwnProps, PageState> {
-  static defaultProps = {
-    handleCancel: () => {
-    },
-    handleConfirm: () => {
-    },
-    handleError: () => {
-    },
-  }
+class ModalGift extends Component<PageOwnProps | any, PageState> {
 
   constructor(props) {
     super(props)
@@ -117,12 +117,66 @@ class ModalGift extends Component<PageOwnProps, PageState> {
       return;
     }
     if (gift.type == global.GIFT_TYPE.CHARGE) {
-      this.sendChargeGift(openId, userNo);
+      if (this.props.deposit == null || this.props.deposit == 0) {
+        this.sendGift(global.PAY_TYPE.ONLINE);
+        return;
+      }
+      this.props.onPayConfirm && this.props.onPayConfirm(this.sendGift, giftInfo.price)
     } else if (gift.type == global.GIFT_TYPE.FREE) {
       this.sendFreeGift(userNo);
     }
   }
-  sendChargeGift = (openId, userNo) => {
+  sendGift = (type) => {
+    if (type == global.PAY_TYPE.ONLINE) {
+      this.sendChargeGift();
+    } else if (type == global.PAY_TYPE.DEPOSIT) {
+      this.sendDepositGift();
+    }
+  }
+  sendDepositGift = async () => {
+    const openId = await getStorage('wechatOpenid')
+    const userNo = await getStorage('userNo')
+    const {handleConfirm, handleError, gift, num = 0} = this.props;
+    Taro.showLoading({title: global.LOADING_TEXT})
+    if (this.state.isPaying) {
+      return;
+    }
+    this.setState({isPaying: true})
+    new Request().post(api.API_DEPOSIT, {
+      openId: openId,
+      userNo: userNo,
+      type: global.ORDER_TYPE.gift,
+      description: `茄子TV-礼物-${gift.id}-${num}-${this.props.leagueId}-${this.props.matchId}-${this.props.heatType}-${this.props.externalId}`,
+      products: [{productId: gift.productId, number: num, isSecond: false}],
+      attach: JSON.stringify({
+        matchId: this.props.matchId,
+        leagueId: this.props.leagueId,
+        type: global.GIFT_TYPE.CHARGE,
+        giftId: gift.id,
+        externalId: this.props.externalId,
+        targetType: this.props.heatType,
+        num: num
+      })
+    }).then((orderResult: any) => {
+      this.setState({isPaying: false})
+      Taro.hideLoading();
+      this.props.onPayClose && this.props.onPayClose();
+      if (orderResult) {
+        handleConfirm(orderResult.orderId);
+      } else {
+        handleError(error.ERROR_PAY_ERROR);
+      }
+    }).catch(reason => {
+      this.setState({isPaying: false})
+      Taro.hideLoading();
+      this.props.onPayClose && this.props.onPayClose();
+      console.log(reason);
+      handleError(error.ERROR_PAY_ERROR);
+    });
+  }
+  sendChargeGift = async () => {
+    const openId = await getStorage('wechatOpenid')
+    const userNo = await getStorage('userNo')
     const {handleConfirm, handleError, gift, num = 0} = this.props;
     Taro.showLoading({title: global.LOADING_TEXT})
     if (this.state.isPaying) {
@@ -133,7 +187,7 @@ class ModalGift extends Component<PageOwnProps, PageState> {
       openId: openId,
       userNo: userNo,
       type: global.ORDER_TYPE.gift,
-      description: `茄子体育-礼物-${gift.id}-${num}-${this.props.leagueId}-${this.props.matchId}-${this.props.heatType}-${this.props.externalId}`,
+      description: `茄子TV-礼物-${gift.id}-${num}-${this.props.leagueId}-${this.props.matchId}-${this.props.heatType}-${this.props.externalId}`,
       products: [{productId: gift.productId, number: num, isSecond: false}],
       attach: JSON.stringify({
         matchId: this.props.matchId,
@@ -146,7 +200,9 @@ class ModalGift extends Component<PageOwnProps, PageState> {
       })
     }).then((unifiedResult: UnifiedJSAPIOrderResult) => {
       this.setState({isPaying: false})
+      this.props.onPayClose && this.props.onPayClose();
       if (unifiedResult) {
+        Taro.hideLoading();
         Taro.requestPayment(
           {
             timeStamp: unifiedResult.timeStamp,
@@ -167,16 +223,16 @@ class ModalGift extends Component<PageOwnProps, PageState> {
               }
             },
           })
-        Taro.hideLoading();
       } else {
-        handleError(error.ERROR_PAY_ERROR);
         Taro.hideLoading();
+        handleError(error.ERROR_PAY_ERROR);
       }
     }).catch(reason => {
+      Taro.hideLoading();
       this.setState({isPaying: false})
+      this.props.onPayClose && this.props.onPayClose();
       console.log(reason);
       handleError(error.ERROR_PAY_ERROR);
-      Taro.hideLoading();
     })
   }
   sendFreeGift = (userNo) => {
@@ -268,6 +324,11 @@ class ModalGift extends Component<PageOwnProps, PageState> {
                 • 经验 +{giftInfo.expValue}
               </View>
               : null}
+            {giftInfo && giftInfo.freeBetTime ?
+              <View className="light-gray qz-gift-modal-content_tip">
+                • 免费竞猜次数 +{giftInfo.freeBetTime}
+              </View>
+              : null}
             {(giftWatchPrice != null || giftWatchEternalPrice != null) && giftInfo != null && giftInfo.price != null && giftInfo.price * 100 >= giftWatchPrice ?
               <View className="gray qz-gift-modal-content_tip">
                 • <View
@@ -305,4 +366,11 @@ class ModalGift extends Component<PageOwnProps, PageState> {
   }
 }
 
-export default ModalGift
+const mapStateToProps = (state) => {
+  return {
+    deposit: state.deposit.depositInfo ? state.deposit.depositInfo.deposit : 0,
+    userInfo: state.user.userInfo,
+    payEnabled: state.config ? state.config.payEnabled : null,
+  }
+}
+export default connect(mapStateToProps)(ModalGift)

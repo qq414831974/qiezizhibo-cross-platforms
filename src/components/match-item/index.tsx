@@ -27,10 +27,13 @@ type PageDispatchProps = {}
 type PageOwnProps = {
   matchInfo: any;
   onClick: any | null;
+  onBetClick: any | null;
   className?: string | null;
   onlytime?: boolean | null;
   showRound?: boolean;
   showCharge?: boolean;
+  showBet?: boolean;
+  forceClick?: boolean;
 }
 
 type PageState = {}
@@ -45,20 +48,26 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
   static defaultProps = {}
 
   onItemClick = () => {
-    if (this.props.matchInfo.activityId) {
-      this.props.onClick();
+    if (this.props.matchInfo.activityId || this.props.forceClick) {
+      this.props.onClick && this.props.onClick();
     }
+  }
+  onBetClick = (e) => {
+    e.stopPropagation();
+    this.props.onBetClick && this.props.onBetClick();
   }
 
   render() {
-    const {matchInfo, className = "", onlytime = false, showRound = true, showCharge = true, payEnabled} = this.props
+    const {matchInfo, className = "", onlytime = false, showRound = true, showCharge = true, payEnabled, showBet = true} = this.props
     if (matchInfo == null) {
       return <View/>
     }
+    // matchInfo.isBetEnable = true
     return (
-      <View className={"qz-match-item " + className} onClick={this.onItemClick}>
+      <View className={`qz-match-item ${matchInfo.isBetEnable && showBet ? "qz-match-item-big" : ""} ${className}`}
+            onClick={this.onItemClick}>
         {matchInfo.hostteam != null && matchInfo.guestteam != null ?
-          <View className="qz-match-item-content">
+          <View className={`qz-match-item-content ${matchInfo.isBetEnable && showBet? "qz-match-item-content-big" : ""}`}>
             {((matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
               <View className="qz-match-item__charge">
                 {matchInfo.isMonopoly ?
@@ -74,6 +83,13 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
               </View>
               : null
             }
+            {matchInfo.isBetEnable && showBet ?
+              <View className="qz-match-item-top-skewed" onClick={this.onBetClick}>
+                <View className="qz-match-item-top-skewed-center-text">
+                  比分竞猜
+                </View>
+              </View>
+              : null}
             <View className='qz-match-item__team'>
               <View className="qz-match-item__team-avatar">
                 <AtAvatar circle

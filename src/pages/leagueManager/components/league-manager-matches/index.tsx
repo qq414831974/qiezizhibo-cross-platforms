@@ -41,7 +41,7 @@ class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
   config: Config = {
-    navigationBarTitleText: '茄子体育',
+    navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
   }
@@ -109,6 +109,9 @@ class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
     let orderby = "asc"
     let {leagueMatch = {round: {rounds: []}}} = this.props
     let tabList = this.getTabList(leagueMatch.round ? leagueMatch.round.rounds : [])
+    if (this.props.matchList.current == null) {
+      return;
+    }
     this.setState({matchLoadingMore: true})
     matchAction.getMatchList_add({
       pageNum: this.props.matchList.current + 1,

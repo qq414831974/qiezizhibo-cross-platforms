@@ -13,7 +13,32 @@ let refreshingInterval = {};
  * // NOTE 需要注意 RN 不支持 *StorageSync，此处用 async/await 解决
  * @param {*} options
  */
+const interceptor = function (chain) {
+  const requestParams = chain.requestParams;
+  const {method, data} = requestParams;
 
+
+  if (method === 'GET') {
+    if (data) {
+      for (let dataKey in data) {
+        const params = data[dataKey];
+        if(Array.isArray(params)){
+          if(params.length > 0){
+            data[dataKey] = params.join()
+          }else{
+            delete data[dataKey];
+          }
+        }
+      }
+      requestParams.data = data;
+    }
+  }
+  return chain.proceed(requestParams)
+    .then(res => {
+      return res
+    })
+};
+Taro.addInterceptor(interceptor);
 const updateRefreshing = (data = false) => {
   refreshing = data;
   // return Promise.all([

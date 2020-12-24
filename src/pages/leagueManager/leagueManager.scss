@@ -124,6 +124,18 @@
   animation: zoom ease-in-out 1s infinite;
 }
 
+.qz-league-manager-fab-betrank {
+  position: fixed;
+  bottom: 20%;
+  right: 16px;
+}
+.qz-league-manager-fab-close {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  height: 30px;
+  width: 30px;
+}
 .qz-league-manager-fab {
   background: $color-bg-transparent;
 

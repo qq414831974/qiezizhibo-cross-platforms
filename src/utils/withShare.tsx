@@ -1,7 +1,7 @@
 import Taro from '@tarojs/taro';
 
 const defalutPath = 'pages/home/home';
-const defalutTitle = '茄子体育';
+const defalutTitle = '茄子TV';
 
 /*
 @withShare({

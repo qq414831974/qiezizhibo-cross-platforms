@@ -52,7 +52,7 @@ interface User {
 }
 
 @withShare({
-  title: '茄子体育',
+  title: '茄子TV',
   imageUrl: logo,
   path: 'pages/home/home'
 })
@@ -84,6 +84,8 @@ class User extends Component<PageOwnProps, PageState> {
       collectNum: 0,
     }
   }
+
+  $setSharePath = () => `/pages/home/home?page=user`
 
   componentWillMount() {
   }
@@ -375,6 +377,30 @@ class User extends Component<PageOwnProps, PageState> {
     }
     Taro.navigateTo({url: `../orders/orders`});
   }
+  onAddressClick = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      this.setState({loginOpen: true})
+      return;
+    }
+    Taro.navigateTo({url: `../address/address`});
+  }
+  onBetClick = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      this.setState({loginOpen: true})
+      return;
+    }
+    Taro.navigateTo({url: `../betOrders/betOrders`});
+  }
+  onDepositClick = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      this.setState({loginOpen: true})
+      return;
+    }
+    Taro.navigateTo({url: `../deposit/deposit`});
+  }
 
   render() {
     const {userInfo, locationConfig, payEnabled} = this.props
@@ -413,12 +439,26 @@ class User extends Component<PageOwnProps, PageState> {
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
+          <Button onClick={this.onBetClick} className='list button-list'>
+            <View className='list_title'>
+              <AtIcon className='list-title-icon' value='shopping-bag' size='18' color='#333'/>
+              {payEnabled ? "我的竞猜" : "我的竞猜"}
+            </View>
+            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
+          </Button>
+          <Button onClick={this.onDepositClick} className='list button-list'>
+            <View className='list_title'>
+              <AtIcon className='list-title-icon' value='money' size='18' color='#333'/>
+              {payEnabled ? "我的茄币" : "我的茄币"}
+            </View>
+            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
+          </Button>
         </View>
         <View className='qz-user-list-view'>
-          <Button open-type="openSetting" className='list button-list'>
+          <Button onClick={this.onAddressClick} className='list button-list'>
             <View className='list_title'>
-              <AtIcon className='list-title-icon' value='check-circle' size='18' color='#333'/>
-              授权设置
+              <AtIcon className='list-title-icon' value='map-pin' size='18' color='#333'/>
+              我的地址
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
@@ -429,6 +469,13 @@ class User extends Component<PageOwnProps, PageState> {
             </View>
             {userInfo && userInfo.phone ? <AtIcon value='check-circle' size='18' color='#13CE66'/>
               : <AtIcon value='alert-circle' size='18' color='#FFC82C'/>}
+          </Button>
+          <Button open-type="openSetting" className='list button-list'>
+            <View className='list_title'>
+              <AtIcon className='list-title-icon' value='check-circle' size='18' color='#333'/>
+              授权设置
+            </View>
+            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
           <Button open-type="share" className='list button-list'>
             <View className='list_title'>

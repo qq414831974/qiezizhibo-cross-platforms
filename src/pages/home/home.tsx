@@ -18,6 +18,9 @@ import MatchItem from "../../components/match-item";
 import withLogin from "../../utils/withLogin";
 import * as global from '../../constants/global'
 import withShare from "../../utils/withShare";
+import Request from '../../utils/request'
+import * as api from "../../constants/api";
+import {getStorage} from "../../utils/utils";
 
 // import {getStorage, hasLogin} from "../../utils/utils";
 
@@ -40,6 +43,7 @@ type PageStateProps = {
   locationConfig: any,
   leagueList: any,
   areaList: any,
+  userInfo: any;
 }
 
 type PageDispatchProps = {}
@@ -79,7 +83,7 @@ class Home extends Component<PageOwnProps, PageState> {
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
   config: Config = {
-    navigationBarTitleText: '茄子体育',
+    navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
     disableScroll: true
@@ -96,6 +100,10 @@ class Home extends Component<PageOwnProps, PageState> {
     }
   }
 
+  $loginCallback = () => {
+    this.initBulletin();
+  }
+
   componentWillMount() {
   }
 
@@ -104,31 +112,21 @@ class Home extends Component<PageOwnProps, PageState> {
     this.getAreas();
     configAction.setVisit();
     configAction.getShareSentence();
-    configAction.getBulletinConfig({
-      province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
-      scene: "home"
-    }).then((data) => {
-      if (data && data.length > 0) {
-        this.setCurtain();
-        this.setBulletin(this.bulletinIndex);
-        this.startTimer_bulletin();
-        Taro.getSystemInfo().then(systemData => {
-          if (systemData.platform == 'android') {
-            //android
-          } else {
-            const weihu = data && data.length > 0 && data[0].content === "升级维护中";
-            if (weihu) {
-              configAction.setPayEnabled(false);
-            } else {
-              configAction.setPayEnabled(true);
-            }
-          }
-        })
-      }
-    });
     if (this.$router.params.id && this.$router.params.page) {
+      let url = '/pages/' + this.$router.params.page + '/' + this.$router.params.page + '?id=' + this.$router.params.id;
       Taro.navigateTo({
-        url: '/pages/' + this.$router.params.page + '/' + this.$router.params.page + '?id=' + this.$router.params.id
+        url: url,
+        fail: () => {
+          Taro.switchTab({url: url})
+        }
+      })
+    } else if (this.$router.params.page) {
+      let url = '/pages/' + this.$router.params.page + '/' + this.$router.params.page;
+      Taro.navigateTo({
+        url: url,
+        fail: () => {
+          Taro.switchTab({url: url})
+        }
       })
     }
   }
@@ -167,9 +165,49 @@ class Home extends Component<PageOwnProps, PageState> {
         })
       }
     })
+    // if (this.state.curtain != null) {
+    //   this.setState({curtainShow: true})
+    // }
   }
 
   componentDidHide() {
+  }
+
+  initBulletin = () => {
+    configAction.getBulletinConfig({
+      province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
+      scene: "home"
+    }).then((data) => {
+      if (data && data.length > 0) {
+        this.setCurtain();
+        this.setBulletin(this.bulletinIndex);
+        this.startTimer_bulletin();
+        Taro.getSystemInfo().then(async (systemData) => {
+          if (systemData.platform == 'android') {
+            //android
+          } else if (systemData.platform == 'ios') {
+            // } else {
+            const weihu = data && data.length > 0 && (data[0].content === "升级维护中" || data[0].content === "因政策调整，iOS支付暂不可用");
+            if (weihu) {
+              const userNo = await getStorage('userNo');
+              if ((this.props.userInfo && this.props.userInfo.userNo) || userNo) {
+                new Request().get(api.API_USER_ABILITY(userNo ? userNo : this.props.userInfo.userNo), null).then((ability: any) => {
+                  if (ability && ability.enablePay) {
+                    configAction.setPayEnabled(true);
+                  } else {
+                    configAction.setPayEnabled(false);
+                  }
+                })
+              } else {
+                configAction.setPayEnabled(false);
+              }
+            } else {
+              configAction.setPayEnabled(true);
+            }
+          }
+        })
+      }
+    });
   }
 
   startTimer_bulletin = () => {
@@ -299,7 +337,11 @@ class Home extends Component<PageOwnProps, PageState> {
     }
   }
   onMatchItemClick = (item) => {
+    // Taro.navigateTo({url: `../bet/bet?id=${5026}`});
     Taro.navigateTo({url: `../live/live?id=${item.id}`});
+  }
+  onMatchItemBetClick = (item) => {
+    Taro.navigateTo({url: `../bet/bet?id=${item.id}`});
   }
   onNoticeBarClick = (bulletin: Bulletin) => {
     if (bulletin.type == 'website') {
@@ -374,7 +416,7 @@ class Home extends Component<PageOwnProps, PageState> {
           <View className='qz-home-league'>
             <View className='qz-home-league-title' onClick={this.onLeagueMoreClick}>
               <Text className='qz-home-league-title-desc'>热门赛事</Text>
-              <Text className='qz-home-league-title-more'>查看更多赛事></Text>
+              <Text className='qz-home-league-title-more'>{`查看更多赛事>`}</Text>
             </View>
             <View className='qz-home-league-content'>
               <View
@@ -413,6 +455,7 @@ class Home extends Component<PageOwnProps, PageState> {
                 <View className='qz-home-league-detail-content__inner'>
                   {item.matchs && item.matchs.map((match) => (
                     <MatchItem key={match.id} matchInfo={{...match, leaguematch: null}}
+                               onBetClick={this.onMatchItemBetClick.bind(this, match)}
                                onClick={this.onMatchItemClick.bind(this, match)}/>
                   ))}
                 </View>
@@ -456,6 +499,7 @@ const mapStateToProps = (state) => {
     leagueList: state.league ? state.league.leagueList : {},
     areaList: state.area ? state.area.areas : {},
     shareSentence: state.config ? state.config.shareSentence : [],
+    userInfo: state.user.userInfo,
   }
 }
 export default connect(mapStateToProps)(Home)

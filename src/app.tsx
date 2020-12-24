@@ -44,11 +44,15 @@ class App extends Component {
       'pages/collection/collection',
       'pages/orders/orders',
       'pages/webview/webview',
+      'pages/bet/bet',
+      'pages/address/address',
+      'pages/betOrders/betOrders',
+      'pages/deposit/deposit',
     ],
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: '茄子体育',
+      navigationBarTitleText: '茄子TV',
       navigationBarTextStyle: 'black'
     },
     tabBar: {
@@ -80,7 +84,7 @@ class App extends Component {
     },
     permission: {
       "scope.userLocation": {
-        "desc": "茄子体育将获得您的位置信息以获取最佳体验"
+        "desc": "茄子TV将获得您的位置信息以获取最佳体验"
       }
     }
   }

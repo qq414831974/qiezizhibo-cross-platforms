@@ -64,6 +64,9 @@ class MatchList extends Component<PageOwnProps, PageState> {
   onMatchItemClick = (item) => {
     Taro.navigateTo({url: `../live/live?id=${item.id}`});
   }
+  onMatchItemBetClick = (item) => {
+    Taro.navigateTo({url: `../bet/bet?id=${item.id}`});
+  }
   getMatchTimeList = (matchList) => {
     let matchTimeList: Dictionary = new Dictionary([]);
     let list: Array<string> = [];
@@ -108,7 +111,11 @@ class MatchList extends Component<PageOwnProps, PageState> {
           <View className='qz-match-list-content__inner'>
             <Text className="qz-match-list-time">{key}</Text>
             {matchTimeList[key].map((item) => (
-              <MatchItem key={item.id} matchInfo={item} onlytime onClick={this.onMatchItemClick.bind(this, item)}/>
+              <MatchItem key={item.id}
+                         matchInfo={item}
+                         onlytime
+                         onBetClick={this.onMatchItemBetClick.bind(this, item)}
+                         onClick={this.onMatchItemClick.bind(this, item)}/>
             ))}
           </View>
         </View>))}

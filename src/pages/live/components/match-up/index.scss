@@ -254,6 +254,8 @@
 
     &-match-score-small {
       font-size: $font-size-lg !important;
+      letter-spacing: $spacing-v-md;
+      text-indent: $spacing-v-md;
     }
 
     &-match-score-penalty {

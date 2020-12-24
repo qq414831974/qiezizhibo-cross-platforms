@@ -34,6 +34,8 @@ export const API_PHONENUMBER = `${auth_service}/auth/getPhoneNumber`;
 export const API_AUTH_USER = `${auth_service}/auth/user`;
 export const API_USER = `${user_service}/user`;
 export const API_REFRESH_TOKEN = `${auth_service}/auth/refresh_token`;
+export const API_USER_ABILITY = (userNo) =>`${user_service}/user/${userNo}/ability`;
+export const API_USER_ADDRESS = (userNo) =>`${user_service}/user/${userNo}/address`;
 
 //league
 export const API_LEAGUE = (id) => `${football_service}/league/${id}`;
@@ -91,6 +93,9 @@ export const API_GIFT_SEND_FREE_LIMIT = `${pay_service}/gift/freeLimit`;
 export const API_GIFT_RANK_MATCH = (id) => `${pay_service}/gift/rank/match/${id}`;
 export const API_GIFT_RANK_LEAGUE = (id) => `${pay_service}/gift/rank/league/${id}`;
 
+export const API_DEPOSIT = `${pay_service}/deposit`;
+export const API_DEPOSIT_LOGS = `${pay_service}/deposit/logs`;
+
 //heat
 export const API_MATCH_HEAT = `${football_service}/heat/match`;
 export const API_MATCH_TEAM_HEAT = `${football_service}/heat/match/team`;
@@ -101,6 +106,14 @@ export const API_LEAGUE_PLAYER_HEAT = `${football_service}/heat/league/player`;
 export const API_LEAGUE_PLAYER_HEAT_TOTAL = `${football_service}/heat/league/player/total`;
 export const API_LEAGUE_TEAM_HEAT = `${football_service}/heat/league/team`;
 export const API_LEAGUE_TEAM_HEAT_TOTAL = `${football_service}/heat/league/team/total`;
+
+//bet
+export const API_LEAGUE_BET = `${football_service}/bet/league`;
+export const API_MATCH_BET = `${football_service}/bet/match`;
+export const API_MATCH_USER_BET = `${football_service}/bet`;
+export const API_MATCH_USER_BET_CASH = `${football_service}/bet/cash`;
+export const API_BET_RANK = `${football_service}/bet/rank`;
+export const API_BET_FREE = `${football_service}/bet/free`;
 
 //subscribe
 export const API_SUBSCRIBE = `${system_service}/subscribe`;

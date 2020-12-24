@@ -1,5 +1,5 @@
 import Taro, {Component} from '@tarojs/taro'
-import {View, ScrollView, Text, Image, Picker} from '@tarojs/components'
+import {View, ScrollView, Text, Image, Picker, Button} from '@tarojs/components'
 import {AtActivityIndicator, AtButton, AtInputNumber} from 'taro-ui'
 import {connect} from '@tarojs/redux'
 import './index.scss'
@@ -12,9 +12,13 @@ import Request from "../../utils/request";
 
 type PageStateProps = {
   userInfo: any;
+  payEnabled: any;
 }
 
-type PageDispatchProps = {}
+type PageDispatchProps = {
+  onPayConfirm: (callback: any, price: any) => any,
+  onPayClose: () => any,
+}
 
 type PageOwnProps = {
   gifts: [];
@@ -67,7 +71,6 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
     this.props.onHandleShareSuccess && this.props.onHandleShareSuccess(this.clearCurrentGift);
     this.setState({numSelectorValue: this.numbers, numSelector: this.numbers});
   }
-
 
   getGiftGrowthByType = (gift: any, type, num) => {
     if (gift == null || gift.growth == null) {
@@ -152,6 +155,13 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
     return value;
   }
   onGiftSendClick = async () => {
+    if (this.props.payEnabled != true) {
+      Taro.showToast({
+        'title': "iOS暂不支持赠送",
+        'icon': 'none',
+      })
+      return;
+    }
     if (this.state.currentGift == null) {
       Taro.showToast({
         'title': "请选择礼物",
@@ -234,14 +244,15 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
   }
 
   render() {
-    const {gifts = [], loading = false, heatType = 0, hidden = false, giftWatchPrice = null, giftWatchEternalPrice = null} = this.props
+    const {gifts = [], loading = false, heatType = 0, hidden = false, giftWatchPrice = null, giftWatchEternalPrice = null, payEnabled} = this.props
     const {currentGift = null, currentNum = 0} = this.state
     const discountPrice = this.getGiftDiscountPriceByNum(currentGift, currentNum);
     const realPrice = this.getGiftRealPriceByNum(currentGift, currentNum);
     const heat = this.getGiftGrowthByType(this.state.currentGift, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, currentNum)
     const exp = this.getGiftGrowthByType(this.state.currentGift, global.GROWTH_TYPE.USER_EXP, currentNum)
+    const freeBet = this.getGiftGrowthByType(this.state.currentGift, global.GROWTH_TYPE.FREE_BET, currentNum)
     const onGiftClick = this.onGiftClick;
-    const giftInfo = {price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp}
+    const giftInfo = {price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp, freeBetTime: freeBet}
 
     return (
       <View className="qz-gifts">
@@ -249,38 +260,45 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
           <View className="qz-lineup-content-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
           :
           <View>
-            <ScrollView scrollY className="qz-gifts__content">
-              <View className="qz-gifts__grid">
-                {gifts.map((data: any) => (
-                    <View key={data.id}
-                          className={`qz-gifts__grid-item ${currentGift && currentGift.id == data.id ? "qz-gifts__grid-item-active" : ""}`}
-                          onClick={onGiftClick.bind(this, data)}>
-                      <View className="qz-gifts__grid-item-img-container">
-                        <Image src={data.pic}/>
-                      </View>
-                      <View className="qz-gifts__grid-item-name">
-                        <Text>{data.name}</Text>
-                      </View>
-                      {data.type == global.GIFT_TYPE.CHARGE ? <View className="qz-gifts__grid-item-price">
-                          <View>{getYuan(data.price)}茄币</View>
-                        </View> :
-                        <View className="qz-gifts__grid-item-price">
-                          <Text>{data.limitRemain > 0 ? `免费(余${data.limitRemain})` : "分享群得茄子"}</Text>
-                        </View>}
-                      <View className="qz-gifts__grid-item-price">
-                        <Image className="qz-gifts__grid-item-price__image" src={flame}/>
-                        <Text>+{this.getGiftGrowthByType(data, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, 1)}票</Text>
-                      </View>
-                      {(giftWatchPrice != null || giftWatchEternalPrice != null) && data.price != null && data.price >= giftWatchPrice ?
-                        <View className="qz-gifts__grid-item-freewatch">
-                          送本场录像
+            {payEnabled ?
+              <ScrollView scrollY className="qz-gifts__content">
+                <View className="qz-gifts__grid">
+                  {gifts.map((data: any) => (
+                      <View key={data.id}
+                            className={`qz-gifts__grid-item ${currentGift && currentGift.id == data.id ? "qz-gifts__grid-item-active" : ""}`}
+                            onClick={onGiftClick.bind(this, data)}>
+                        <View className="qz-gifts__grid-item-img-container">
+                          <Image src={data.pic}/>
                         </View>
-                        : null}
-                    </View>
-                  )
-                )}
-              </View>
-            </ScrollView>
+                        <View className="qz-gifts__grid-item-name">
+                          <Text>{data.name}</Text>
+                        </View>
+                        {data.type == global.GIFT_TYPE.CHARGE ? <View className="qz-gifts__grid-item-price">
+                            <View>{getYuan(data.price)}茄币</View>
+                          </View> :
+                          <View className="qz-gifts__grid-item-price">
+                            <Text>{data.limitRemain > 0 ? `免费(余${data.limitRemain})` : "分享群得茄子"}</Text>
+                          </View>}
+                        <View className="qz-gifts__grid-item-price">
+                          <Image className="qz-gifts__grid-item-price__image" src={flame}/>
+                          <Text>+{this.getGiftGrowthByType(data, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, 1)}票</Text>
+                        </View>
+                        {(giftWatchPrice != null || giftWatchEternalPrice != null) && data.price != null && data.price >= giftWatchPrice ?
+                          <View className="qz-gifts__grid-item-freewatch">
+                            送本场录像
+                          </View>
+                          : null}
+                      </View>
+                    )
+                  )}
+                </View>
+              </ScrollView>
+              : <View className="qz-gifts__content y-center">
+                <View className="text-center w-full">
+                  iOS端暂不支持赠送
+                </View>
+                <Button className="black" openType="contact">联系客服</Button>
+              </View>}
             <View className="qz-gifts__bottom-container">
               <View className="qz-gifts__bottom at-row">
                 <View className="at-col at-col-7">
@@ -346,6 +364,8 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
               handleCancel={this.onGiftConfrimCancel}
               handleConfirm={this.onGiftConfrim}
               handleError={this.props.onHandlePayError}
+              onPayConfirm={this.props.onPayConfirm}
+              onPayClose={this.props.onPayClose}
             />
           </View>
         }
@@ -357,6 +377,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
 const mapStateToProps = (state) => {
   return {
     userInfo: state.user.userInfo,
+    payEnabled: state.config ? state.config.payEnabled : null,
   }
 }
 export default connect(mapStateToProps)(GiftPanel)

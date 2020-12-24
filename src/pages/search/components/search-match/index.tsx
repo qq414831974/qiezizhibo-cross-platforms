@@ -66,6 +66,9 @@ class SearchMatch extends Component<PageOwnProps, PageState> {
   onMatchItemClick = (item) => {
     Taro.navigateTo({url: `../live/live?id=${item.id}`});
   }
+  onMatchItemBetClick = (item) => {
+    Taro.navigateTo({url: `../bet/bet?id=${item.id}`});
+  }
 
   render() {
     const {match, isBeenSearch = false, loading = false, visible = false, loadingmore = false} = this.props
@@ -90,7 +93,10 @@ class SearchMatch extends Component<PageOwnProps, PageState> {
           <View className='qz-search__result-content'>
             <View className='qz-search__result-content__inner'>
               {match.records.map((item) => (
-                <MatchItem key={item.id} matchInfo={item} onClick={this.onMatchItemClick.bind(this, item)}/>
+                <MatchItem key={item.id}
+                           matchInfo={item}
+                           onBetClick={this.onMatchItemBetClick.bind(this, item)}
+                           onClick={this.onMatchItemClick.bind(this, item)}/>
               ))}
             </View>
           </View>

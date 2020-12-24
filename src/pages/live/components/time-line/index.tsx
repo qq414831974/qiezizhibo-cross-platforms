@@ -1,15 +1,17 @@
 import Taro, {Component} from '@tarojs/taro'
 import {View, Text, Image} from '@tarojs/components'
 import './index.scss'
-import redcard from '../../../../assets/live/redcard.png';
-import yellowcard from '../../../../assets/live/yellowcard.png';
-import change from '../../../../assets/live/change.png';
-import goal from '../../../../assets/live/goal.png';
-import owngoal from '../../../../assets/live/owngoal.png';
-import shoot from '../../../../assets/live/shoot.png';
+import {
+  redcard,
+  yellowcard,
+  change,
+  goal,
+  owngoal,
+  shoot,
+  substitutionLeft,
+  substitutionRight
+} from '../../../../utils/assets';
 import noperson from '../../../../assets/no-person.png';
-import substitutionLeft from '../../../../assets/live/substitution_arrow.png';
-import substitutionRight from '../../../../assets/live/substitution_arrow_right.png';
 
 const eventType = {
   1: {text: "进球", icon: goal},

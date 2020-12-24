@@ -1,0 +1,89 @@
+@import '../../app.scss';
+
+.qz-deposit-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.qz-deposit-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 50px 0;
+  height: 20%;
+  background-color: $color-bg-blue-main;
+  position: relative;
+
+  &__button {
+    position: absolute;
+    bottom: 48px;
+    right: 64px;
+    border-radius: 30px !important;
+    padding: 0 32px !important;
+  }
+
+  &__title {
+    position: relative;
+    color: $color-text-base-inverse;
+    font-size: 88px;
+    font-weight: 700;
+    height: 124px;
+    margin-left: 50px;
+  }
+
+  &__title:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    display: inline-block;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background-color: $color-text-base-inverse;
+  }
+
+  &__title-hint {
+    position: relative;
+    color: $color-text-base-inverse;
+    font-size: $font-size-base;
+    font-weight: 700;
+    height: 88px;
+    display: flex;
+    align-items: flex-end;
+    margin-left: $spacing-h-md;
+  }
+}
+
+.qz-deposit-body {
+  &-panel {
+    margin-top: $spacing-h-md;
+
+    &__title {
+      position: relative;
+      color: $color-text-paragraph;
+      margin-bottom: $spacing-h-xl;
+      padding-left: 2 * $spacing-v-lg;
+      font-size: $font-size-base;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    &__title:before {
+      content: "";
+      display: inline-block;
+      position: absolute;
+      left: $spacing-v-lg;
+      top: 50%;
+      margin-top: -0.5 * $font-size-base;
+      width: 4px;
+      height: $font-size-base;
+      background-color: $color-bg-blue-main;
+      box-shadow: 0 .14933rem .256rem 0 rgba(97, 144, 232, .2);
+      border-radius: 2px;
+    }
+  }
+}

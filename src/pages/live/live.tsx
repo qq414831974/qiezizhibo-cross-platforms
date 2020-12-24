@@ -14,6 +14,7 @@ import matchAction from "../../actions/match";
 import liveAction from "../../actions/live";
 import playerAction from "../../actions/player";
 import payAction from "../../actions/pay";
+import depositAction from "../../actions/deposit";
 import {
   clearLoginToken,
   formatTimeSecond,
@@ -35,6 +36,7 @@ import {
   SHARE_SENTENCE_TYPE,
   TABS_TYPE,
   SUBSCRIBE_TEMPLATES,
+  PAY_TYPE,
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import star from '../../assets/live/star.png'
@@ -50,17 +52,9 @@ import LineUp from "./components/line-up";
 import ChattingRoom from "./components/chatting-room";
 import LoginModal from "../../components/modal-login";
 import PhoneModal from "../../components/modal-phone";
-import PayModal from "../../components/modal-pay";
+import ChargeModal from "../../components/modal-charge";
 import * as error from "../../constants/error";
 import userAction from "../../actions/user";
-import goal from "../../assets/live/goal.png";
-import shoot from "../../assets/live/shoot.png";
-import yellowcard from "../../assets/live/yellowcard.png";
-import redcard from "../../assets/live/redcard.png";
-import change from "../../assets/live/change.png";
-import substitutionLeft from "../../assets/live/substitution_arrow.png";
-import substitutionRight from "../../assets/live/substitution_arrow_right.png";
-import owngoal from "../../assets/live/owngoal.png";
 import Request from "../../utils/request";
 import ModalAlbum from "../../components/modal-album";
 import GiftPanel from "../../components/gift-panel";
@@ -69,6 +63,17 @@ import GiftRank from "../../components/gift-rank";
 import HeatPlayer from "../../components/heat-player";
 import HeatLeagueTeam from "../../components/heat-league-team";
 import ShareMoment from "../../components/share-moment";
+import ModalPay from "../../components/modal-pay";
+import {
+  redcard,
+  yellowcard,
+  change,
+  goal,
+  owngoal,
+  shoot,
+  substitutionLeft,
+  substitutionRight
+} from '../../utils/assets';
 
 type Bulletin = {
   id: number,
@@ -98,6 +103,7 @@ type PageStateProps = {
   payEnabled: boolean;
   shareSentence: any;
   giftList: any;
+  deposit: number;
 }
 
 type PageDispatchProps = {}
@@ -178,6 +184,9 @@ type PageState = {
   heatStartTime: any,
   heatEndTime: any,
   onHandleShareSuccess: any,
+  payCallback: any;
+  payConfirmShow: boolean;
+  currentPrice: number;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -226,7 +235,7 @@ class Live extends Component<PageOwnProps, PageState> {
   enterTime: any;
 
   config: Config = {
-    navigationBarTitleText: '茄子体育',
+    navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
   }
@@ -308,10 +317,14 @@ class Live extends Component<PageOwnProps, PageState> {
       heatStartTime: null,
       heatEndTime: null,
       onHandleShareSuccess: null,
+      payCallback: null,
+      payConfirmShow: false,
+      currentPrice: 0,
     }
   }
 
-  $setSharePath = () => `/pages/live/live?id=${this.props.match.id}`
+  // $setSharePath = () => `/pages/live/live?id=${this.props.match.id}`
+  $setSharePath = () => `/pages/home/home?id=${this.getParamId()}&page=live`
 
   $setShareTitle = () => {
     const shareSentence = random_weight(this.props.shareSentence.filter(value => value.type == SHARE_SENTENCE_TYPE.match).map(value => {
@@ -368,6 +381,9 @@ class Live extends Component<PageOwnProps, PageState> {
     matchAction.getMatchInfo_clear()
     matchAction.getMatchComment_clear()
     liveAction.getLiveMediaList_clear()
+    if (this.props.userInfo && this.props.userInfo.userNo) {
+      depositAction.getDeposit(this.props.userInfo.userNo);
+    }
     Taro.showLoading({title: LOADING_TEXT})
     this.getParamId() && this.initCurtain(this.getParamId());
     this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
@@ -471,11 +487,13 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   getParamId = () => {
     let id;
-    if (this.$router.params) {
-      if (this.$router.params.id == null) {
+    if (this.$router.params != null) {
+      if (this.$router.params.id == null && this.$router.params.scene != null) {
         id = this.$router.params.scene
-      } else {
+      } else if (this.$router.params.id != null) {
         id = this.$router.params.id
+      } else {
+        return null
       }
     } else {
       return null;
@@ -729,7 +747,11 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   getMatchInfo = (id) => {
-    return matchAction.getMatchInfo(id)
+    let userNo = null;
+    if (this.props.userInfo && this.props.userInfo.userNo) {
+      userNo = this.props.userInfo.userNo;
+    }
+    return matchAction.getMatchInfo({id: id, userNo: userNo})
   }
   getMatchStatus = (id) => {
     return matchAction.getMatchStatus({matchId: id})
@@ -1093,6 +1115,9 @@ class Live extends Component<PageOwnProps, PageState> {
     })
   }
   getCommentsList = (comments) => {
+    if (comments == null) {
+      return null;
+    }
     return comments.sort((item1, item2) => {
       const date1 = new Date(item1.date).getTime();
       const date2 = new Date(item2.date).getTime();
@@ -1247,7 +1272,8 @@ class Live extends Component<PageOwnProps, PageState> {
   onAuthSuccess = () => {
     this.setState({loginOpen: false})
     this.getUserInfo((res) => {
-      const {phone} = res.payload
+      const {phone} = res.payload.phone
+      depositAction.getDeposit(res.userNo);
       if (res.payload != null && phone == null) {
         this.setState({phoneOpen: true})
       }
@@ -1320,14 +1346,17 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   onPayClose = () => {
+    this.onPayConfirmClose();
     this.setState({payOpen: false})
   }
 
   onPayCancel = () => {
+    this.onPayConfirmClose();
     this.setState({payOpen: false})
   }
 
   onPayError = (reason) => {
+    this.onPayConfirmClose();
     switch (reason) {
       case error.ERROR_PAY_CANCEL: {
         Taro.showToast({
@@ -1347,11 +1376,13 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   onPaySuccess = (orderId: string) => {
+    this.onPayConfirmClose();
     this.setState({payOpen: false})
     this.getOrderStatus(orderId, null)
   }
 
   onGiftPayError = (reason) => {
+    this.onPayConfirmClose();
     switch (reason) {
       case error.ERROR_PAY_CANCEL: {
         Taro.showToast({
@@ -1378,6 +1409,7 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   onGiftPaySuccess = (orderId: any) => {
+    this.onPayConfirmClose();
     this.setState({giftOpen: false})
     if (orderId == GIFT_TYPE.FREE) {
       this.getParamId() && this.getTeamHeatInfo(this.getParamId(), null);
@@ -2013,6 +2045,21 @@ class Live extends Component<PageOwnProps, PageState> {
   onHandleShareSuccess = (func: any) => {
     this.setState({onHandleShareSuccess: func});
   }
+  onBetClick = () => {
+    Taro.navigateTo({url: `../bet/bet?id=${this.getParamId()}`});
+  }
+  onPayConfirm = (callback, price) => {
+    this.setState({payCallback: callback, payConfirmShow: true, currentPrice: price})
+  }
+  onPayConfirmClose = () => {
+    this.setState({payConfirmShow: false})
+  }
+  handleWechatConfirm = () => {
+    this.state.payCallback && this.state.payCallback(PAY_TYPE.ONLINE)
+  }
+  handleDepositConfirm = () => {
+    this.state.payCallback && this.state.payCallback(PAY_TYPE.DEPOSIT)
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
@@ -2034,7 +2081,7 @@ class Live extends Component<PageOwnProps, PageState> {
                                   className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
             </View>
             :
-            (this.state.needGiftLive && match.status != FootballEventType.FINISH && liveStatus != LiveStatus.UNOPEN  && this.state.heatRule && this.state.heatRule.available ?
+            (payEnabled && this.state.needGiftLive && match.status != FootballEventType.FINISH && liveStatus != LiveStatus.UNOPEN && this.state.heatRule && this.state.heatRule.available ?
               <View className='qz-live-match__video'>
                 <Image src={match.poster} className="qz-live-match__video-poster-img"/>
                 {match && <AtButton type='primary' onClick={this.switchToGiftSend}
@@ -2051,6 +2098,7 @@ class Live extends Component<PageOwnProps, PageState> {
                 onEnded={this.bindPlayEnd}
                 onPlay={this.bindPlayStart}
                 onError={this.bindPlayError}
+                show-casting-button
                 autoplay
                 // enableDanmu
                 // danmuList={danmuList}
@@ -2061,15 +2109,22 @@ class Live extends Component<PageOwnProps, PageState> {
                   <View className="qz-live-match__video-poster">
                     <Image src={match.poster} className="qz-live-match__video-poster-img"/>
                     {liveStatus == LiveStatus.UNOPEN ?
-                      <View className="qz-live-match__video-poster-time" onClick={this.onSubscribeClick}>
-                        <View className='qz-live-match__video-poster-time__title'>
-                          <View>距比赛开始还有{diffDayTime.diffDay}</View>
-                        </View>
-                        <View className='qz-live-match__video-poster-time__time'>
-                          <View>{diffDayTime.diffTime}</View>
-                        </View>
-                        <View className='qz-live-match__video-poster-time__hint'>
-                          <View><View className='at-icon at-icon-bell'/>提醒我开始</View>
+                      <View className="qz-live-match__video-poster-inner">
+                        {match.isBetEnable ?
+                          <View className="qz-live-match__video-poster-bet" onClick={this.onBetClick}>
+                            比分竞猜
+                          </View>
+                          : null}
+                        <View className="qz-live-match__video-poster-time" onClick={this.onSubscribeClick}>
+                          <View className='qz-live-match__video-poster-time__title'>
+                            <View>距比赛开始还有{diffDayTime.diffDay}</View>
+                          </View>
+                          <View className='qz-live-match__video-poster-time__time'>
+                            <View>{diffDayTime.diffTime}</View>
+                          </View>
+                          <View className='qz-live-match__video-poster-time__hint'>
+                            <View><View className='at-icon at-icon-bell'/>提醒我开始</View>
+                          </View>
                         </View>
                       </View>
                       :
@@ -2305,7 +2360,7 @@ class Live extends Component<PageOwnProps, PageState> {
           handleCancel={this.onPhoneCancel}
           handleClose={this.onPhoneClose}
           handleError={this.onPhoneError}/>
-        <PayModal
+        <ChargeModal
           giftDiscount={match && match.giftWatchRecordEnable ? match.giftWatchRecordPrice != null : false}
           giftDiscountPrice={match && match.giftWatchRecordEnable ? match.giftWatchRecordPrice : null}
           charge={this.state.charge}
@@ -2315,7 +2370,9 @@ class Live extends Component<PageOwnProps, PageState> {
           handleClose={this.onPayClose}
           handleError={this.onPayError}
           handleToGiftSend={this.switchToGiftSend}
-          payEnabled={payEnabled}/>
+          payEnabled={payEnabled}
+          onPayConfirm={this.onPayConfirm}
+          onPayClose={this.onPayConfirmClose}/>
         <HeatReward
           heatRule={this.state.heatRule}
           loading={this.state.heatRule == null}
@@ -2345,7 +2402,7 @@ class Live extends Component<PageOwnProps, PageState> {
           handleClose={this.onPremissionClose}/>
         <AtFloatLayout
           className="qz-gift-float"
-          title={`礼物送给${(this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}       1茄币=1元`}
+          title={`礼物送给${(this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}>
           <GiftPanel
@@ -2361,7 +2418,10 @@ class Live extends Component<PageOwnProps, PageState> {
             onHandlePaySuccess={this.onGiftPaySuccess}
             onHandlePayError={this.onGiftPayError}
             onHandleShareSuccess={this.onHandleShareSuccess}
-            hidden={!this.state.giftOpen}/>
+            hidden={!this.state.giftOpen}
+            onPayConfirm={this.onPayConfirm}
+            onPayClose={this.onPayConfirmClose}
+          />
         </AtFloatLayout>
         <ShareMoment
           isOpened={this.state.shareMomentOpen}
@@ -2370,6 +2430,12 @@ class Live extends Component<PageOwnProps, PageState> {
           handleConfirm={this.onShareMomentConfirm}
           handleCancel={this.onShareMomentCancel}
         />
+        <ModalPay
+          isOpened={this.state.payConfirmShow}
+          price={this.state.currentPrice}
+          onCancel={this.onPayConfirmClose}
+          onWechatPay={this.handleWechatConfirm}
+          onDepositPay={this.handleDepositConfirm}/>
         {this.state.giftSendQueue && this.state.giftSendQueue.map((data: any) => (
           <GiftNotify
             active={data.active}
@@ -2412,19 +2478,19 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 }
 
-const
-  mapStateToProps = (state) => {
-    return {
-      match: state.match.match,
-      matchStatus: state.match.status,
-      mediaList: state.live.mediaList,
-      playerList: state.player.playerList.records,
-      userInfo: state.user.userInfo,
-      commentList: state.match.comment,
-      danmuList: state.match.danmu,
-      payEnabled: state.config ? state.config.payEnabled : null,
-      shareSentence: state.config ? state.config.shareSentence : [],
-      giftList: state.pay ? state.pay.gifts : [],
-    }
+const mapStateToProps = (state) => {
+  return {
+    deposit: state.deposit.depositInfo ? state.deposit.depositInfo.deposit : 0,
+    match: state.match.match,
+    matchStatus: state.match.status,
+    mediaList: state.live.mediaList,
+    playerList: state.player.playerList.records,
+    userInfo: state.user.userInfo,
+    commentList: state.match.comment,
+    danmuList: state.match.danmu,
+    payEnabled: state.config ? state.config.payEnabled : null,
+    shareSentence: state.config ? state.config.shareSentence : [],
+    giftList: state.pay ? state.pay.gifts : [],
   }
+}
 export default connect(mapStateToProps)(Live)

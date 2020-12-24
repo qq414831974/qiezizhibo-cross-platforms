@@ -41,7 +41,7 @@ class Match extends Component<PageOwnProps, PageState> {
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
   config: Config = {
-    navigationBarTitleText: '茄子体育',
+    navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
     enablePullDownRefresh: true
@@ -58,6 +58,7 @@ class Match extends Component<PageOwnProps, PageState> {
       matchList: {},
     }
   }
+  $setSharePath = () => `/pages/home/home?page=match`
 
   componentWillMount() {
   }
@@ -150,6 +151,9 @@ class Match extends Component<PageOwnProps, PageState> {
         status = "finish"
         orderby = "desc";
         break;
+    }
+    if (this.state.matchList.current == null) {
+      return;
     }
     this.setState({loadingmore: true})
     new Request().get(API_MATCHES, {

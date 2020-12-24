@@ -57,8 +57,11 @@ function withLogin(lifecycle = 'willMount') {
       async componentWillMount() {
         if (super.componentWillMount) {
           if (lifecycle === LIFE_CYCLE_MAP[0]) {
-            const res = await this.$_autoLogin();
-            if (!res) return;
+            this.$_autoLogin().then(()=>{
+              if (this.$loginCallback && typeof this.$loginCallback === 'function') {
+                this.$loginCallback();
+              }
+            });
           }
 
           super.componentWillMount();
@@ -68,8 +71,11 @@ function withLogin(lifecycle = 'willMount') {
       async componentDidMount() {
         if (super.componentDidMount) {
           if (lifecycle === LIFE_CYCLE_MAP[1]) {
-            const res = await this.$_autoLogin();
-            if (!res) return;
+            this.$_autoLogin().then(()=>{
+              if (this.$loginCallback && typeof this.$loginCallback === 'function') {
+                this.$loginCallback();
+              }
+            });
           }
 
           super.componentDidMount();
@@ -79,30 +85,38 @@ function withLogin(lifecycle = 'willMount') {
       async componentDidShow() {
         if (super.componentDidShow) {
           if (lifecycle === LIFE_CYCLE_MAP[2]) {
-            const res = await this.$_autoLogin();
-            if (!res) return;
+            this.$_autoLogin().then(()=>{
+              if (this.$loginCallback && typeof this.$loginCallback === 'function') {
+                this.$loginCallback();
+              }
+            });
           }
 
           super.componentDidShow();
         }
       }
 
-      $_autoLogin = async () => {
+      $_autoLogin = () => {
         // ...这里是登录逻辑
-        Taro.showLoading({title: global.LOADING_TEXT})
-        if (await hasLogin()) {
-          const openid = await getStorage('wechatOpenid');
-          userAction.getUserInfo({openId: openid}, {
-            success: () => {
-              Taro.hideLoading()
-            }, failed: () => {
-              Taro.hideLoading()
-            }
-          });
-        } else {
-          Taro.hideLoading()
-        }
-        return true;
+        // return true;
+        return new Promise(async (resolve, reject) => {
+          Taro.showLoading({title: global.LOADING_TEXT})
+          if (await hasLogin()) {
+            const openid = await getStorage('wechatOpenid');
+            userAction.getUserInfo({openId: openid}, {
+              success: () => {
+                Taro.hideLoading()
+                resolve()
+              }, failed: () => {
+                Taro.hideLoading()
+                resolve();
+              }
+            });
+          } else {
+            resolve()
+            Taro.hideLoading()
+          }
+        })
       }
     }
   }

@@ -65,6 +65,9 @@ class MatchList extends Component<PageOwnProps, PageState> {
   onMatchItemClick = (item) => {
     Taro.navigateTo({url: `../live/live?id=${item.id}`});
   }
+  onMatchItemBetClick = (item) => {
+    Taro.navigateTo({url: `../bet/bet?id=${item.id}`});
+  }
   getMatchTimeList = (matchList) => {
     let matchTimeList: Dictionary = new Dictionary([]);
     let list: Array<string> = [];
@@ -113,6 +116,7 @@ class MatchList extends Component<PageOwnProps, PageState> {
                          matchInfo={item}
                          onlytime
                          showRound={showRound}
+                         onBetClick={this.onMatchItemBetClick.bind(this,item)}
                          onClick={this.onMatchItemClick.bind(this, item)}/>
             ))}
           </View>

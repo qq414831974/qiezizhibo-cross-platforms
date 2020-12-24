@@ -216,6 +216,9 @@ export const getCityData = (cityArray: Array<any>): any => {
 }
 
 export const getYuan = (fen: number): any => {
+  if (fen == null) {
+    return 0;
+  }
   let yuan = (fen / 100).toFixed(2);
   return Number(yuan);
 }

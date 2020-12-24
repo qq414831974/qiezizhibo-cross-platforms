@@ -1,0 +1,100 @@
+@import '../../../../app.scss';
+
+.mini-gray {
+  color: $color-grey-3;
+}
+
+.light-gray {
+  color: $color-grey-2;
+}
+
+.gray {
+  color: $color-grey-1;
+}
+
+.black {
+  color: $color-black-1 !important;
+}
+
+.bold {
+  font-weight: 800;
+}
+
+.qz-deposit-modal-title {
+  font-weight: bold;
+  font-size: $font-size-lg;
+  margin-bottom: $spacing-v-sm;
+}
+
+.qz-deposit-modal-content_text {
+  font-size: $font-size-xs;
+  margin-top: $spacing-v-sm;
+}
+
+.qz-deposit-modal-content_tip {
+  display: flex;
+  text-align: left;
+  padding: 0 $spacing-h-md;
+  font-size: $font-size-xs;
+}
+
+.qz-deposit-modal-content_tip-highlight {
+  background: $color-highlight;
+  color: $color-text-base-inverse;
+  border-radius: 5px;
+}
+
+.qz-deposit-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 33.33%);
+  grid-template-rows: auto;
+  box-sizing: border-box;
+  position: relative;
+
+  &-item-active {
+    //border: solid $color-bg-blue-main 2px;
+    background-color: $color-bg-blue-main !important;
+
+    .qz-deposit-modal__grid-item-text {
+      color: $color-text-base-inverse !important;
+    }
+  }
+
+  &-item {
+    position: relative;
+    padding: $spacing-v-xs $spacing-v-sm;
+    border-radius: 20px;
+    box-sizing: border-box;
+    height: min-content;
+    background-color: $color-bg-light;
+    margin: $spacing-v-sm;
+    text-align: center;
+
+    &-text {
+      font-size: $font-size-sm;
+      color: $color-text-paragraph;
+    }
+  }
+
+  &-content {
+    &-score {
+      font-size: $font-size-sm;
+      color: $color-text-paragraph;
+      padding-left: $spacing-v-sm;
+    }
+    &-price {
+      font-size: $font-size-sm;
+      color: $color-text-placeholder;
+      padding-left: $spacing-v-sm;
+    }
+
+    &-award {
+      font-size: $font-size-sm;
+      color: $color-text-placeholder;
+      padding-left: $spacing-v-sm;
+    }
+  }
+}
+.qz-deposit-modal__input {
+  padding: 0 $spacing-h-lg;
+}

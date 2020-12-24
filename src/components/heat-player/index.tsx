@@ -338,7 +338,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                     <Image src={data.player && data.player.headImg ? data.player.headImg : noperson}/>
                     <View className="qz-heat-player__grid-item-heat">
                       <Image src={flame}/>
-                      <Text className="qz-heat-player__grid-item-heat-value">{getHeat(data)}票</Text>
+                      <Text className="qz-heat-player__grid-item-heat-value">{getHeat(data)}</Text>
                     </View>
                     {isTopPlayerHeat(data, topPlayerHeats) ?
                       <View
@@ -384,7 +384,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                   </View>
                   <View className="qz-heat-player-footer-heat">
                     <Image src={flame}/>
-                    <Text>{getHeat(currentPlayerHeat)}票</Text>
+                    <Text>{getHeat(currentPlayerHeat)}</Text>
                     {/*<Text>(第{currentPlayerHeat.index}名)</Text>*/}
                   </View>
                 </View>
@@ -419,7 +419,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                 circle
                 onClick={this.handleSupport}
               >
-                投票
+                点赞
               </AtButton>
             </View>
           </View>

@@ -95,6 +95,9 @@ class SearchAll extends Component<PageOwnProps, PageState> {
   onMatchItemClick = (item) => {
     Taro.navigateTo({url: `../live/live?id=${item.id}`});
   }
+  onMatchItemBetClick = (item) => {
+    Taro.navigateTo({url: `../bet/bet?id=${item.id}`});
+  }
 
   render() {
     const {league, match, player, isBeenSearch = false, loading = false, visible = false} = this.props
@@ -114,7 +117,7 @@ class SearchAll extends Component<PageOwnProps, PageState> {
               <View className='qz-search__result-league-title' onClick={this.onLeagueMoreClick}>
                 <Text className='qz-search__result-league-title-desc'>联赛</Text>
                 <Text className='qz-search__result-league-title-count'>{league.total}</Text>
-                <Text className='qz-search__result-league-title-more'>更多></Text>
+                <Text className='qz-search__result-league-title-more'>{`更多>`}</Text>
               </View>
               <View className='qz-search__result-league-content'>
                 <View className='qz-search__result-league-content__inner'>
@@ -144,7 +147,7 @@ class SearchAll extends Component<PageOwnProps, PageState> {
               <View className='qz-search__result-match-title' onClick={this.onMatchMoreClick}>
                 <Text className='qz-search__result-match-title-desc'>比赛</Text>
                 <Text className='qz-search__result-match-title-count'>{match.total}</Text>
-                <Text className='qz-search__result-match-title-more'>更多></Text>
+                <Text className='qz-search__result-match-title-more'>{`更多>`}</Text>
               </View>
               <View className='qz-search__result-match-content'>
                 <View className='qz-search__result-match-content__inner'>
@@ -152,7 +155,10 @@ class SearchAll extends Component<PageOwnProps, PageState> {
                     if (index >= 5) {
                       return
                     }
-                    return <MatchItem key={item.id} matchInfo={item} onClick={this.onMatchItemClick.bind(this, item)}/>
+                    return <MatchItem key={item.id}
+                                      matchInfo={item}
+                                      onBetClick={this.onMatchItemBetClick.bind(this, item)}
+                                      onClick={this.onMatchItemClick.bind(this, item)}/>
                   })}
                 </View>
               </View>

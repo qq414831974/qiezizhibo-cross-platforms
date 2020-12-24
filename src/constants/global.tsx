@@ -76,6 +76,8 @@ export const ORDER_TYPE = {
   "record": 2,
   "monopoly": 3,
   "gift": 4,
+  "bet": 5,
+  "deposit": 6,
 }
 export const ORDER_STAUTS = {
   "notpaid": 0,
@@ -108,13 +110,37 @@ export const GROWTH_TYPE = {
   USER_EXP: 1,
   TEAM_HEAT: 2,
   PLAYER_HEAT: 3,
+  FREE_BET: 4,
 }
 export const GIFT_TYPE = {
   FREE: 0,
   CHARGE: 1,
 }
+export const BET_STATUS = {
+  BETTING: -1,
+  BET_FAILED: 0,
+  BET_SUCCESS_NOT_SEND: 1,
+  BET_SUCCESS_ALREADY_SEND: 2,
+  BET_SUCCESS_GIVE_UP: 3,
+  BET_CANCEL: 4,
+}
 export const SUBSCRIBE_TEMPLATES = {
   MATCH_START: "Sh-UGpahk_q0RiXLtY1N1NAvPjO_10rh_vkimwC-Xi0",
   HEAT_SURPASS: "y8VV0Wp1ndS4phfhSUgrA9QyTwgadZ2VJtmjAOMLx3M",
-  HEAT_COUNTDOWN: "2rDzauHgfdE55lncK3jgCuZuoKyNBeYj6gj4UG03S50"
+  HEAT_COUNTDOWN: "2rDzauHgfdE55lncK3jgCuZuoKyNBeYj6gj4UG03S50",
+  BET_SUCCESS: "KIvAhpqkNYGc84S6ssvqN6J5UNHZS0xT_C6P-TeugCo"
+}
+export const PAY_TYPE = {
+  ONLINE: 0,
+  DEPOSIT: 1,
+}
+export const DEPOSIT_LOG_TYPE = {
+  PAY: 0,
+  CHARGE: 1,
+  REFUND: 2,
+  BET_AWARD: 3,
+}
+export const BET_TYPE = {
+  FREE: 0,
+  CHARGE: 1,
 }

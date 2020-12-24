@@ -590,12 +590,24 @@ $at-timeline-line-color: $color-border-lighter !default;
   }
 }
 
+
+.y-center {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
 .center {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
+.flex-important{
+  display: flex !important;
+}
+.text-center{
+  text-align: center;
+}
 .w-full {
   width: 100%;
 }
@@ -625,4 +637,11 @@ $at-timeline-line-color: $color-border-lighter !default;
     max-height: 1100px;
     padding: 0;
   }
+}
+.white{
+  background: $color-bg;
+  box-shadow: none;
+}
+.base-font-size{
+  font-size: $font-size-sm;
 }

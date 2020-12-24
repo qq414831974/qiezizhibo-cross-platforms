@@ -5,6 +5,10 @@ import store from '../store'
 import {createApiAction, createAction} from './index'
 import Request from '../utils/request'
 
+type MatchParam = {
+  id: number,
+  userNo: string,
+}
 type MatchParams = {
   pageNum: number,
   pageSize: number,
@@ -46,7 +50,7 @@ type DanmuParams = {
   matchId: number,
   index: number,
 }
-export const getMatchInfo: any = createApiAction(match.MATCH, (id: number) => new Request().get(api.API_MATCH(id), null))
+export const getMatchInfo: any = createApiAction(match.MATCH, (param: MatchParam) => new Request().get(api.API_MATCH(param.id), param))
 export const getMatchInfo_clear: any = createAction(match.MATCH_CLEAR)
 export const getMatchList: any = createApiAction(match.MATCHES, (params: MatchParams) => new Request().get(api.API_MATCHES, params))
 export const getMatchList_add: any = createApiAction(match.MATCHES_ADD, (params: MatchParams) => new Request().get(api.API_MATCHES, params))

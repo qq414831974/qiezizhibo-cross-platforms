@@ -1,0 +1,283 @@
+@import '../../app.scss';
+@import "~taro-ui/dist/style/components/flex.scss";
+@import "~taro-ui/dist/style/components/tabs.scss";
+
+.qz-bet-content {
+  width: 100%;
+  height: 100%;
+}
+
+.qz-bet-match-up {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  background: $color-bg-blue-main;
+
+  &__team {
+    vertical-align: middle;
+    display: inline-block;
+    height: 192px;
+    //width: 30 / 100 * 90vw;
+    width: 30%;
+    overflow: hidden;
+    margin-top: $spacing-v-md/2;
+
+    &-avatar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    &-name {
+      display: flex !important;
+      margin-top: $spacing-v-xs;
+      font-size: $font-size-sm;
+      color: $color-text-base-inverse;
+      line-height: $line-height-en;
+      width: 100%;
+      height: $font-size-sm * 2 * $line-height-en !important;
+      text-align: center;
+      display: -webkit-box;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-wrap: break-word;
+      word-break: break-all;
+      white-space: normal !important;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+  }
+
+  &__vs {
+    margin-top: -1 * $spacing-v-sm;
+    vertical-align: middle;
+    //display: inline-block;
+    //width: 40 / 100 * 90vw;
+    width: 40%;
+    height: 192px;
+    //overflow: hidden;
+    //text-overflow: ellipsis;
+    //white-space: nowrap;
+    //text-align: center;
+    //position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    &-content {
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: center;
+      position: relative;
+    }
+
+    &-league-name {
+      font-size: $font-size-xs;
+      line-height: $line-height-base;
+      color: $color-text-base-inverse;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+      text-align: center;
+    }
+
+    &-match-time {
+      font-size: $font-size-xs;
+      color: $color-text-base-inverse;
+      width: 100%;
+      line-height: $line-height-en;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      margin-top: $spacing-v-xs/2;
+      //position: absolute;
+      //bottom: $spacing-v-xs;
+      &-status {
+        margin-left: $spacing-h-sm;
+      }
+    }
+
+    &-match-place {
+      font-size: $font-size-xs;
+      color: $color-text-base-inverse;
+      width: 100%;
+      line-height: $line-height-en;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      margin-top: $spacing-v-xs/2;
+      margin-left: -$font-size-sm/2;
+
+      .icon {
+
+      }
+
+      .text {
+
+      }
+    }
+
+    &-match-round {
+      font-size: $font-size-xs;
+      color: $color-text-base-inverse;
+      width: 100%;
+      line-height: $line-height-en;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+    }
+
+    &-match-name {
+      font-size: $font-size-base;
+      color: $color-text-base-inverse;
+      width: 100%;
+      line-height: $line-height-zh;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+    }
+
+    &-match-score {
+      font-size: $font-size-xxxl;
+      color: $color-text-base-inverse;
+      width: 100%;
+      line-height: 1.1;
+      letter-spacing: $spacing-v-lg;
+      text-indent: $spacing-v-lg;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+    }
+
+    &-match-score-small {
+      font-size: $font-size-lg !important;
+    }
+
+    &-match-score-penalty {
+      font-size: $font-size-xs;
+      color: $color-text-base-inverse;
+      width: 100%;
+      letter-spacing: $spacing-v-md;
+      text-indent: $spacing-v-md;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+    }
+  }
+
+  &__vs-full {
+    width: 100% !important;
+    margin-top: 0 !important;
+
+    .qz-match-up-item__vs-match-name {
+      display: inline !important;
+    }
+  }
+}
+
+.qz-bet-score {
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    //background: $color-bg-blue-main;
+    background-color: $color-bg-grey;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+    padding: $spacing-v-sm 0;
+
+    &-item {
+      vertical-align: middle;
+      display: inline-block;
+      width: 33.33%;
+      overflow: hidden;
+      font-size: $font-size-sm;
+      color: $color-text-title;
+      text-align: center;
+    }
+  }
+
+  &-header:after {
+    content: "";
+    display: table;
+    clear: both;
+    overflow: hidden;
+  }
+
+  &-content {
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    &-item-list {
+      width: 33.33%;
+      margin: 10px 0;
+      padding: 0 10px 90px 10px;
+    }
+
+    &-item {
+      width: 100%;
+
+      view {
+        font-size: $font-size-base;
+        color: $color-text-paragraph;
+        background-color: $color-bg-lighter;
+        text-align: center;
+        padding: 10px 0;
+        margin-bottom: 10px;
+      }
+    }
+  }
+}
+.qz-bet-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: fit-content;
+  align-self: center;
+  background-color: $color-bg-base;
+  box-shadow: 4px 0 4px 0 rgba(0, 0, 0, 0.3);
+  padding: $spacing-v-sm 0;
+  &-left {
+    &-title{
+      font-size: $font-size-xs;
+      color: $color-text-paragraph;
+      text-align: center;
+    }
+    &-text{
+      font-size: $font-size-xs;
+      color: $color-text-paragraph;
+      text-align: center;
+    }
+    &-center-text{
+      display: inline-block;
+      width: 100%;
+      font-size: $font-size-sm;
+      color: $color-text-paragraph;
+      text-align: center;
+      vertical-align: middle;
+    }
+  }
+
+  &-right {
+    padding: 0 $spacing-v-md;
+  }
+}

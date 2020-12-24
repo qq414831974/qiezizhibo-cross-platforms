@@ -3,6 +3,7 @@ import {View, Image} from '@tarojs/components'
 import {AtActivityIndicator, AtTabs, AtTabsPane, AtMessage, AtFloatLayout, AtFab, AtToast} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import defaultLogo from '../../assets/default-logo.png'
+import cancel from '../../assets/cancel.png'
 
 import './leagueManager.scss'
 import leagueAction from "../../actions/league";
@@ -28,6 +29,9 @@ import GiftRank from "../../components/gift-rank";
 import HeatReward from "../../components/heat-reward";
 import ModalAlbum from "../../components/modal-album";
 import ShareMoment from "../../components/share-moment";
+import BetRank from "../../components/bet-rank";
+import ModalPay from "../../components/modal-pay";
+import depositAction from "../../actions/deposit";
 
 type PageStateProps = {
   leagueTeams: any;
@@ -36,6 +40,7 @@ type PageStateProps = {
   shareSentence: any;
   userInfo: any;
   giftList: any;
+  deposit: any;
 }
 
 type PageDispatchProps = {}
@@ -82,6 +87,14 @@ type PageState = {
   heatStartTime: any,
   heatEndTime: any,
   onHandleShareSuccess: any,
+  betRanks: any;
+  betRanksLoading: any;
+  betRankShow: boolean;
+  betRankFabHide: boolean;
+  leagueBetEnable: boolean;
+  payCallback: any;
+  payConfirmShow: boolean;
+  currentPrice: number;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -106,7 +119,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
   config: Config = {
-    navigationBarTitleText: '茄子体育',
+    navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
   }
@@ -153,10 +166,18 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       heatStartTime: null,
       heatEndTime: null,
       onHandleShareSuccess: null,
+      betRanks: null,
+      betRanksLoading: false,
+      betRankShow: false,
+      betRankFabHide: false,
+      leagueBetEnable: false,
+      payCallback: null,
+      payConfirmShow: false,
+      currentPrice: 0,
     }
   }
 
-  $setSharePath = () => `/pages/home/home?id=${this.state.league.id}&page=leagueManager`
+  $setSharePath = () => `/pages/home/home?id=${this.getParamId()}&page=leagueManager`
 
   $setShareTitle = () => {
     const shareSentence = random_weight(this.props.shareSentence.filter(value => value.type == global.SHARE_SENTENCE_TYPE.league).map(value => {
@@ -204,6 +225,10 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
   componentDidMount() {
     this.getParamId() && this.getLeagueInfo(this.getParamId());
+    this.getParamId() && this.getBetRanks(this.getParamId());
+    if (this.props.userInfo && this.props.userInfo.userNo) {
+      depositAction.getDeposit(this.props.userInfo.userNo);
+    }
     const query = Taro.createSelectorQuery();
     query.select('.qz-league-manager-tabs').boundingClientRect(rect => {
       this.tabsY = (rect as {
@@ -231,11 +256,13 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
   getParamId = () => {
     let id;
-    if (this.$router.params) {
-      if (this.$router.params.id == null) {
+    if (this.$router.params != null) {
+      if (this.$router.params.id == null && this.$router.params.scene != null) {
         id = this.$router.params.scene
-      } else {
+      } else if (this.$router.params.id != null) {
         id = this.$router.params.id
+      } else {
+        return null
       }
     } else {
       return null;
@@ -373,6 +400,21 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       Taro.hideLoading()
       Taro.stopPullDownRefresh()
     }
+  }
+
+  getBetRanks = (leagueId) => {
+    this.setState({betRanksLoading: true})
+    new Request().get(api.API_LEAGUE_BET, {leagueId: leagueId}).then((leagueData: any) => {
+      if (leagueData && leagueData.available) {
+        this.setState({leagueBetEnable: true})
+        new Request().get(api.API_BET_RANK, {leagueId: leagueId}).then((data: any) => {
+          if (Array.isArray(data)) {
+            data = data.filter(res => res.count != null && res.count != 0);
+            this.setState({betRanks: data, betRanksLoading: false})
+          }
+        });
+      }
+    });
   }
 
   onPlayerHeatRefresh = (func) => {
@@ -572,7 +614,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   onAuthSuccess = () => {
     this.setState({loginOpen: false})
     this.getUserInfo((res) => {
-      const {phone} = res.payload
+      const {phone} = res.payload.phone
+      depositAction.getDeposit(res.userNo);
       if (res.payload != null && phone == null) {
         this.setState({phoneOpen: true})
       }
@@ -940,6 +983,28 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   onHandleShareSuccess = (func: any) => {
     this.setState({onHandleShareSuccess: func});
   }
+  handleBetRankClick = () => {
+    this.setState({betRankShow: true});
+  }
+  handleBetRankCancel = () => {
+    this.setState({betRankShow: false});
+  }
+  hideBetRank = () => {
+    this.setState({betRankFabHide: true});
+  }
+  onPayConfirm = (callback, price) => {
+    this.setState({payCallback: callback, payConfirmShow: true, currentPrice: price})
+  }
+  onPayConfirmClose = () => {
+    this.setState({payConfirmShow: false})
+  }
+  handleWechatConfirm = () => {
+    this.state.payCallback && this.state.payCallback(global.PAY_TYPE.ONLINE)
+  }
+  handleDepositConfirm = () => {
+    this.state.payCallback && this.state.payCallback(global.PAY_TYPE.DEPOSIT)
+  }
+
   render() {
     const {leaguePlayers, leagueTeams} = this.props
     const {league} = this.state
@@ -1054,7 +1119,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
         <AtMessage/>
         <AtFloatLayout
           className="qz-gift-float"
-          title={`礼物送给${(this.state.heatType == global.HEAT_TYPE.TEAM_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}       1茄币=1元`}
+          title={`礼物送给${(this.state.heatType == global.HEAT_TYPE.TEAM_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}>
           <GiftPanel
@@ -1068,7 +1133,10 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             onHandlePaySuccess={this.onGiftPaySuccess}
             onHandlePayError={this.onGiftPayError}
             onHandleShareSuccess={this.onHandleShareSuccess}
-            hidden={!this.state.giftOpen}/>
+            hidden={!this.state.giftOpen}
+            onPayConfirm={this.onPayConfirm}
+            onPayClose={this.onPayConfirmClose}
+          />
         </AtFloatLayout>
         {this.state.giftSendQueue && this.state.giftSendQueue.map((data: any) => (
           <GiftNotify
@@ -1105,6 +1173,18 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           handleConfirm={this.onPremissionSuccess}
           handleCancel={this.onPremissionCancel}
           handleClose={this.onPremissionClose}/>
+        <BetRank
+          betRanks={this.state.betRanks}
+          loading={this.state.betRanksLoading}
+          isOpened={this.state.betRankShow}
+          handleCancel={this.handleBetRankCancel}
+        />
+        <ModalPay
+          isOpened={this.state.payConfirmShow}
+          price={this.state.currentPrice}
+          onCancel={this.onPayConfirmClose}
+          onWechatPay={this.handleWechatConfirm}
+          onDepositPay={this.handleDepositConfirm}/>
         {this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.heatPlayer] || this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.heatTeam] ?
           <View>
             <View className="qz-league-manager-fab qz-league-manager-fab-square qz-league-manager-fab-giftrank">
@@ -1122,6 +1202,16 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           </View>
           : null
         }
+        {this.state.leagueBetEnable && this.state.currentTab != tabs[global.LEAGUE_TABS_TYPE.heatPlayer] && this.state.currentTab != tabs[global.LEAGUE_TABS_TYPE.heatTeam] && !this.state.betRankFabHide ?
+          <View className="qz-league-manager-fab qz-league-manager-fab-square qz-league-manager-fab-betrank">
+            <Image onClick={this.hideBetRank} className="qz-league-manager-fab-close" src={cancel}/>
+            <AtFab onClick={this.handleBetRankClick}>
+              <Image className="qz-league-manager-fab-image"
+                     src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/bet_rank.png"/>
+            </AtFab>
+          </View>
+          : null
+        }
       </View>
     )
   }
@@ -1129,6 +1219,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
 const mapStateToProps = (state) => {
   return {
+    deposit: state.deposit.depositInfo ? state.deposit.depositInfo.deposit : 0,
     userInfo: state.user.userInfo,
     leaguePlayers: state.league.leaguePlayers,
     leagueTeams: state.league.leagueTeams,

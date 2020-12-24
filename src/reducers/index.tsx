@@ -8,6 +8,7 @@ import live from './live'
 import player from './player'
 import area from './area'
 import pay from './pay'
+import deposit from './deposit'
 
 export default combineReducers({
   user,
@@ -19,4 +20,5 @@ export default combineReducers({
   player,
   area,
   pay,
+  deposit,
 })

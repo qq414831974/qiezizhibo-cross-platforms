@@ -12,14 +12,13 @@
     display: flex;
     justify-content: center;
     margin-top: $spacing-v-md;
+    overflow: hidden;
     &__inner {
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
       width: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
+      overflow: hidden;
       padding: 0 5%;
     }
   }
