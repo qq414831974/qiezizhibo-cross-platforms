@@ -74,6 +74,7 @@ import {
   substitutionLeft,
   substitutionRight
 } from '../../utils/assets';
+import MatchClip from "./components/match-clip";
 
 type Bulletin = {
   id: number,
@@ -187,6 +188,7 @@ type PageState = {
   payCallback: any;
   payConfirmShow: boolean;
   currentPrice: number;
+  matchClips: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -320,6 +322,7 @@ class Live extends Component<PageOwnProps, PageState> {
       payCallback: null,
       payConfirmShow: false,
       currentPrice: 0,
+      matchClips: null,
     }
   }
 
@@ -416,6 +419,7 @@ class Live extends Component<PageOwnProps, PageState> {
 
         this.getCommentList(this.props.match.id);
         this.initHeatCompetition(data);
+        this.getMatchMediaClip(data.id);
       }
       Taro.hideLoading();
     })
@@ -740,6 +744,14 @@ class Live extends Component<PageOwnProps, PageState> {
       Taro.hideLoading()
       Taro.stopPullDownRefresh()
     }
+  }
+
+  getMatchMediaClip = (id) => {
+    new Request().get(api.API_MATCH_MEDIA, {matchId: id}, false).then((data: any) => {
+      if (Array.isArray(data)) {
+        this.setState({matchClips: data})
+      }
+    })
   }
 
   getMatchDanmu = (id, index) => {
@@ -1781,6 +1793,12 @@ class Live extends Component<PageOwnProps, PageState> {
     //   tabs[TABS_TYPE.giftRank] = tabIndex;
     //   tabIndex = tabIndex + 1;
     // }
+    //开启集锦
+    if (match && match.type && match.type.indexOf(MATCH_TYPE.clip) != -1) {
+      tabList.push({title: '集锦'})
+      tabs[TABS_TYPE.clip] = tabIndex;
+      tabIndex = tabIndex + 1;
+    }
     //开启统计
     if (match && match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1) {
       tabList.push({title: '统计'})
@@ -2309,6 +2327,12 @@ class Live extends Component<PageOwnProps, PageState> {
                   )}
                 </ScrollView>
               </AtTabsPane>
+              {match.type && match.type.indexOf(MATCH_TYPE.clip) != -1 &&
+              <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.clip]}>
+                <MatchClip
+                  hidden={this.state.currentTab != tabs[TABS_TYPE.clip]}
+                  medias={this.state.matchClips}/>
+              </AtTabsPane>}
               {/*{this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?*/}
               {/*  <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatReward]}>*/}
 

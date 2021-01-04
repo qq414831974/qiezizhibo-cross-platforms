@@ -52,6 +52,7 @@ export const MATCH_TYPE = {
   timeLine: 1,
   lineUp: 3,
   chattingRoom: 4,
+  clip: 5,
 }
 export const LEAGUE_TABS_TYPE = {
   leagueRule: "leagueRule",
@@ -67,6 +68,7 @@ export const TABS_TYPE = {
   matchUp: "matchUp",
   heatReward: "heatReward",
   giftRank: "giftRank",
+  clip: "clip",
   statistics: "statistics",
   lineUp: "lineUp",
 }

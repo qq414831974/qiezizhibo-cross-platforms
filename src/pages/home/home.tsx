@@ -338,6 +338,7 @@ class Home extends Component<PageOwnProps, PageState> {
   }
   onMatchItemClick = (item) => {
     // Taro.navigateTo({url: `../bet/bet?id=${5026}`});
+    // Taro.navigateTo({url: `../live/live?id=1385`});
     Taro.navigateTo({url: `../live/live?id=${item.id}`});
   }
   onMatchItemBetClick = (item) => {

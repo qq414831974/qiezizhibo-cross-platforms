@@ -20,7 +20,7 @@ export const websocket = (id) => `${websocket_service}/websocket/${id}`;
 //config
 export const API_CONFIG_BANNER = `${system_service}/system/config/banner`;
 export const API_CONFIG_BULLETIN = `${system_service}/system/config/bulletin`;
-export const API_CONFIG_BULLETIN_MATCH = (id) =>`${system_service}/system/config/bulletin/match/${id}`;
+export const API_CONFIG_BULLETIN_MATCH = (id) => `${system_service}/system/config/bulletin/match/${id}`;
 export const API_SYSTEM_SECURITY_CHECK = `${system_service}/system/wxa_security_check`;
 export const API_VISIT = `${user_service}/user/visit`;
 export const API_GET_WXACODE = `${system_service}/system/getWxacode`;
@@ -34,8 +34,8 @@ export const API_PHONENUMBER = `${auth_service}/auth/getPhoneNumber`;
 export const API_AUTH_USER = `${auth_service}/auth/user`;
 export const API_USER = `${user_service}/user`;
 export const API_REFRESH_TOKEN = `${auth_service}/auth/refresh_token`;
-export const API_USER_ABILITY = (userNo) =>`${user_service}/user/${userNo}/ability`;
-export const API_USER_ADDRESS = (userNo) =>`${user_service}/user/${userNo}/address`;
+export const API_USER_ABILITY = (userNo) => `${user_service}/user/${userNo}/ability`;
+export const API_USER_ADDRESS = (userNo) => `${user_service}/user/${userNo}/address`;
 
 //league
 export const API_LEAGUE = (id) => `${football_service}/league/${id}`;
@@ -55,6 +55,7 @@ export const API_MATCH_NOOICE = `${football_service}/match/nooice`;
 export const API_MATCH_COMMENT = `${chat_service}/comment`;
 export const API_MATCH_COMMENT_COUNT = `${chat_service}/comment/count`;
 export const API_MATCH_COMMENT_DANMU = `${chat_service}/comment/danmu`;
+export const API_MATCH_MEDIA = `${media_service}/media/match`;
 
 //team
 export const API_TEAM = (id) => `${football_service}/team/${id}`;
@@ -64,14 +65,14 @@ export const API_TEAMS = `${football_service}/teams`;
 export const API_PLAYER = (id) => `${football_service}/player/${id}`;
 export const API_PLAYERS = `${football_service}/player`;
 export const API_PLAYER_BEST = `${football_service}/player/best`;
-export const API_PLAYER_MEDIA = `${football_service}/media/player`;
+export const API_PLAYER_MEDIA = `${media_service}/media/player`;
 
 //live
 export const API_ACTIVITY_MEDIA_LIST = (id) => `${media_service}/media/activity?activityId=${id}`;
 export const API_ACTIVITY_PING = (id) => `${live_service}/activity/${id}/ping`;
 
 //media
-export const API_MEDIA = `${media_service}/media`;
+export const API_MEDIA = (id) => `${media_service}/media/${id}`;
 export const API_MEDIA_RECOMMEND = `${media_service}/media/recommend`;
 export const API_MEDIA_NOOICE = `${media_service}/media/nooice`;
 

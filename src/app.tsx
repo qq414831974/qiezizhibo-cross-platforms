@@ -48,6 +48,7 @@ class App extends Component {
       'pages/address/address',
       'pages/betOrders/betOrders',
       'pages/deposit/deposit',
+      'pages/media/media',
     ],
     window: {
       backgroundTextStyle: 'light',
