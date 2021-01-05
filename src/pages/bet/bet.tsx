@@ -1,6 +1,6 @@
 import Taro, {Component, Config} from '@tarojs/taro'
-import {View, Text} from '@tarojs/components'
-import {AtLoadMore, AtAvatar, AtIcon, AtButton} from "taro-ui"
+import {View, Text, Button, Picker} from '@tarojs/components'
+import {AtLoadMore, AtAvatar, AtIcon, AtButton, AtModal, AtModalContent, AtModalAction} from "taro-ui"
 import {connect} from '@tarojs/redux'
 
 import './bet.scss'
@@ -25,6 +25,7 @@ eventType[15] = {text: "下半场", color: "live"};
 eventType[16] = {text: "暂停", color: "live"};
 eventType[21] = {text: "比赛结束", color: "finish"};
 
+const numberList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30];
 const scoreList: { [key: string]: Array<{ title: string, score: string }>; } = {};
 scoreList["host"] = [{
   title: "1-0",
@@ -71,9 +72,6 @@ scoreList["host"] = [{
 }, {
   title: "5-4",
   score: "5-4"
-}, {
-  title: "主胜其他",
-  score: "win"
 }];
 scoreList["draw"] = [{
   title: "0-0",
@@ -93,9 +91,6 @@ scoreList["draw"] = [{
 }, {
   title: "5-5",
   score: "5-5"
-}, {
-  title: "平其他",
-  score: "draw"
 }];
 scoreList["guest"] = [{
   title: "0-1",
@@ -142,9 +137,6 @@ scoreList["guest"] = [{
 }, {
   title: "4-5",
   score: "4-5"
-}, {
-  title: "客胜其他",
-  score: "lost"
 }];
 
 const STATUS = {
@@ -179,6 +171,9 @@ type PageState = {
   betRanksLoading: any;
   freeBetLoading: boolean;
   freeBetTimes: number;
+  betInputShow: boolean;
+  betInputHost: any;
+  betInputGuest: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -412,6 +407,34 @@ class Bet extends Component<PageOwnProps, PageState> {
       'duration': 5000,
     })
   }
+  onInputScoreClick = () => {
+    this.setState({betInputShow: true, betInputHost: null, betInputGuest: null})
+  }
+  onBetInputHide = () => {
+    this.setState({betInputShow: false})
+  }
+  handleBetHostScoreChange = (e) => {
+    this.setState({
+      betInputHost: e.detail.value
+    })
+  }
+  handleBetGuestScoreChange = (e) => {
+    this.setState({
+      betInputGuest: e.detail.value
+    })
+  }
+  handleBetInputConfirm = () => {
+    if (this.state.betInputHost == null || this.state.betInputGuest == null ||
+      Number(this.state.betInputHost) != this.state.betInputHost || Number(this.state.betInputGuest) != this.state.betInputGuest) {
+      Taro.showToast({
+        'title': "请选择正确的比分",
+        'icon': 'none',
+      })
+      return;
+    }
+    this.setState({betInputShow: false})
+    this.handleBetClick(`${this.state.betInputHost}-${this.state.betInputGuest}`)
+  }
 
   render() {
     const {match = {}, loading, startDiffDayTime, endDiffDayTime, betStatus} = this.state
@@ -498,6 +521,11 @@ class Bet extends Component<PageOwnProps, PageState> {
                   </View>
                 )}
               </View>
+              <View className='qz-bet-score-content-item' onClick={this.onInputScoreClick}>
+                <View>
+                  自定义
+                </View>
+              </View>
             </View>
             <View className='qz-bet-score-content-item-list'>
               <View className='qz-bet-score-content-item'>
@@ -507,6 +535,11 @@ class Bet extends Component<PageOwnProps, PageState> {
                   </View>
                 )}
               </View>
+              <View className='qz-bet-score-content-item' onClick={this.onInputScoreClick}>
+                <View>
+                  自定义
+                </View>
+              </View>
             </View>
             <View className='qz-bet-score-content-item-list'>
               <View className='qz-bet-score-content-item'>
@@ -515,6 +548,11 @@ class Bet extends Component<PageOwnProps, PageState> {
                     {item.title}
                   </View>
                 )}
+              </View>
+              <View className='qz-bet-score-content-item' onClick={this.onInputScoreClick}>
+                <View>
+                  自定义
+                </View>
               </View>
             </View>
           </View>
@@ -580,6 +618,40 @@ class Bet extends Component<PageOwnProps, PageState> {
           isOpened={this.state.rankShow}
           handleCancel={this.handleBetRankCancel}
         />
+        <AtModal isOpened={this.state.betInputShow} onClose={this.onBetInputHide}>
+          <AtModalContent>
+            <View className="qz-bet-input-container">
+              <View className="qz-bet-input-header">
+                请选择比分
+              </View>
+              <View className="at-row">
+                <View className="at-col at-col-5">
+                  <Picker value={0} mode='selector' range={numberList} onChange={this.handleBetHostScoreChange}>
+                    <View className="qz-bet-input-socre">
+                      {this.state.betInputHost ? this.state.betInputHost : '请选择'}
+                    </View>
+                  </Picker>
+                </View>
+                <View className="at-col at-col-2">
+                  <View className="qz-bet-input-socre">
+                    -
+                  </View>
+                </View>
+                <View className="at-col at-col-5">
+                  <Picker value={0} mode='selector' range={numberList} onChange={this.handleBetGuestScoreChange}>
+                    <View className="qz-bet-input-socre">
+                      {this.state.betInputGuest ? this.state.betInputGuest : '请选择'}
+                    </View>
+                  </Picker>
+                </View>
+              </View>
+            </View>
+          </AtModalContent>
+          <AtModalAction>
+            <Button className="mini-gray" onClick={this.onBetInputHide}>关闭</Button>
+            <Button className="black" onClick={this.handleBetInputConfirm}>确定</Button>
+          </AtModalAction>
+        </AtModal>
       </View>
     )
   }

@@ -281,7 +281,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
                           </View>}
                         <View className="qz-gifts__grid-item-price">
                           <Image className="qz-gifts__grid-item-price__image" src={flame}/>
-                          <Text>+{this.getGiftGrowthByType(data, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, 1)}票</Text>
+                          <Text>+{this.getGiftGrowthByType(data, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, 1)}</Text>
                         </View>
                         {(giftWatchPrice != null || giftWatchEternalPrice != null) && data.price != null && data.price >= giftWatchPrice ?
                           <View className="qz-gifts__grid-item-freewatch">
@@ -311,7 +311,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
                       <View className="qz-gifts__bottom-discount">(原价{realPrice})</View>
                       : null}
                     {heat ?
-                      <View className="qz-gifts__bottom-heat"><Image src={flame}/><Text>+{heat}票</Text></View> : null}
+                      <View className="qz-gifts__bottom-heat"><Image src={flame}/><Text>+{heat}</Text></View> : null}
                     {/*{exp ?*/}
                     {/*  <View className="qz-gifts__bottom-exp">+{exp}经验</View> : null}*/}
                   </View>

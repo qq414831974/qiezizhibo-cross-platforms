@@ -246,6 +246,23 @@
     }
   }
 }
+.qz-bet-input-container {
+  width: 100%;
+  height: 100%;
+}
+.qz-bet-input-header{
+  font-size: $font-size-lg;
+  color: $color-text-title;
+  text-align: center;
+}
+.qz-bet-input-socre {
+  font-size: $font-size-lg;
+  color: $color-text-paragraph;
+  background-color: $color-bg-lighter;
+  text-align: center;
+  padding: 10px 0;
+  margin-top: $spacing-h-xl;
+}
 .qz-bet-footer {
   position: fixed;
   bottom: 0;

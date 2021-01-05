@@ -359,6 +359,29 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                     <View className="qz-heat-player__grid-item-shirtNum">
                       <Text>{data.sequence ? data.sequence : "0"}号</Text>
                     </View> : null}
+                  <View
+                    className={`qz-heat-player__grid-item-popup ${currentPlayerHeat && currentPlayerHeat.id == data.id ? "qz-heat-player__grid-item-popup-active" : ""}`}>
+                    <RoundButton
+                      animation
+                      margin="0 5px"
+                      size={25}
+                      img={share}
+                      openType="share"
+                      onClick={() => {
+                      }}/>
+                    <RoundButton
+                      animation
+                      margin="0 5px"
+                      size={25}
+                      img={moment}
+                      onClick={this.handleShareMoment}/>
+                    <RoundButton
+                      animation
+                      margin="0 5px"
+                      size={25}
+                      img={flame}
+                      onClick={this.handleSupport}/>
+                  </View>
                 </View>
               )
             )}

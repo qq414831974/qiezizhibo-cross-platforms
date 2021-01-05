@@ -252,5 +252,38 @@
       font-size: $font-size-xs;
       color: $color-grey-1;
     }
+
+    &-popup {
+      display: none;
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      height: 60px;
+      width: 100%;
+      background-color: #2d8cf0;
+      z-index: $zindex-flot-layout;
+      border-radius: 20px;
+      animation: fadeInDown .3s;
+      align-items: center;
+      justify-content: center;
+    }
+    &-popup-active {
+      display: flex;
+    }
+  }
+}
+
+@keyframes fadeInDown {
+  0% {
+    -webkit-transform: translate3d(0, -20%, 0) scale(0.5);
+    -webkit-transform: translate3d(0, -20%, 0) scale(0.5);
+    transform: translate3d(0, -20%, 0) scale(0.5);
+    transform: translate3d(0, -20%, 0) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    opacity: 1;
   }
 }
