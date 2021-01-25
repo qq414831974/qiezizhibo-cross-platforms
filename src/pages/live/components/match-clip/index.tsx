@@ -10,6 +10,7 @@ type PageDispatchProps = {}
 type PageOwnProps = {
   hidden: boolean;
   medias: [];
+  needPay: boolean;
 }
 
 type PageState = {}
@@ -23,6 +24,14 @@ interface MatchClip {
 class MatchClip extends Component<PageOwnProps, PageState> {
   static defaultProps = {}
   onMediaClick = (mediaId) => {
+    if(this.props.needPay){
+      Taro.showToast({
+        title: "购买比赛后才可观看本场比赛剪辑",
+        duration: 2000,
+        icon: "none",
+      });
+      return;
+    }
     Taro.navigateTo({url: `../media/media?id=${mediaId}`});
   }
 

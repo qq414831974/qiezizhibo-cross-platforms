@@ -1,7 +1,7 @@
 import Taro, {Component, Config} from '@tarojs/taro'
-import {View, Text, Button, Image, Swiper, SwiperItem, Navigator} from '@tarojs/components'
+import {View, Text, Button, Image, Swiper, SwiperItem, Navigator, ScrollView} from '@tarojs/components'
 import {connect} from '@tarojs/redux'
-import {AtNoticebar, AtAvatar, AtIcon, AtCurtain} from 'taro-ui'
+import {AtNoticebar, AtAvatar, AtIcon, AtCurtain, AtLoadMore} from 'taro-ui'
 import NavigationBar from './components/navigation-search-bar'
 import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
 
@@ -56,6 +56,7 @@ type PageState = {
   bulletin: Bulletin | null,
   curtain: Bulletin | null,
   curtainShow: boolean,
+  loadingMore: boolean,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -86,7 +87,7 @@ class Home extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
-    disableScroll: true
+    disableScroll: true,
   }
 
   constructor(props) {
@@ -97,6 +98,7 @@ class Home extends Component<PageOwnProps, PageState> {
       bulletin: null,
       curtain: null,
       curtainShow: false,
+      loadingMore: false,
     }
   }
 
@@ -250,7 +252,7 @@ class Home extends Component<PageOwnProps, PageState> {
       leagueAction.getLeagueList({
         pageSize: 10,
         pageNum: 1,
-        leagueType: 4,
+        leagueType: 3,
         sortField: "remark",
         sortOrder: "desc",
         country: "中国",
@@ -264,6 +266,30 @@ class Home extends Component<PageOwnProps, PageState> {
       });
     });
   }
+  nextPage = () => {
+    if (this.state.loadingMore) {
+      return;
+    }
+    this.setState({loadingMore: true})
+    leagueAction.getLeagueList_add({
+      pageSize: 10,
+      pageNum: this.props.leagueList.current + 1,
+      leagueType: 3,
+      sortField: "remark",
+      sortOrder: "desc",
+      country: "中国",
+      province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
+      matchnum: 2,
+    }).then(() => {
+      this.setState({loadingMore: false})
+    })
+  }
+
+  // 小程序上拉加载
+  onReachBottom() {
+    this.nextPage();
+  }
+
   getAreas = () => {
     areaAction.getAreas();
   }
@@ -367,9 +393,14 @@ class Home extends Component<PageOwnProps, PageState> {
 
   render() {
     const {leagueList = {}, locationConfig} = this.props
-
+    let loadingmoreStatus: any = "more";
+    if (this.state.loadingMore) {
+      loadingmoreStatus = "loading";
+    } else if (leagueList == null || leagueList.records == null || leagueList.records.length <= 0 || leagueList.total <= leagueList.records.length) {
+      loadingmoreStatus = "noMore"
+    }
     return (
-      <View className='qz-home-content'>
+      <ScrollView scrollY onScrollToLower={this.onReachBottom} className='qz-home-content'>
         <View className='qz-home-top'>
           {this.state.bulletin && this.state.bulletin.content ?
             <View className='qz-home-notice-content' onClick={this.onNoticeBarClick.bind(this, this.state.bulletin)}>
@@ -469,6 +500,7 @@ class Home extends Component<PageOwnProps, PageState> {
               </View>
             </View>)
         })}
+        <AtLoadMore status={loadingmoreStatus} loadingText="加载中..." onClick={this.nextPage}/>
         <ModalLocation
           isOpened={this.state.locationShow}
           handleConfirm={this.onLocationSuccess}
@@ -480,12 +512,12 @@ class Home extends Component<PageOwnProps, PageState> {
           onClose={this.onCurtainClose}
         >
           <Image
-            style='width:100%;height:250px'
+            mode="widthFix"
             src={this.state.curtain ? this.state.curtain.content : ""}
             onClick={this.handleCurtainClick}
           />
         </AtCurtain>
-      </View>
+      </ScrollView>
     )
   }
 }

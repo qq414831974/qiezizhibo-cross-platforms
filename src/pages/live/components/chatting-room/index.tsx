@@ -63,16 +63,20 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
       return;
     }
     this.setState({scrolling: true})
-    this.props.nextPage().then(() => {
+    this.props.nextPage && this.props.nextPage().then(() => {
       this.setState({scrolling: false})
     });
   }
   getCommentsList = (comments) => {
-    return comments.sort((item1, item2) => {
+    let commentList: Array<any> = comments.sort((item1, item2) => {
       const date1 = new Date(item1.date).getTime();
       const date2 = new Date(item2.date).getTime();
       return date1 > date2 ? 1 : (date1 == date2 ? 0 : -1)
     });
+    if(commentList.length > 10){
+      commentList = commentList.slice(0,10)
+    }
+    return commentList;
   }
   getGfitOrder = (content) => {
     return JSON.parse(content);

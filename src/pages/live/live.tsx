@@ -1095,6 +1095,10 @@ class Live extends Component<PageOwnProps, PageState> {
   getCommentList_next = () => {
     const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
     return new Promise((resolve, reject) => {
+      if (commentList.length > 10) {
+        resolve();
+        return;
+      }
       this.setState({chatLoading: true})
       matchAction.getMatchComment_add({
         pageNum: this.props.commentList.current ? this.props.commentList.current + 1 : 1,
@@ -2331,7 +2335,9 @@ class Live extends Component<PageOwnProps, PageState> {
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.clip]}>
                 <MatchClip
                   hidden={this.state.currentTab != tabs[TABS_TYPE.clip]}
-                  medias={this.state.matchClips}/>
+                  medias={this.state.matchClips}
+                  needPay={this.state.needPay}
+                />
               </AtTabsPane>}
               {/*{this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?*/}
               {/*  <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatReward]}>*/}
@@ -2412,7 +2418,7 @@ class Live extends Component<PageOwnProps, PageState> {
           onClose={this.onCurtainClose}
         >
           <Image
-            style='width:100%;height:250px'
+            mode="widthFix"
             src={this.state.curtain ? this.state.curtain.content : ""}
             onClick={this.handleCurtainClick}
           />

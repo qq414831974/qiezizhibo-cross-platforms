@@ -64,13 +64,13 @@ class ModalPay extends Component<PageOwnProps | any, PageState> {
     const openId = this.props.userInfo ? this.props.userInfo.wechatOpenid : null
     const userNo = this.props.userInfo ? this.props.userInfo.userNo : null
     if (userNo == null || openId == null) {
-      Taro.showToast({
-        title: "登录失效，请重新登录",
-        icon: 'none',
-        complete: () => {
-          toLogin();
-        }
-      })
+      // Taro.showToast({
+      //   title: "登录失效，请重新登录",
+      //   icon: 'none',
+      //   complete: () => {
+      //     toLogin();
+      //   }
+      // })
       return;
     }
     this.setState({loading: true});

@@ -6,6 +6,7 @@ import RoundButton from '../../components/round-button'
 import './index.scss'
 import {getTimeDifference} from "../../utils/utils";
 import noperson from '../../assets/no-person.png';
+import defaultLogo from '../../assets/default-logo.png';
 import flame from '../../assets/live/left-support.png';
 import share from '../../assets/live/share.png';
 import moment from '../../assets/live/moment.png';
@@ -334,6 +335,9 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                 <View key={data.id}
                       className={`qz-heat-player__grid-item ${currentPlayerHeat && currentPlayerHeat.id == data.id ? "qz-heat-player__grid-item-active" : ""}`}
                       onClick={onPlayerClick.bind(this, data)}>
+                  <View className="qz-heat-player__grid-item-team">
+                    <Image src={data.team && data.team.headImg ? data.team.headImg : defaultLogo}/>
+                  </View>
                   <View className="qz-heat-player__grid-item-img-container">
                     <Image src={data.player && data.player.headImg ? data.player.headImg : noperson}/>
                     <View className="qz-heat-player__grid-item-heat">

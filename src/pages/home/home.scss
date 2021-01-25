@@ -4,8 +4,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-x: hidden;
-  overflow-y: scroll;
+  //overflow-x: hidden;
+  //overflow-y: scroll;
   width: 100vw;
   height: 100vh;
   //background-color: $color-bg-grey;
@@ -251,6 +251,8 @@
 
   &-content {
     width: 100%;
+    overflow: hidden;
+    clear: both;
     //background-color: #fff;
     //border-radius: 10px;
     //box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
