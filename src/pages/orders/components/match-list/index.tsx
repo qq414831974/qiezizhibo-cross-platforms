@@ -75,8 +75,15 @@ class MatchList extends Component<PageOwnProps, PageState> {
     Taro.navigateTo({url: `../live/live?id=${item.id}`});
   }
   getExpireDays = (time) => {
+    if (time == null) {
+      return "无";
+    }
     let timeString;
-    const {diffDay = null, diffTime = null} = getTimeDifference(time);
+    const diff = getTimeDifference(time);
+    if (diff == null) {
+      return "已过期";
+    }
+    const {diffDay = null, diffTime = null} = diff;
     if (diffDay) {
       timeString = diffDay
     } else if (diffTime) {
@@ -97,9 +104,17 @@ class MatchList extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {matchList = []} = this.props
+    const {matchList} = this.props
     return <View className='qz-match-list'>
-      {matchList.map((item) => {
+      {matchList && matchList.filter(item => {
+        if (item.mpo.expireTime) {
+          const time_diff = Date.parse(item.mpo.expireTime) - new Date().getTime();
+          if (time_diff < 0) {
+            return false
+          }
+        }
+        return true;
+      }).map((item) => {
         return <View key={item.id}>
           <View className='qz-match-list-content'>
             <View className='qz-match-list-content__inner'>

@@ -154,7 +154,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
     this.setState({currentNum: value})
     return value;
   }
-  onGiftSendClick = async () => {
+  onGiftSendClick =  () => {
     if (this.props.payEnabled != true) {
       Taro.showToast({
         'title': "iOS暂不支持赠送",
@@ -169,7 +169,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
       })
       return;
     }
-    const openid = await getStorage('wechatOpenid');
+    const openid = this.props.userInfo.wechatOpenid;
     let param: any = {
       userNo: this.props.userInfo.userNo,
       openId: openid,
@@ -199,7 +199,8 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
           }
         })
       }
-    }).catch(() => {
+    }).catch((err) => {
+      console.log(err)
       this.setState({giftConfirmOpen: true})
       Taro.showToast({title: `未订阅，则无法收到${hintString}`, icon: "none", duration: 3000});
     })

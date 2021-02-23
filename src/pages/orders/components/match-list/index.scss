@@ -32,6 +32,7 @@
       background-color: $color_warning;
       border-radius: $border-radius-md;
       padding: $spacing-v-xxs $spacing-v-xs;
+      z-index: $zindex-divider;
     }
   }
   &-time{
