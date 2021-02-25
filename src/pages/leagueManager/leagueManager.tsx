@@ -614,7 +614,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   onAuthSuccess = () => {
     this.setState({loginOpen: false})
     this.getUserInfo((res) => {
-      const {phone} = res.payload.phone
+      const phone = res.payload.phone
       depositAction.getDeposit(res.userNo);
       if (res.payload != null && phone == null) {
         this.setState({phoneOpen: true})

@@ -219,7 +219,7 @@ class User extends Component<PageOwnProps, PageState> {
   onAuthSuccess = () => {
     this.setState({loginOpen: false, isLogin: true})
     this.getUserInfo((res) => {
-      const {phone} = res.payload
+      const phone = res.payload.phone
       if (res.payload != null && phone == null) {
         this.setState({phoneOpen: true})
       }
