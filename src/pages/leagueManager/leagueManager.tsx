@@ -437,11 +437,11 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           this.setState({playerHeatLoading: false})
           if (name) {
             this.setState({playerHeats: data}, () => {
-              resolve();
+              resolve(data.records);
             })
           } else {
             this.setState({playerHeats: data, topPlayerHeats: this.getTopThreeHeat(data.records)}, () => {
-              resolve();
+              resolve(data.records);
             })
           }
         })
@@ -495,11 +495,11 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           this.setState({teamHeatLoading: false})
           if (name) {
             this.setState({teamHeats: data}, () => {
-              resolve();
+              resolve(data.records);
             })
           } else {
             this.setState({teamHeats: data, topTeamHeats: this.getTopThreeHeat(data.records)}, () => {
-              resolve();
+              resolve(data.records);
             })
           }
         })

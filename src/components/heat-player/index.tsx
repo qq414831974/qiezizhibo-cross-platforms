@@ -76,8 +76,10 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
   }
 
   refresh = () => {
-    this.props.onGetPlayerHeatInfo(1, 40, this.state.searchText).then(() => {
-      this.refreshCurrentPlayer();
+    this.props.onGetPlayerHeatInfo(1, 40, this.state.searchText).then((res) => {
+      this.setState({currentPlayerHeat: res[0]},()=>{
+        this.refreshCurrentPlayer();
+      })
     });
   }
   getStartDiffTime = () => {

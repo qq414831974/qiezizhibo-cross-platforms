@@ -824,11 +824,11 @@ class Live extends Component<PageOwnProps, PageState> {
           this.setState({playerHeatLoading: false})
           if (name) {
             this.setState({playerHeats: data}, () => {
-              resolve();
+              resolve(data.records);
             })
           } else {
             this.setState({playerHeats: data, topPlayerHeats: this.getTopThreeHeat(data.records)}, () => {
-              resolve();
+              resolve(data.records);
             })
           }
         })
@@ -913,11 +913,11 @@ class Live extends Component<PageOwnProps, PageState> {
           this.setState({leagueTeamHeatLoading: false})
           if (name) {
             this.setState({leagueTeamHeats: data}, () => {
-              resolve();
+              resolve(data.records);
             })
           } else {
             this.setState({leagueTeamHeats: data, topLeagueTeamHeats: this.getTopThreeHeat(data.records)}, () => {
-              resolve();
+              resolve(data.records);
             })
           }
         })

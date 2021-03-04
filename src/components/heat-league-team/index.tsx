@@ -75,8 +75,10 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
   }
 
   refresh = () => {
-    this.props.onGetTeamHeatInfo(1, 40, this.state.searchText).then(() => {
-      this.refreshCurrentTeam();
+    this.props.onGetTeamHeatInfo(1, 40, this.state.searchText).then((res) => {
+      this.setState({currentTeamHeat: res[0]},()=>{
+        this.refreshCurrentTeam();
+      })
     });
   }
   getStartDiffTime = () => {
