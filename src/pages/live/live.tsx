@@ -842,11 +842,11 @@ class Live extends Component<PageOwnProps, PageState> {
           this.setState({playerHeatLoading: false})
           if (name) {
             this.setState({playerHeats: data}, () => {
-              resolve();
+              resolve(data.records);
             })
           } else {
             this.setState({playerHeats: data, topPlayerHeats: this.getTopThreeHeat(data.records)}, () => {
-              resolve();
+              resolve(data.records);
             })
           }
         })

@@ -67,7 +67,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
 
   componentDidMount() {
     this.props.onPlayerHeatRefresh && this.props.onPlayerHeatRefresh(this.refresh);
-    this.refresh();
+    this.refresh(true);
     this.startTimer_CountDown();
   }
 
@@ -75,11 +75,15 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     this.clearTimer_CountDown();
   }
 
-  refresh = () => {
+  refresh = (first?) => {
     this.props.onGetPlayerHeatInfo(1, 40, this.state.searchText).then((res) => {
-      this.setState({currentPlayerHeat: res[0]},()=>{
+      if(first){
+        this.setState({currentPlayerHeat: res[0]},()=>{
+          this.refreshCurrentPlayer();
+        })
+      }else{
         this.refreshCurrentPlayer();
-      })
+      }
     });
   }
   getStartDiffTime = () => {
