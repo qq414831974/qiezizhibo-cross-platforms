@@ -108,7 +108,7 @@ class Media extends Component<PageOwnProps, PageState> {
             {this.state.media ? this.state.media.title : "集锦"}
           </View>
           <View className='at-article__info'>
-            {this.state.media ? this.state.media.createtime : "时间未知"}
+            {this.state.media ? this.state.media.createTime : "时间未知"}
           </View>
         </View>
       </View>

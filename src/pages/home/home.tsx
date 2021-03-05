@@ -178,7 +178,7 @@ class Home extends Component<PageOwnProps, PageState> {
   initBulletin = () => {
     configAction.getBulletinConfig({
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
-      scene: "home"
+      sceneType: "home"
     }).then((data) => {
       if (data && data.length > 0) {
         this.setCurtain();
@@ -193,7 +193,7 @@ class Home extends Component<PageOwnProps, PageState> {
             if (weihu) {
               const userNo = await getStorage('userNo');
               if ((this.props.userInfo && this.props.userInfo.userNo) || userNo) {
-                new Request().get(api.API_USER_ABILITY(userNo ? userNo : this.props.userInfo.userNo), null).then((ability: any) => {
+                new Request().get(api.API_USER_ABILITY, {userNo: userNo ? userNo : this.props.userInfo.userNo}).then((ability: any) => {
                   if (ability && ability.enablePay) {
                     configAction.setPayEnabled(true);
                   } else {
@@ -253,11 +253,11 @@ class Home extends Component<PageOwnProps, PageState> {
         pageSize: 10,
         pageNum: 1,
         leagueType: 3,
-        sortField: "remark",
+        sortField: "sortIndex",
         sortOrder: "desc",
         country: "中国",
         province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
-        matchnum: 2,
+        matchNum: 2,
       }).then(() => {
         Taro.hideLoading();
       }).catch(() => {
@@ -275,11 +275,11 @@ class Home extends Component<PageOwnProps, PageState> {
       pageSize: 10,
       pageNum: this.props.leagueList.current + 1,
       leagueType: 3,
-      sortField: "remark",
+      sortField: "sortIndex",
       sortOrder: "desc",
       country: "中国",
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
-      matchnum: 2,
+      matchNum: 2,
     }).then(() => {
       this.setState({loadingMore: false})
     })
@@ -356,7 +356,7 @@ class Home extends Component<PageOwnProps, PageState> {
     Taro.switchTab({url: '../league/league'})
   }
   onLeagueItemClick = (item) => {
-    if (item.isparent) {
+    if (item.isParent) {
       Taro.navigateTo({url: `../series/series?id=${item.id}`});
     } else {
       Taro.navigateTo({url: `../leagueManager/leagueManager?id=${item.id}`});
@@ -486,7 +486,7 @@ class Home extends Component<PageOwnProps, PageState> {
                 </View>
                 <View className='qz-home-league-detail-content__inner'>
                   {item.matchs && item.matchs.map((match) => (
-                    <MatchItem key={match.id} matchInfo={{...match, leaguematch: null}}
+                    <MatchItem key={match.id} matchInfo={{...match, league: null}}
                                onBetClick={this.onMatchItemBetClick.bind(this, match)}
                                onClick={this.onMatchItemClick.bind(this, match)}/>
                   ))}

@@ -4,7 +4,7 @@ import {AtModal, AtModalContent, AtAvatar, AtDivider} from "taro-ui"
 import {connect} from '@tarojs/redux'
 
 import './index.scss'
-import {getYuan, toLogin} from "../../utils/utils";
+import {getYuan} from "../../utils/utils";
 import wechat from "../../assets/wechat.png";
 import eggplantcoin from "../../assets/eggplantcoin.png";
 // import Request from "../../utils/request";

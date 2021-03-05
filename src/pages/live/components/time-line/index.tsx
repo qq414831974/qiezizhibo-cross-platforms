@@ -54,7 +54,7 @@ class TimeLine extends Component<PageOwnProps, PageState> {
               <View className="qz_time-line-item-dot">
                 <Image src={eventType[item.eventType].icon}/>
               </View>
-              {matchInfo && matchInfo.hostteam && matchInfo.hostteam.id == item.teamId ?
+              {matchInfo && matchInfo.hostTeam && matchInfo.hostTeam.id == item.teamId ?
                 <View className="qz_time-line-item-content qz_time-line-item-left">
                   <View className="qz_time-line-item-content__item qz_time-line-item-content__item-left">
                     {eventType[item.eventType].secondIcon ?
@@ -90,7 +90,7 @@ class TimeLine extends Component<PageOwnProps, PageState> {
                   </View>
                 </View>
                 : null}
-              {matchInfo && matchInfo.guestteam && matchInfo.guestteam.id == item.teamId ?
+              {matchInfo && matchInfo.guestTeam && matchInfo.guestTeam.id == item.teamId ?
                 <View className="qz_time-line-item-content qz_time-line-item-right">
                   <View className="qz_time-line-item-content__item qz_time-line-item-content__item-right">
                     <View className="qz_time-line-item-content__item-time">

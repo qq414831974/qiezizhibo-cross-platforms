@@ -71,7 +71,7 @@ class BetOrders extends Component<PageOwnProps, PageState> {
   getUserAddress = () => {
     const userNo = this.props.userInfo ? this.props.userInfo.userNo : null
     this.setState({addressLoading: true})
-    new Request().get(api.API_USER_ADDRESS(userNo), null).then((data: any) => {
+    new Request().get(api.API_USER_ADDRESS, {userNo: userNo}).then((data: any) => {
       if (data && data.id) {
         this.setState({address: data})
       }
@@ -176,7 +176,7 @@ class BetOrders extends Component<PageOwnProps, PageState> {
             addressLoading={this.state.addressLoading}
             onRefreshFunc={this.getOrdersList}
             matchList={orderList}/>
-         : null}
+          : null}
         <AtLoadMore status={loadingmoreStatus} loadingText="加载中..." noMoreText="没有更多了" onClick={this.nextPage}/>
       </View>
     )

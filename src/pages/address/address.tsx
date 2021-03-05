@@ -75,7 +75,7 @@ class Address extends Component<PageOwnProps | any, PageState> {
   getUserAddress = () => {
     const userNo = this.props.userInfo ? this.props.userInfo.userNo : null
     this.setState({loading: true})
-    new Request().get(api.API_USER_ADDRESS(userNo), null).then((data: any) => {
+    new Request().get(api.API_USER_ADDRESS, {userNo: userNo}).then((data: any) => {
       if (data && data.id) {
         this.setState({address: data})
       }
@@ -84,8 +84,9 @@ class Address extends Component<PageOwnProps | any, PageState> {
   }
   addUserAddress = (params) => {
     const userNo = this.props.userInfo ? this.props.userInfo.userNo : null
+    params.userNo = userNo;
     this.setState({updateLoading: true})
-    new Request().post(api.API_USER_ADDRESS(userNo), params).then((data: any) => {
+    new Request().post(api.API_USER_ADDRESS, params).then((data: any) => {
       if (data) {
         this.getUserAddress();
         this.setState({updateLoading: false})

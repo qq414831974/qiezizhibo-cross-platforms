@@ -506,7 +506,7 @@ class Live extends Component<PageOwnProps, PageState> {
     return id;
   }
   initCurtain = (id) => {
-    new Request().get(`${api.API_CONFIG_BULLETIN_MATCH(id)}`, null).then((res: Array<any>) => {
+    new Request().get(`${api.API_CONFIG_BULLETIN_MATCH}`, {matchId: id}).then((res: Array<any>) => {
       if (res && res.length > 0) {
         const curtain = res[0];
         if (curtain.curtain) {
@@ -540,9 +540,9 @@ class Live extends Component<PageOwnProps, PageState> {
           });
         } else if (res.data !== 'success') {
           const comment = JSON.parse(res.data);
-          if (comment && comment.broadcast) {
-            const giftOrder = JSON.parse(comment.content);
-            context.addToGiftSendQueue(giftOrder);
+          if (comment && comment.isBroadcast) {
+            const giftSendBroadcast = JSON.parse(comment);
+            context.addToGiftSendQueue(giftSendBroadcast);
             // let broadcastList = context.state.broadcastList;
             // let broadcastText = '';
             // if (giftOrder && giftOrder.user && giftOrder.user.name) {
@@ -594,8 +594,8 @@ class Live extends Component<PageOwnProps, PageState> {
           content: message,
           userNo: this.props.userInfo.userNo,
           token: token,
-          danmuindex: this.state.currentMedia,
-          danmusecond: this.state.videoTime + 1,
+          danmuIndex: this.state.currentMedia,
+          danmuSecond: this.state.videoTime + 1,
         };
       }
       new Request().post(`${api.API_SYSTEM_SECURITY_CHECK}`, message).then(res => {
@@ -774,7 +774,7 @@ class Live extends Component<PageOwnProps, PageState> {
   getLiveInfo = (id, callback?) => {
     this.setState({liveLoading: true})
     // liveAction.livePing(id).then((res) => {
-    new Request().get(api.API_ACTIVITY_PING(id), null, false).then((res: any) => {
+    new Request().get(api.API_ACTIVITY_PING, {activityId: id}, false).then((res: any) => {
       if (res.isPushing) {
         this.setState({ping: res, liveLoaded: true, liveLoading: false}, () => {
           callback && callback()
@@ -1141,7 +1141,7 @@ class Live extends Component<PageOwnProps, PageState> {
     });
   }
   setUpNooice = (status) => {
-    this.setState({leftNooice: status.hostnooice, rightNooice: status.guestnooice})
+    this.setState({leftNooice: status.hostNooice, rightNooice: status.guestNooice})
   }
 
   isThisYear = (date: Date) => {
@@ -1166,7 +1166,7 @@ class Live extends Component<PageOwnProps, PageState> {
     })
   }
   onLeagueClick = (item) => {
-    if (item.isparent) {
+    if (item.isParent) {
       Taro.navigateTo({url: `../series/series?id=${item.id}`});
     } else {
       Taro.navigateTo({url: `../leagueManager/leagueManager?id=${item.id}`});
@@ -1191,7 +1191,7 @@ class Live extends Component<PageOwnProps, PageState> {
         leftNooice: this.state.leftNooice + 1,
         nooiceEnabled: true
       });
-      this.props.match && this.props.match.hostteam && this.addNooice(this.props.match.hostteam.id)
+      this.props.match && this.props.match.hostTeam && this.addNooice(this.props.match.hostTeam.id)
     }, 1000);
   }
   handleRightNooice = async () => {
@@ -1210,7 +1210,7 @@ class Live extends Component<PageOwnProps, PageState> {
         rightNooice: this.state.rightNooice + 1,
         nooiceEnabled: true
       });
-      this.props.match && this.props.match.guestteam && this.addNooice(this.props.match.guestteam.id)
+      this.props.match && this.props.match.guestTeam && this.addNooice(this.props.match.guestTeam.id)
     }, 1000);
   }
   onCollectClick = async () => {
@@ -1445,7 +1445,7 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   getOrderStatus = async (orderId: string, type) => {
-    new Request().post(api.API_ORDER_QUERY(orderId), {}).then((res) => {
+    new Request().post(api.API_ORDER_QUERY, {orderId: orderId}).then((res) => {
       if (res == ORDER_STAUTS.paid) {
         Taro.showToast({
           title: "支付成功",
@@ -1720,7 +1720,7 @@ class Live extends Component<PageOwnProps, PageState> {
   onShareMoment = () => {
     const {match = null} = this.props;
     this.setState({downLoading: true})
-    new Request().get(api.API_GET_WXACODE, {id: match.id}).then((imageUrl: string) => {
+    new Request().get(api.API_GET_SHARE_MOMENT_PICTURE, {id: match.id}).then((imageUrl: string) => {
       if (imageUrl == null) {
         Taro.showToast({title: "获取图片失败", icon: "none"});
         this.setState({downLoading: false})
@@ -1864,18 +1864,18 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   handleLeftSupport = () => {
     const {match = null} = this.props;
-    if (match == null || match.hostteam == null) {
+    if (match == null || match.hostTeam == null) {
       return;
     }
-    this.setState({currentSupportTeam: match.hostteam})
+    this.setState({currentSupportTeam: match.hostTeam})
     this.showGiftPanel();
   }
   handleRightSupport = () => {
     const {match = null} = this.props;
-    if (match == null || match.guestteam == null) {
+    if (match == null || match.guestTeam == null) {
       return;
     }
-    this.setState({currentSupportTeam: match.guestteam})
+    this.setState({currentSupportTeam: match.guestTeam})
     this.showGiftPanel();
   }
 
@@ -1891,26 +1891,26 @@ class Live extends Component<PageOwnProps, PageState> {
     }
   }
 
-  addToGiftSendQueue = (giftOrder) => {
+  addToGiftSendQueue = (giftBroadcast) => {
     let position = "left";
-    if (giftOrder.match != null && giftOrder.targetType == HEAT_TYPE.TEAM_HEAT && giftOrder.externalId != null) {
-      if (giftOrder.match.hostTeamId == giftOrder.externalId) {
-        position = "left";
-      } else {
-        position = "right";
-      }
+    const rand = Boolean(Math.round(Math.random()));
+    if (rand) {
+      position = "left";
+    } else {
+      position = "right";
     }
-    giftOrder.position = position;
-    const row = this.assignGiftRow(giftOrder, position);
-    giftOrder.row = row;
+
+    giftBroadcast.position = position;
+    const row = this.assignGiftRow(giftBroadcast, position);
+    giftBroadcast.row = row;
     if (row != -1) {
-      this.state.giftSendQueue.push(giftOrder)
-      this.initGiftTimeout(giftOrder.id);
+      this.state.giftSendQueue.push(giftBroadcast)
+      this.initGiftTimeout(giftBroadcast.id);
       this.setState({giftSendQueue: this.state.giftSendQueue})
     }
   }
 
-  assignGiftRow = (giftOrderItem, position) => {
+  assignGiftRow = (giftBroadcast, position) => {
     let rowIndex = -1;
     let isInsert = false;
     const giftRow = this.giftRows[position];
@@ -1923,14 +1923,14 @@ class Live extends Component<PageOwnProps, PageState> {
     if (giftRow != null) {
       giftRow.map((row, index) => {
         if (row.id == null && giftRow_reverse[index].id == null && !isInsert) {
-          giftRow[index] = giftOrderItem;
+          giftRow[index] = giftBroadcast;
           rowIndex = index;
           isInsert = true;
         }
       })
     }
     if (rowIndex == -1) {
-      this.giftRows.unset.push(giftOrderItem);
+      this.giftRows.unset.push(giftBroadcast);
     }
     return rowIndex;
   }
@@ -2181,7 +2181,7 @@ class Live extends Component<PageOwnProps, PageState> {
                       ))}
                       <View className="qz-live-match__video-controllers__views">
                         <Image className="qz-live-match__video-controllers__views-img" src={views_icon}/>
-                        {this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
+                        {this.props.match.chargeTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.match.online ? this.props.match.online : "0")}
                       </View>
                     </View>
                   }
@@ -2222,7 +2222,7 @@ class Live extends Component<PageOwnProps, PageState> {
                     ))}
                     <View className="qz-live-match__video-controllers__views">
                       <Image className="qz-live-match__video-controllers__views-img" src={views_icon}/>
-                      {this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
+                      {this.props.match.chargeTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.match.online ? this.props.match.online : "0")}
                     </View>
                     <View
                       className={`qz-live-match__video-controllers__right ${this.state.videoShowMore ? "qz-live-matc1h__video-controllers__right-more" : ""}`}>
@@ -2308,7 +2308,7 @@ class Live extends Component<PageOwnProps, PageState> {
                         {/*<RoundButton*/}
                         {/*  size={30}*/}
                         {/*  img={playButton}*/}
-                        {/*  text={this.props.matchStatus.payTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.matchStatus.payTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}*/}
+                        {/*  text={this.props.match.chargeTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.match.online ? this.props.match.online : "0")}*/}
                         {/*  onClick={() => {*/}
                         {/*  }}/>*/}
                         <RoundButton
@@ -2336,7 +2336,7 @@ class Live extends Component<PageOwnProps, PageState> {
                           onClick={() => {
                           }}/>
                       </View>
-                      {match.hostteam && match.guestteam ?
+                      {match.hostTeam && match.guestTeam ?
                         (this.state.heatType == HEAT_TYPE.TEAM_HEAT ?
                             <HeatTeam
                               teamHeats={teamHeats}
@@ -2501,9 +2501,7 @@ class Live extends Component<PageOwnProps, PageState> {
             active={data.active}
             key={data.id}
             position={data.position}
-            gift={data.gift}
-            user={data.user}
-            num={data.num}
+            detail={data}
             row={data.row}/>
         ))}
         {match.league ?

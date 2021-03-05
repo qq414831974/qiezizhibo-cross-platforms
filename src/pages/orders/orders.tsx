@@ -7,7 +7,6 @@ import './orders.scss'
 import MatchList from "./components/match-list";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
-import * as global from "../../constants/global";
 import {getStorage} from "../../utils/utils";
 
 type PageStateProps = {}
@@ -67,7 +66,6 @@ class Orders extends Component<PageOwnProps, PageState> {
     new Request().get(api.API_ORDER_USER, {
       pageSize: 5,
       pageNum: 1,
-      status: global.ORDER_STAUTS.paid,
       userNo: userNo,
     }).then((res: any) => {
       if (res) {
@@ -81,7 +79,6 @@ class Orders extends Component<PageOwnProps, PageState> {
     new Request().get(api.API_ORDER_USER, {
       pageSize: 5,
       pageNum: this.state.current + 1,
-      status: global.ORDER_STAUTS.paid,
       userNo: userNo,
     }).then((res: any) => {
       if (res) {

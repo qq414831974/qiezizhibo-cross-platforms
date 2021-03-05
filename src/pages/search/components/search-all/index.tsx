@@ -85,7 +85,7 @@ class SearchAll extends Component<PageOwnProps, PageState> {
   }
 
   onLeagueItemClick = (item) => {
-    if (item.isparent) {
+    if (item.isParent) {
       Taro.navigateTo({url: `../series/series?id=${item.id}`});
     } else {
       Taro.navigateTo({url: `../leagueManager/leagueManager?id=${item.id}`});
@@ -133,7 +133,7 @@ class SearchAll extends Component<PageOwnProps, PageState> {
                                   image={item.headImg}/>
                       </View>
                       <Text
-                        className="qz-search__result-league-item-name">{item.shortname ? item.shortname : item.name}
+                        className="qz-search__result-league-item-name">{item.shortName ? item.shortName : item.name}
                       </Text>
                     </View>
                   })}

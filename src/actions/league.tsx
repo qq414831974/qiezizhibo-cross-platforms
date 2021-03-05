@@ -47,7 +47,7 @@ export const getLeagueSeriesList_add: any = createApiAction(league.LEAGUE_SERIES
 export const getLeagueSeriesLeagues: any = createApiAction(league.LEAGUE_SERIES_LEAGUE, (params: SeriesLeagueParams) => new Request().get(api.API_LEAGUE_SERIES_LEAGUE, params))
 export const getLeaguePlayer: any = createApiAction(league.LEAGUE_PLAYERS, (params: LeaguePlayerParams) => new Request().get(api.API_LEAGUE_PLAYER, params))
 export const getLeagueTeam: any = createApiAction(league.LEAGUE_TEAMS, (params: LeagueTeamParams) => new Request().get(api.API_LEAGUE_TEAM, params))
-export const getLeagueReport: any = createApiAction(league.LEAGUE_REPORT, (id: number) => new Request().get(api.API_LEAGUE_REPORT(id), null))
+export const getLeagueReport: any = createApiAction(league.LEAGUE_REPORT, (id: number) => new Request().get(api.API_LEAGUE_REPORT, {leagueId: id}))
 
 export default bindActionCreators({
   getLeagueInfo,

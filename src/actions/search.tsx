@@ -15,15 +15,11 @@ export const search_league: any = createApiAction(searcher.SEARCH_LEAGUE, (param
 export const search_league_add: any = createApiAction(searcher.SEARCH_LEAGUE_ADD, (params: Params) => new Request().get(api.API_SEARCH, {type: "league", ...params}))
 export const search_match: any = createApiAction(searcher.SEARCH_MATCH, (params: Params) => new Request().get(api.API_SEARCH, {type: "match", ...params}))
 export const search_match_add: any = createApiAction(searcher.SEARCH_MATCH_ADD, (params: Params) => new Request().get(api.API_SEARCH, {type: "match", ...params}))
-export const search_player: any = createApiAction(searcher.SEARCH_PLAYER, (params: Params) => new Request().get(api.API_SEARCH, {type: "player", ...params}))
-export const search_player_add: any = createApiAction(searcher.SEARCH_PLAYER_ADD, (params: Params) => new Request().get(api.API_SEARCH, {type: "player", ...params}))
 export const search_clear_all: any = createAction(searcher.SEARCH_CLEAR_ALL);
 export default bindActionCreators({
   search_league,
   search_league_add,
   search_match,
   search_match_add,
-  search_player,
-  search_player_add,
   search_clear_all,
 }, store.dispatch)

@@ -5,7 +5,7 @@ import {connect} from '@tarojs/redux'
 import './index.scss'
 import * as global from '../../constants/global';
 import * as api from '../../constants/api';
-import {getStorage, getYuan, isInteger} from '../../utils/utils';
+import {getYuan, isInteger} from '../../utils/utils';
 import GiftModal from '../../components/modal-gift';
 import flame from '../../assets/live/left-support.png';
 import Request from "../../utils/request";

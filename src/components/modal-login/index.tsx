@@ -48,30 +48,22 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
     const {handleCancel, handleConfirm, handleError} = this.props;
     if (value && value.detail && value.detail.errMsg === "getUserInfo:ok") {
       const userInfo = value.detail.userInfo;
-      let userVo: any = {};
-      userVo.avatar = userInfo.avatarUrl;
-      userVo.province = userInfo.province;
-      userVo.city = userInfo.city;
-      userVo.country = userInfo.country;
-      userVo.name = userInfo.nickName;
+      let param: any = {};
+      param.avatar = userInfo.avatarUrl;
+      param.province = userInfo.province;
+      param.city = userInfo.city;
+      param.country = userInfo.country;
+      param.name = userInfo.nickName;
+      param.wechatType = 1;
       Taro.login().then(loginValue => {
         if (loginValue && loginValue.errMsg === "login:ok") {
-          new Request().post(`${api.API_LOGIN}?code=${loginValue.code}&type=1`, {}).then((res: any) => {
+          new Request().post(`${api.API_LOGIN}?code=${loginValue.code}&wechatType=1`, param).then(async (res: any) => {
             if (res.accessToken) {
-              new Request().post(api.API_AUTH_USER, {}).then(async (user: any) => {
-                if (user.user && user.user.openId) {
-                  userVo.wechatOpenid = user.user.openId;
-                  userVo.wechatType = 1;
-                  await updateStorage({wechatOpenid: user.user.openId});
-                  await updateStorage({userNo: user.user.userNo});
-                  new Request().put(api.API_USER, userVo).then(() => {
-                    handleConfirm();
-                  });
-                }
-              }).catch(reason => {
-                console.log(reason);
-                handleError(error.ERROR_WX_UPDATE_USER);
-              })
+              if (res.userNo && res.openId) {
+                await updateStorage({wechatOpenid: res.openId});
+                await updateStorage({userNo: res.userNo});
+                handleConfirm();
+              }
             } else {
               handleError(error.ERROR_LOGIN);
             }

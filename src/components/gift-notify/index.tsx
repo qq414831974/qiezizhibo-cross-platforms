@@ -10,9 +10,7 @@ type PageStateProps = {}
 type PageDispatchProps = {}
 
 type PageOwnProps = {
-  gift: any,
-  user: any,
-  num: any,
+  detail: any,
   position: any,
   row: any,
   active: any,
@@ -42,9 +40,9 @@ class GiftNotify extends Component<PageOwnProps, PageState> {
     this.state = {}
   }
 
-  getFontSize = (user) => {
-    if (user && user.name && user.name.length > 7) {
-      if (user && user.name && user.name.length > 9) {
+  getFontSize = (name) => {
+    if (name && name.length > 7) {
+      if (name && name.length > 9) {
         return "qz-giftnotify-content-text-mini";
       }
       return "qz-giftnotify-content-text-small";
@@ -52,26 +50,29 @@ class GiftNotify extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {gift, user, num, position = "left", row = 1, active = false} = this.props
+    const {detail, position = "left", row = 1, active = false} = this.props
 
     return (
       <View
         className={`qz-giftnotify ${position == "left" ? "qz-giftnotify-left" : "qz-giftnotify-right"} ${active ? "qz-giftnotify-active" : ""}`}
         style={{bottom: rowData[row]}}>
         <View className="qz-giftnotify-content">
-          <View className={`qz-giftnotify-content-user-name ${this.getFontSize(user)}`}>
+          <View className={`qz-giftnotify-content-user-name ${this.getFontSize(detail.senderName)}`}>
             <View className="qz-giftnotify-content-user-name-text">
-              {user && user.name ? user.name : "用户"}
+              {detail.senderName ? detail.senderName : "用户"}
             </View>
           </View>
-          <Image src={user && user.avatar ? user.avatar : NoUser} className="qz-giftnotify-content-user-avatar"/>
+          <Image src={detail.senderHeadImg ? detail.senderHeadImg : NoUser}
+                 className="qz-giftnotify-content-user-avatar"/>
           <View className="qz-giftnotify-content-gift-name">
             <View className="qz-giftnotify-content-gift-name-text">
-              送出 {gift && gift.name ? gift.name : "礼物"}
+              送出 {detail.giftName ? detail.giftName : "礼物"}
             </View>
           </View>
-          <Image src={gift && gift.pic ? gift.pic : defaultLogo} className="qz-giftnotify-content-gift-img"/>
-          <View className="qz-giftnotify-content-gift-num">{position == "left" ? `${num} x` : `x ${num}`}</View>
+          <Image src={detail.giftHeadImg ? detail.giftHeadImg : defaultLogo}
+                 className="qz-giftnotify-content-gift-img"/>
+          <View
+            className="qz-giftnotify-content-gift-num">{position == "left" ? `${detail.giftNumber} x` : `x ${detail.giftNumber}`}</View>
         </View>
       </View>
     )

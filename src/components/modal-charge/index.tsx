@@ -15,13 +15,11 @@ import flame from "../../assets/live/left-support.png"
 
 type MatchCharge = {
   price: number,
-  secondPrice: number,
-  productId: number,
+  monthlyPrice: number,
   type: number,
   matchId: number,
   isMonopolyCharge: boolean,
   monopolyPrice: number,
-  monopolyProductId: number,
   monopolyOnly: boolean,
   deposit: number,
 }
@@ -86,7 +84,7 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
     if (isMonopoly) {
       price = charge.monopolyPrice;
     } else if (isMonth) {
-      price = charge.secondPrice;
+      price = charge.monthlyPrice;
     } else {
       price = charge.price;
     }
@@ -125,9 +123,8 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
       return;
     }
     let desc;
-    let products = [{productId: charge.productId, isSecond: isMonth}];
     let type = charge.type;
-    let attach = JSON.stringify({matchId: charge.matchId, type: charge.type});
+    let attach = JSON.stringify({matchId: charge.matchId, type: charge.type, isMonthly: isMonth});
     if (charge.type == global.ORDER_TYPE.live) {
       desc = `茄子TV-直播-${charge.matchId}`;
     } else if (charge.type == global.ORDER_TYPE.record) {
@@ -135,11 +132,9 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
     }
     if (isMonopoly) {
       desc = `茄子TV-买断-${charge.matchId}`;
-      products = [{productId: charge.monopolyProductId, isSecond: false}];
       type = global.ORDER_TYPE.monopoly;
       attach = JSON.stringify({
         matchId: charge.matchId,
-        type: global.ORDER_TYPE.monopoly,
         anonymous: anonymous
       });
     }
@@ -153,7 +148,6 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
       userNo: userNo,
       type: type,
       description: desc,
-      products: products,
       attach: attach
     }).then((orderResult: any) => {
       this.setState({isPaying: false})
@@ -189,9 +183,8 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
       return;
     }
     let desc;
-    let products = [{productId: charge.productId, isSecond: isMonth}];
     let type = charge.type;
-    let attach = JSON.stringify({matchId: charge.matchId, type: charge.type});
+    let attach = JSON.stringify({matchId: charge.matchId, type: charge.type, isMonthly: isMonth});
     if (charge.type == global.ORDER_TYPE.live) {
       desc = `茄子TV-直播-${charge.matchId}`;
     } else if (charge.type == global.ORDER_TYPE.record) {
@@ -199,11 +192,9 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
     }
     if (isMonopoly) {
       desc = `茄子TV-买断-${charge.matchId}`;
-      products = [{productId: charge.monopolyProductId, isSecond: false}];
       type = global.ORDER_TYPE.monopoly;
       attach = JSON.stringify({
         matchId: charge.matchId,
-        type: global.ORDER_TYPE.monopoly,
         anonymous: anonymous
       });
     }
@@ -217,7 +208,6 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
       userNo: userNo,
       type: type,
       description: desc,
-      products: products,
       attach: attach
     }).then((unifiedResult: UnifiedJSAPIOrderResult) => {
       this.setState({isPaying: false})
@@ -271,7 +261,7 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
     if (charge == null) {
       return 10;
     }
-    return Number((getJiao(giftDiscountPrice) / getJiao(charge.secondPrice)).toFixed(2)) * 10;
+    return Number((getJiao(giftDiscountPrice) / getJiao(charge.monthlyPrice)).toFixed(2)) * 10;
   }
   getOpenId = () => {
     return this.props.user ? this.props.user.openId : null;
@@ -319,7 +309,7 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
               </View>}
               {charge && charge.monopolyOnly ? null : <View>
                 <View className="gray qz-pay-modal-content_tip">
-                  • 本场比赛限时观看一个月 价格{charge ? getYuan(charge.secondPrice) : 0}（元）
+                  • 本场比赛限时观看一个月 价格{charge ? getYuan(charge.monthlyPrice) : 0}（元）
                 </View>
                 <View className="gray qz-pay-modal-content_tip">
                   • 本场比赛永久观看 价格{charge ? getYuan(charge.price) : 0}（元）
@@ -380,7 +370,7 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
           }
         </AtModal>
         <AtActionSheet
-          title={`本场比赛需要付费观看\n本场比赛限时观看一个月 价格${charge ? getYuan(charge.secondPrice) : 0}（元）\n本场比赛永久观看 价格${charge ? getYuan(charge.price) : 0}（元）\n购买永久后，本场比赛可无限次数观看`}
+          title={`本场比赛需要付费观看\n本场比赛限时观看一个月 价格${charge ? getYuan(charge.monthlyPrice) : 0}（元）\n本场比赛永久观看 价格${charge ? getYuan(charge.price) : 0}（元）\n购买永久后，本场比赛可无限次数观看`}
           cancelText='取消'
           isOpened={isChargeOpen}
           onCancel={this.handleChargeClose}

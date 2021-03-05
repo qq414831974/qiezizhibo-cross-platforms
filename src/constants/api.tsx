@@ -18,24 +18,24 @@ export const websocket_service = `${protocol_ws}${gateway_client_service}/servic
 export const websocket = (id) => `${websocket_service}/websocket/${id}`;
 
 //config
-export const API_CONFIG_BANNER = `${system_service}/system/config/banner`;
-export const API_CONFIG_BULLETIN = `${system_service}/system/config/bulletin`;
-export const API_CONFIG_BULLETIN_MATCH = (id) => `${system_service}/system/config/bulletin/match/${id}`;
-export const API_SYSTEM_SECURITY_CHECK = `${system_service}/system/wxa_security_check`;
+export const API_CONFIG_BANNER = `${system_service}/sys/banner`;
+export const API_CONFIG_BULLETIN = `${system_service}/sys/bulletin`;
+export const API_CONFIG_BULLETIN_MATCH = `${system_service}/sys/bulletin/match`;
+export const API_SYSTEM_SECURITY_CHECK = `${system_service}/wx/ma/securityCheck`;
 export const API_VISIT = `${user_service}/user/visit`;
-export const API_GET_WXACODE = `${system_service}/system/getWxacode`;
-export const API_GET_SHARE_SENTENCE = `${system_service}/system/share/sentence`;
-export const API_GET_SHARE_PICTURE = `${system_service}/system/share/picture`;
-export const API_GET_HEAT_COMPETITION_SHARE = `${system_service}/system/heatcompetition/picture`;
+export const API_GET_SHARE_MOMENT_PICTURE = `${system_service}/wx/ma/picture/moment`;
+export const API_GET_SHARE_SENTENCE = `${system_service}/sys/share/sentence`;
+export const API_GET_SHARE_PICTURE = `${system_service}/wx/ma/picture/share`;
+export const API_GET_HEAT_COMPETITION_SHARE = `${system_service}/wx/ma/picture/heat`;
 
 //user
-export const API_LOGIN = `${auth_service}/auth/wechat`;
-export const API_PHONENUMBER = `${auth_service}/auth/getPhoneNumber`;
+export const API_LOGIN = `${auth_service}/auth`;
+export const API_PHONENUMBER = `${auth_service}/auth/phone`;
 export const API_AUTH_USER = `${auth_service}/auth/user`;
 export const API_USER = `${user_service}/user`;
 export const API_REFRESH_TOKEN = `${auth_service}/auth/refresh_token`;
-export const API_USER_ABILITY = (userNo) => `${user_service}/user/${userNo}/ability`;
-export const API_USER_ADDRESS = (userNo) => `${user_service}/user/${userNo}/address`;
+export const API_USER_ABILITY = `${user_service}/user/ability`;
+export const API_USER_ADDRESS = `${user_service}/user/address`;
 
 //league
 export const API_LEAGUE = (id) => `${football_service}/league/${id}`;
@@ -44,16 +44,15 @@ export const API_LEAGUE_SERIES = `${football_service}/league`;
 export const API_LEAGUE_PLAYER = `${football_service}/league/rank/player`;
 export const API_LEAGUE_TEAM = `${football_service}/league/rank/team`;
 export const API_LEAGUE_SERIES_LEAGUE = `${football_service}/league`;
-export const API_LEAGUE_REPORT = (id) => `${football_service}/league/${id}/report`;
+export const API_LEAGUE_REPORT = `${football_service}/league/report`;
+export const API_LEAGUE_RANK_SETTING = `${football_service}/league/rank/setting`;
 
 //match
 export const API_MATCH = (id) => `${football_service}/match/${id}`;
 export const API_MATCHES = `${football_service}/match`;
 export const API_MATCH_STATUS = `${football_service}/timeline/status`;
-export const API_MATCH_RECOMMEND = `${football_service}/recommend/matchs`;
 export const API_MATCH_NOOICE = `${football_service}/match/nooice`;
 export const API_MATCH_COMMENT = `${chat_service}/comment`;
-export const API_MATCH_COMMENT_COUNT = `${chat_service}/comment/count`;
 export const API_MATCH_COMMENT_DANMU = `${chat_service}/comment/danmu`;
 export const API_MATCH_MEDIA = `${media_service}/media/match`;
 
@@ -69,7 +68,7 @@ export const API_PLAYER_MEDIA = `${media_service}/media/player`;
 
 //live
 export const API_ACTIVITY_MEDIA_LIST = (id) => `${media_service}/media/activity?activityId=${id}`;
-export const API_ACTIVITY_PING = (id) => `${live_service}/activity/${id}/ping`;
+export const API_ACTIVITY_PING = `${live_service}/activity/ping`;
 
 //media
 export const API_MEDIA = (id) => `${media_service}/media/${id}`;
@@ -80,19 +79,19 @@ export const API_MEDIA_NOOICE = `${media_service}/media/nooice`;
 export const API_SEARCH = `${football_service}/search`;
 
 //area
-export const API_AREA = `${system_service}/system/config/area`;
+export const API_AREA = `${system_service}/sys/area`;
 
 //pay
 export const API_ORDER_CREATE = `${pay_service}/pay/jsapi`;
 export const API_ORDER_IS_NEED_BUY = `${pay_service}/order/isUserNeedByMatch`;
-export const API_ORDER_QUERY = (id) => `${pay_service}/pay/${id}/query`;
+export const API_ORDER_QUERY = `${pay_service}/pay/query`;
 export const API_ORDER_USER = `${pay_service}/order/user`;
 
 export const API_GIFT_LIST = `${pay_service}/gift/list`;
-export const API_GIFT_SEND_FREE = `${pay_service}/gift/sendFree`;
-export const API_GIFT_SEND_FREE_LIMIT = `${pay_service}/gift/freeLimit`;
-export const API_GIFT_RANK_MATCH = (id) => `${pay_service}/gift/rank/match/${id}`;
-export const API_GIFT_RANK_LEAGUE = (id) => `${pay_service}/gift/rank/league/${id}`;
+export const API_GIFT_SEND_FREE = `${pay_service}/gift/free/send`;
+export const API_GIFT_SEND_FREE_LIMIT = `${pay_service}/gift/free/limit`;
+export const API_GIFT_RANK_MATCH = (id) => `${pay_service}/gift/rank/match?matchId=${id}`;
+export const API_GIFT_RANK_LEAGUE = (id) => `${pay_service}/gift/rank/league?leagueId=${id}`;
 
 export const API_DEPOSIT = `${pay_service}/deposit`;
 export const API_DEPOSIT_LOGS = `${pay_service}/deposit/logs`;

@@ -13,7 +13,7 @@ import LeaguePlayerTable from "./components/league-player-table";
 import LeagueRegulations from "./components/league-regulations";
 import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
-import {clearLoginToken, getStorage, hasLogin, random, random_weight} from "../../utils/utils";
+import {clearLoginToken, getStorage, hasLogin, random_weight} from "../../utils/utils";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import payAction from "../../actions/pay";
@@ -22,7 +22,6 @@ import * as error from "../../constants/error";
 import LoginModal from "../../components/modal-login";
 import PhoneModal from "../../components/modal-phone";
 import GiftPanel from "../../components/gift-panel";
-import GiftNotify from "../../components/gift-notify";
 import HeatPlayer from "../../components/heat-player";
 import HeatLeagueTeam from "../../components/heat-league-team";
 import GiftRank from "../../components/gift-rank";
@@ -48,7 +47,6 @@ type PageDispatchProps = {}
 type PageOwnProps = {}
 
 type PageState = {
-  timerID_socketHeartBeat: any;
   timerID_giftController: any;
   loadingmore: boolean;
   loading: boolean;
@@ -68,7 +66,6 @@ type PageState = {
   teamHeats: any,
   topTeamHeats: any,
   teamHeatTotal: any,
-  giftSendQueue: any,
   giftRanks: any,
   giftRanksLoading: any,
   broadcastList: any,
@@ -79,6 +76,7 @@ type PageState = {
   giftRanksOpen: any,
   heatRewardOpen: any,
   league: any,
+  leagueRankSetting: any,
   permissionShow: any,
   downLoading: any,
   shareMomentOpen: any,
@@ -127,7 +125,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   constructor(props) {
     super(props)
     this.state = {
-      timerID_socketHeartBeat: null,
       timerID_giftController: null,
       loadingmore: false,
       loading: false,
@@ -147,7 +144,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       teamHeats: null,
       topTeamHeats: null,
       teamHeatTotal: null,
-      giftSendQueue: [],
       giftRanks: null,
       giftRanksLoading: false,
       broadcastList: [],
@@ -158,6 +154,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       giftRanksOpen: false,
       heatRewardOpen: false,
       league: {},
+      leagueRankSetting: null,
       permissionShow: false,
       downLoading: false,
       shareMomentOpen: false,
@@ -241,10 +238,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   componentWillUnmount() {
-    this.clearTimer_HeartBeat();
-    this.socketTask && this.socketTask.close({})
-    this.socketTask = null;
-    this.clearTimer_Gift();
   }
 
   componentDidShow() {
@@ -294,7 +287,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             this.switchTab(tabs[global.LEAGUE_TABS_TYPE.heatTeam]);
           }
         })
-        this.startTimer_Gift();
         // this.initSocket(id);
         if (!await this.isUserLogin()) {
           this.showAuth();
@@ -303,82 +295,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       }
     })
   }
-  startTimer_Gift = () => {
-    this.clearTimer_Gift();
-    const timerID_giftController = setInterval(() => {
-      this.addUnsetToGiftSendQueue();
-    }, 1000)
-    this.setState({timerID_giftController: timerID_giftController})
-  }
-  clearTimer_Gift = () => {
-    if (this.state.timerID_giftController) {
-      clearInterval(this.state.timerID_giftController)
-      this.setState({timerID_giftController: null})
-    }
-  }
-  startTimer_HeartBeat = () => {
-    this.clearTimer_HeartBeat();
-    const timerID_socketHeartBeat = setInterval(() => {
-      this.socketTask && this.socketTask.send({data: "success"});
-    }, 5000)
-    this.setState({timerID_socketHeartBeat: timerID_socketHeartBeat})
-  }
-  clearTimer_HeartBeat = () => {
-    if (this.state.timerID_socketHeartBeat) {
-      clearInterval(this.state.timerID_socketHeartBeat)
-      this.setState({timerID_socketHeartBeat: null})
-    }
-  }
-  initSocket = async (matchId) => {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const context = this;
-    const token = await getStorage('accessToken');
-    const header = token ? {'Authorization': `Bearer ${token}`} : {};
-    Taro.connectSocket({
-      url: api.websocket(matchId),
-      header: header
-    }).then(task => {
-      this.socketTask = task;
-      task.onOpen(function () {
-        context.startTimer_HeartBeat();
-      })
-      task.onMessage(function (res) {
-        if (res.data == 'unauthenticated') {
-          Taro.showToast({
-            title: "登陆状态过期请重新授权",
-            duration: 1000,
-            icon: "none",
-            complete: () => {
-              context.showAuth();
-            }
-          });
-        } else if (res.data !== 'success') {
-          const comment = JSON.parse(res.data);
-          if (comment && comment.broadcast) {
-            const giftOrder = JSON.parse(comment.content);
-            context.addToGiftSendQueue(giftOrder);
-            let broadcastList = context.state.broadcastList;
-            let broadcastText = '';
-            if (giftOrder && giftOrder.user && giftOrder.user.name) {
-              broadcastText = broadcastText + giftOrder.user.name + "送出";
-            }
-            if (giftOrder && giftOrder.gift && giftOrder.gift.name) {
-              broadcastText = broadcastText + giftOrder.gift.name + giftOrder.num + "个";
-            }
-            broadcastList.push({broadcast: true, content: broadcastText, id: giftOrder.id, date: new Date()})
-            context.setState({broadcastList: broadcastList})
-          }
-        }
-      })
-      task.onError(function () {
-        console.log('onError')
-      })
-      task.onClose(function (e) {
-        console.log('onClose: ', e)
-      })
-    })
-  }
-
   async getUserInfo(onSuccess?: Function | null) {
     if (await hasLogin()) {
       const openid = await getStorage('wechatOpenid');
@@ -703,7 +619,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   getOrderStatus = async (orderId: string, type) => {
-    new Request().post(api.API_ORDER_QUERY(orderId), {}).then((res) => {
+    new Request().post(api.API_ORDER_QUERY, {orderId: orderId}).then((res) => {
       if (res == global.ORDER_STAUTS.paid) {
         Taro.showToast({
           title: "支付成功",
@@ -754,88 +670,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     }
     return null
   }
-  addUnsetToGiftSendQueue = () => {
-    let unshiftIndex = -1;
-    this.giftRows.unset.some((data, index) => {
-      this.addToGiftSendQueue(data);
-      unshiftIndex = index;
-      return true;
-    })
-    if (unshiftIndex != -1) {
-      this.giftRows.unset.splice(unshiftIndex, 1);
-    }
-  }
-
-  addToGiftSendQueue = (giftOrder) => {
-    let position = "left";
-    if (random(0, 100) % 2 == 0) {
-      position = "left";
-    } else {
-      position = "right";
-    }
-    giftOrder.position = position;
-    const row = this.assignGiftRow(giftOrder, position);
-    giftOrder.row = row;
-    if (row != -1) {
-      this.state.giftSendQueue.push(giftOrder)
-      this.initGiftTimeout(giftOrder.id);
-      this.setState({giftSendQueue: this.state.giftSendQueue})
-    }
-  }
-
-  assignGiftRow = (giftOrderItem, position) => {
-    let rowIndex = -1;
-    let isInsert = false;
-    const giftRow = this.giftRows[position];
-    let giftRow_reverse = this.giftRows["position"];
-    if (position == "left") {
-      giftRow_reverse = this.giftRows["right"];
-    } else {
-      giftRow_reverse = this.giftRows["left"];
-    }
-    if (giftRow != null) {
-      giftRow.map((row, index) => {
-        if (row.id == null && giftRow_reverse[index].id == null && !isInsert) {
-          giftRow[index] = giftOrderItem;
-          rowIndex = index;
-          isInsert = true;
-        }
-      })
-    }
-    if (rowIndex == -1) {
-      this.giftRows.unset.push(giftOrderItem);
-    }
-    return rowIndex;
-  }
-
-  initGiftTimeout(id) {
-    this.timeout_gift[id] = setTimeout(() => {
-      this.timeout_gift[id] = null
-      const showQueue = this.state.giftSendQueue;
-      showQueue.forEach(data => {
-        if (data.id == id) {
-          data.active = true;
-        }
-      });
-      this.setState({giftSendQueue: showQueue}, () => {
-        this.timeout_gift_show[id] = setTimeout(() => {
-          this.timeout_gift_show[id] = null
-          const giftSendQueue = this.state.giftSendQueue.filter(item => item.id != id);
-          this.setState({giftSendQueue: giftSendQueue});
-          let giftRowsShadow = this.giftRows;
-          for (let position in giftRowsShadow) {
-            for (let rowKey in giftRowsShadow[position]) {
-              if (giftRowsShadow[position][rowKey] != null && giftRowsShadow[position][rowKey].id == id) {
-                giftRowsShadow[position][rowKey] = {};
-              }
-            }
-          }
-          this.giftRows = giftRowsShadow;
-        }, 5000);
-      });
-    }, 300);
-  }
-
   getGiftRanks = (id) => {
     this.setState({giftRanksLoading: true})
     new Request().get(api.API_GIFT_RANK_LEAGUE(id), null).then((data: any) => {
@@ -856,13 +690,19 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   getLeagueInfo = (id) => {
     this.setState({loading: true})
     Taro.showLoading({title: global.LOADING_TEXT})
-    new Request().get(api.API_LEAGUE(id), {detailRound: true}).then((data: any) => {
+    new Request().get(api.API_LEAGUE(id), null).then((data: any) => {
       this.setState({league: data}, () => {
         this.getLeagueList(id);
+        this.getLeagueRankSetting(id);
         let {tabs} = this.getTabsList();
         this.switchTab(tabs[global.LEAGUE_TABS_TYPE.leagueMatch]);
         this.initHeatCompetition(this.getParamId());
       })
+    })
+  }
+  getLeagueRankSetting = (id) => {
+    new Request().get(api.API_LEAGUE_RANK_SETTING, {leagueId: id}).then((data: any) => {
+      this.setState({leagueRankSetting: data})
     })
   }
   getLeagueList = (id) => {
@@ -893,7 +733,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     this.setState({heatRewardOpen: false});
   }
   getTabsList = () => {
-    const {league} = this.state
+    const {leagueRankSetting} = this.state
     let tabList: any = []
     const tabs: any = {};
     let tabIndex = 0;
@@ -918,13 +758,13 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       tabIndex = tabIndex + 1;
     }
     //积分榜
-    if (league.showleagueteam) {
+    if (leagueRankSetting.showLeagueTeam) {
       tabList.push({title: '积分榜'})
       tabs[global.LEAGUE_TABS_TYPE.leagueTeam] = tabIndex;
       tabIndex = tabIndex + 1;
     }
     //射手榜
-    if (league.showleagueplayer) {
+    if (leagueRankSetting.showLeaguePlayer) {
       tabList.push({title: '射手榜'})
       tabs[global.LEAGUE_TABS_TYPE.leaguePlayer] = tabIndex;
       tabIndex = tabIndex + 1;
@@ -1007,7 +847,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
   render() {
     const {leaguePlayers, leagueTeams} = this.props
-    const {league} = this.state
+    const {league, leagueRankSetting} = this.state
     let {tabList, tabs} = this.getTabsList();
 
     if (this.state.loading) {
@@ -1021,7 +861,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           <View className='qz-league-manager-header-container'>
             <Image className="img"
                    src={league.headImg ? league.headImg : defaultLogo}/>
-            <View className='text'>{league.shortname ? league.shortname : league.name}</View>
+            <View className='text'>{league.shortName ? league.shortName : league.name}</View>
           </View>
           }
         </View>
@@ -1086,7 +926,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
                 onPictureDownLoaded={this.showShareMoment}
               />
             </AtTabsPane>}
-            {league.showleagueteam &&
+            {leagueRankSetting.showLeagueTeam &&
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.leagueTeam]}>
               <LeagueTeamTable
                 leagueMatch={league}
@@ -1094,7 +934,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
                 visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueTeam]}
                 teamGroup={leagueTeams}/>
             </AtTabsPane>}
-            {league.showleagueplayer &&
+            {leagueRankSetting.showLeaguePlayer &&
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.leaguePlayer]}>
               <LeaguePlayerTable
                 leagueMatch={league}
@@ -1138,16 +978,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             onPayClose={this.onPayConfirmClose}
           />
         </AtFloatLayout>
-        {this.state.giftSendQueue && this.state.giftSendQueue.map((data: any) => (
-          <GiftNotify
-            active={data.active}
-            key={data.id}
-            position={data.position}
-            gift={data.gift}
-            user={data.user}
-            num={data.num}
-            row={data.row}/>
-        ))}
         <GiftRank
           giftRanks={this.state.giftRanks}
           loading={this.state.giftRanksLoading}

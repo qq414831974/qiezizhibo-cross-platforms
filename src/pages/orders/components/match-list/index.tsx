@@ -107,43 +107,43 @@ class MatchList extends Component<PageOwnProps, PageState> {
     const {matchList} = this.props
     return <View className='qz-match-list'>
       {matchList && matchList.filter(item => {
-        if (item.mpo.expireTime) {
-          const time_diff = Date.parse(item.mpo.expireTime) - new Date().getTime();
+        if (item.expireTime) {
+          const time_diff = Date.parse(item.expireTime) - new Date().getTime();
           if (time_diff < 0) {
             return false
           }
         }
         return true;
       }).map((item) => {
-        return <View key={item.id}>
+        return <View key={item.orderId}>
           <View className='qz-match-list-content'>
             <View className='qz-match-list-content__inner'>
-              {item.mpo && item.mpo.type == 3 ? <View className="qz-match-list-content__charge">
+              {item.orderType == 3 ? <View className="qz-match-list-content__charge">
                 请大家围观
               </View> : null}
               <MatchItem
                 matchInfo={item.match}
                 showCharge={false}
-                onClick={this.onItemClick.bind(this, item.id)}/>
+                onClick={this.onItemClick.bind(this, item.orderId)}/>
             </View>
           </View>
-          {item.mpo && this.state.orderlist[item.id] ? <View className='qz-match-list-order'>
+          {this.state.orderlist[item.orderId] ? <View className='qz-match-list-order'>
               <View className="at-row at-row--no-wrap">
-                <View className='at-col at-col-8 qz-match-list-order__item'>订单号：{item.mpo.orderId}</View>
+                <View className='at-col at-col-8 qz-match-list-order__item'>订单号：{item.orderId}</View>
                 <View className='at-col at-col-4 qz-match-list-order__item'>
-                  价格：{item.mpo.isSecond ? getYuan(item.mpo.secondPrice) : getYuan(item.mpo.price)}元
+                  价格：{getYuan(item.orderPrice)}元
                 </View>
               </View>
               <View className="at-row at-row--no-wrap">
-                <View className='at-col at-col-8 qz-match-list-order__item'>创建时间：{item.mpo.createTime}</View>
-                {item.mpo.expireTime ?
+                <View className='at-col at-col-8 qz-match-list-order__item'>创建时间：{item.createTime}</View>
+                {item.expireTime ?
                   <View className='at-col at-col-4 qz-match-list-order__item'>
-                    过期时间：{this.getExpireDays(item.mpo.expireTime)}
+                    过期时间：{this.getExpireDays(item.expireTime)}
                   </View>
                   : null}
               </View>
               <View className='item_view'>
-                <View className='item' onClick={this.copyOrderId.bind(this, item.mpo.orderId)}>
+                <View className='item' onClick={this.copyOrderId.bind(this, item.orderId)}>
                   <View className='desc'>复制订单号</View>
                 </View>
                 <View className='line'/>

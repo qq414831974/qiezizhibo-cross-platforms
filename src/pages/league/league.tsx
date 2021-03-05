@@ -74,7 +74,7 @@ class League extends Component<PageOwnProps, PageState> {
     Taro.navigateTo({url: "../search/search"});
   }
   onLeagueItemClick = (item) => {
-    if (item.isparent) {
+    if (item.isParent) {
       Taro.navigateTo({url: `../series/series?id=${item.id}`});
     } else {
       Taro.navigateTo({url: `../leagueManager/leagueManager?id=${item.id}`});

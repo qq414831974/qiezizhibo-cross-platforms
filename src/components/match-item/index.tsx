@@ -66,7 +66,7 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
     return (
       <View className={`qz-match-item ${matchInfo.isBetEnable && showBet ? "qz-match-item-big" : ""} ${className}`}
             onClick={this.onItemClick}>
-        {matchInfo.hostteam != null && matchInfo.guestteam != null ?
+        {matchInfo.hostTeam != null && matchInfo.guestTeam != null ?
           <View className={`qz-match-item-content ${matchInfo.isBetEnable && showBet? "qz-match-item-content-big" : ""}`}>
             {((matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
               <View className="qz-match-item__charge">
@@ -79,7 +79,7 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
                         请大家围观
                       </View>
                       : "匿名用户请大家围观"
-                  ) : (matchInfo.payTimes ? `付费 ${matchInfo.payTimes}人已观看` : "付费")}
+                  ) : (matchInfo.chargeTimes ? `付费 ${matchInfo.chargeTimes}人已观看` : "付费")}
               </View>
               : null
             }
@@ -94,30 +94,30 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
               <View className="qz-match-item__team-avatar">
                 <AtAvatar circle
                           size="large"
-                          image={matchInfo.hostteam && matchInfo.hostteam.headImg ? matchInfo.hostteam.headImg : defaultLogo}/>
+                          image={matchInfo.hostTeam && matchInfo.hostTeam.headImg ? matchInfo.hostTeam.headImg : defaultLogo}/>
               </View>
               <Text
                 className="qz-match-item__team-name">
-                {matchInfo.hostteam ? matchInfo.hostteam.name : ""}
+                {matchInfo.hostTeam ? matchInfo.hostTeam.name : ""}
               </Text>
             </View>
             <View className='qz-match-item__vs'>
               <View className='qz-match-item__vs-content'>
                 {matchInfo.league != null ?
                   <Text className="qz-match-item__vs-league-name">
-                    {matchInfo.league.shortname ? matchInfo.league.shortname : matchInfo.league.name}
+                    {matchInfo.league.shortName ? matchInfo.league.shortName : matchInfo.league.name}
                   </Text> : <View/>}
                 {matchInfo.round != null && showRound ?
                   <Text className="qz-match-item__vs-match-round">
                     {matchInfo.round}
                   </Text> : <View/>}
                 <Text
-                  className={matchInfo.penaltyscore ? "qz-match-item__vs-match-score qz-match-item__vs-match-score-small" : "qz-match-item__vs-match-score"}>
+                  className={matchInfo.penaltyScore ? "qz-match-item__vs-match-score qz-match-item__vs-match-score-small" : "qz-match-item__vs-match-score"}>
                   {matchInfo.status == -1 ? "VS" : matchInfo.score}
                 </Text>
-                {matchInfo.penaltyscore ?
+                {matchInfo.penaltyScore ?
                   <Text className="qz-match-item__vs-match-score-penalty">
-                    {`点球:${matchInfo.penaltyscore}`}
+                    {`点球:${matchInfo.penaltyScore}`}
                   </Text> : null
                 }
                 <View className="qz-match-item__vs-match-status">
@@ -144,11 +144,11 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
               <View className="qz-match-item__team-avatar">
                 <AtAvatar circle
                           size="large"
-                          image={matchInfo.guestteam && matchInfo.guestteam.headImg ? matchInfo.guestteam.headImg : defaultLogo}/>
+                          image={matchInfo.guestTeam && matchInfo.guestTeam.headImg ? matchInfo.guestTeam.headImg : defaultLogo}/>
               </View>
               <Text
                 className="qz-match-item__team-name">
-                {matchInfo.guestteam ? matchInfo.guestteam.name : ""}
+                {matchInfo.guestTeam ? matchInfo.guestTeam.name : ""}
               </Text>
             </View>
           </View>
@@ -158,7 +158,7 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
               <View className='qz-match-item__vs-content'>
                 {matchInfo.league != null ?
                   <Text className="qz-match-item__vs-league-name">
-                    {matchInfo.league.shortname ? matchInfo.league.shortname : matchInfo.league.name}
+                    {matchInfo.league.shortName ? matchInfo.league.shortName : matchInfo.league.name}
                   </Text> : <View/>}
                 {matchInfo.round != null && showRound ?
                   <Text className="qz-match-item__vs-match-round">

@@ -78,7 +78,7 @@ class Series extends Component<PageOwnProps, PageState> {
     return id;
   }
   onLeagueItemClick = (item) => {
-    if (item.isparent) {
+    if (item.isParent) {
       Taro.navigateTo({url: `../series/series?id=${item.id}`});
     } else {
       Taro.navigateTo({url: `../leagueManager/leagueManager?id=${item.id}`});
@@ -108,7 +108,7 @@ class Series extends Component<PageOwnProps, PageState> {
           <View className='qz-series-content-header-container'>
             <Image className="img"
                    src={league.headImg ? league.headImg : defaultLogo}/>
-            <View className='text'>{league.shortname ? league.shortname : league.name}</View>
+            <View className='text'>{league.shortName ? league.shortName : league.name}</View>
           </View>
           }
         </View>

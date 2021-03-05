@@ -60,17 +60,17 @@ class MatchUp extends Component<PageOwnProps, PageState> {
       <View className={'qz-match-up-content ' + className}>
         <View className='qz-match-up-content__inner'>
           <View className='qz-match-up-item' onClick={this.onItemClick}>
-            {matchInfo.hostteam != null && matchInfo.guestteam != null ?
+            {matchInfo.hostTeam != null && matchInfo.guestTeam != null ?
               <View className='qz-match-up-item-content'>
                 <View className='qz-match-up-item__team'>
                   <View className='qz-match-up-item__team-avatar'>
                     <AtAvatar circle
                               size='large'
-                              image={matchInfo.hostteam && matchInfo.hostteam.headImg ? matchInfo.hostteam.headImg : defaultLogo}/>
+                              image={matchInfo.hostTeam && matchInfo.hostTeam.headImg ? matchInfo.hostTeam.headImg : defaultLogo}/>
                   </View>
                   <Text
                     className='qz-match-up-item__team-name'>
-                    {matchInfo.hostteam ? matchInfo.hostteam.name : ""}
+                    {matchInfo.hostTeam ? matchInfo.hostTeam.name : ""}
                   </Text>
                 </View>
                 <View className='qz-match-up-item__vs'>
@@ -79,12 +79,12 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                       {`${onlytime ? formatMonthDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))} ${eventType[matchStatus.status != null ? matchStatus.status : -1].text}`}
                     </Text>
                     <Text
-                      className={matchStatus.penaltyscore || matchStatus.score.length > 5 ? 'qz-match-up-item__vs-match-score qz-match-up-item__vs-match-score-small' : 'qz-match-up-item__vs-match-score'}>
+                      className={matchStatus.penaltyScore || matchStatus.score.length > 5 ? 'qz-match-up-item__vs-match-score qz-match-up-item__vs-match-score-small' : 'qz-match-up-item__vs-match-score'}>
                       {matchStatus.status == -1 ? "VS" : matchStatus.score}
                     </Text>
-                    {matchStatus.penaltyscore ?
+                    {matchStatus.penaltyScore ?
                       <Text className='qz-match-up-item__vs-match-score-penalty'>
-                        {matchStatus.penaltyscore}
+                        {matchStatus.penaltyScore}
                       </Text> : null
                     }
                     {matchInfo.round != null ?
@@ -136,11 +136,11 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                   <View className='qz-match-up-item__team-avatar'>
                     <AtAvatar circle
                               size='large'
-                              image={matchInfo.guestteam && matchInfo.guestteam.headImg ? matchInfo.guestteam.headImg : defaultLogo}/>
+                              image={matchInfo.guestTeam && matchInfo.guestTeam.headImg ? matchInfo.guestTeam.headImg : defaultLogo}/>
                   </View>
                   <Text
                     className='qz-match-up-item__team-name'>
-                    {matchInfo.guestteam ? matchInfo.guestteam.name : ""}
+                    {matchInfo.guestTeam ? matchInfo.guestTeam.name : ""}
                   </Text>
                 </View>
               </View>

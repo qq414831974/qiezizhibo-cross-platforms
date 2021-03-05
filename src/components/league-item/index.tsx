@@ -72,7 +72,7 @@ class LeagueItem extends Component<PageOwnProps, PageState> {
             </Text>
             :
             <Text className="time">
-              {leagueInfo.isparent ? "系列赛" : null}
+              {leagueInfo.isParent ? "系列赛" : null}
             </Text>
           }
         </View>}

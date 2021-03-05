@@ -203,8 +203,9 @@ class Deposit extends Component<PageOwnProps, PageState> {
       userNo: userNo,
       type: global.ORDER_TYPE.deposit,
       description: `茄子TV-茄币-` + price * 100,
-      orderPrice: price * 100,
-      attach: JSON.stringify({})
+      attach: JSON.stringify({
+        price: price * 100
+      })
     }).then((unifiedResult: UnifiedJSAPIOrderResult) => {
       this.setState({isPaying: false, isPayOpen: false})
       if (unifiedResult) {
@@ -265,7 +266,7 @@ class Deposit extends Component<PageOwnProps, PageState> {
     this.getOrderStatus(orderId)
   }
   getOrderStatus = async (orderId: string) => {
-    new Request().post(api.API_ORDER_QUERY(orderId), {}).then((res) => {
+    new Request().post(api.API_ORDER_QUERY, {orderId: orderId}).then((res) => {
       if (res == global.ORDER_STAUTS.paid) {
         Taro.showToast({
           title: "支付成功",

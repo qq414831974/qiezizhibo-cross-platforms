@@ -448,29 +448,29 @@ class Bet extends Component<PageOwnProps, PageState> {
             <View className='qz-bet-match-up__team-avatar'>
               <AtAvatar circle
                         size='large'
-                        image={match.hostteam && match.hostteam.headImg ? match.hostteam.headImg : defaultLogo}/>
+                        image={match.hostTeam && match.hostTeam.headImg ? match.hostTeam.headImg : defaultLogo}/>
             </View>
             <Text
               className='qz-bet-match-up__team-name'>
-              {match.hostteam ? match.hostteam.name : ""}
+              {match.hostTeam ? match.hostTeam.name : ""}
             </Text>
           </View>
           <View className='qz-bet-match-up__vs'>
             <View className='qz-bet-match-up__vs-content'>
               {match.league != null ?
                 <Text className="qz-bet-match-up__vs-league-name">
-                  {match.league.shortname ? match.league.shortname : match.league.name}
+                  {match.league.shortName ? match.league.shortName : match.league.name}
                 </Text> : <View/>}
               {match.startTime ? <Text className='qz-bet-match-up__vs-match-time'>
                 {`${formatTime(new Date(match.startTime))} ${eventType[match.status != null ? match.status : -1].text}`}
               </Text> : null}
               <Text
-                className={match.penaltyscore ? 'qz-bet-match-up__vs-match-score qz-bet-match-up__vs-match-score-small' : 'qz-bet-match-up__vs-match-score'}>
+                className={match.penaltyScore ? 'qz-bet-match-up__vs-match-score qz-bet-match-up__vs-match-score-small' : 'qz-bet-match-up__vs-match-score'}>
                 {match.status == -1 ? "VS" : match.score}
               </Text>
-              {match.penaltyscore ?
+              {match.penaltyScore ?
                 <Text className='qz-bet-match-up__vs-match-score-penalty'>
-                  {match.penaltyscore}
+                  {match.penaltyScore}
                 </Text> : null
               }
               {match.round != null ?
@@ -492,24 +492,24 @@ class Bet extends Component<PageOwnProps, PageState> {
             <View className='qz-bet-match-up__team-avatar'>
               <AtAvatar circle
                         size='large'
-                        image={match.guestteam && match.guestteam.headImg ? match.guestteam.headImg : defaultLogo}/>
+                        image={match.guestTeam && match.guestTeam.headImg ? match.guestTeam.headImg : defaultLogo}/>
             </View>
             <Text
               className='qz-bet-match-up__team-name'>
-              {match.guestteam ? match.guestteam.name : ""}
+              {match.guestTeam ? match.guestTeam.name : ""}
             </Text>
           </View>
         </View>
         <View className='qz-bet-score'>
           <View className='qz-bet-score-header'>
             <View className='qz-bet-score-header-item'>
-              {match.hostteam ? match.hostteam.name : ""}
+              {match.hostTeam ? match.hostTeam.name : ""}
             </View>
             <View className='qz-bet-score-header-item'>
               和局
             </View>
             <View className='qz-bet-score-header-item'>
-              {match.guestteam ? match.guestteam.name : ""}
+              {match.guestTeam ? match.guestTeam.name : ""}
             </View>
           </View>
           <View className='qz-bet-score-content'>

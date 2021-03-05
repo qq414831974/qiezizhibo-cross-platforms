@@ -110,8 +110,8 @@ class ModalBet extends Component<PageOwnProps | any, PageState> {
       return;
     }
     const {betInfo} = this.props;
-    if (betInfo && betInfo.gradeInfos) {
-      this.setState({currentBet: betInfo.gradeInfos[0]});
+    if (betInfo && betInfo.gradeInfo) {
+      this.setState({currentBet: betInfo.gradeInfo[0]});
     }
     this.getFreeBetTime(userNo);
   }
@@ -393,7 +393,7 @@ class ModalBet extends Component<PageOwnProps | any, PageState> {
           <AtModalHeader>选择竞猜档次</AtModalHeader>
           {isOpened ? <AtModalContent>
             <View className="qz-bet-modal__grid">
-              {betInfo && betInfo.gradeInfos && betInfo.gradeInfos.map((data: any) =>
+              {betInfo && betInfo.gradeInfo && betInfo.gradeInfo.map((data: any) =>
                 <View
                   className={`qz-bet-modal__grid-item ${data.grade == currentBet.grade ? "qz-bet-modal__grid-item-active" : ""}`}
                   key={data.grade}

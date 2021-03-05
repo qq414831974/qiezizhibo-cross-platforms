@@ -1,5 +1,4 @@
 import Taro, {ENV_TYPE} from '@tarojs/taro';
-import '../sdk/cnchar.2.0.3.min.js';
 
 export const isInteger = (num) => {
   return typeof num == "number" && num % 1 == 0;
@@ -192,15 +191,12 @@ export const getCityData = (cityArray: Array<any>): any => {
   let cityMap: any = {};
   for (let i = 0; i < cityArray.length; i++) {
     const province = cityArray[i].province;
+    const provinceKey = cityArray[i].provinceKey;
     if (province && province.trim() != "") {
-      let firstLetter = province.spell("array", "first")[0];
-      if (province.startsWith('广')) {
-        firstLetter = "G";
+      if (cityMap[provinceKey] == null) {
+        cityMap[provinceKey] = [];
       }
-      if (cityMap[firstLetter] == null) {
-        cityMap[firstLetter] = [];
-      }
-      cityMap[firstLetter].push({'name': province, 'key': cityArray[i].id});
+      cityMap[provinceKey].push({'name': province, 'key': cityArray[i].id});
     }
   }
   let cityMapSorted: any = {};

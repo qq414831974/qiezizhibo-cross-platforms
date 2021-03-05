@@ -150,8 +150,8 @@ class Statistics extends Component<PageOwnProps, PageState> {
     const method = item.method;
     let hostvalue = 0;
     let guestvalue = 0;
-    let hostStatistics = statistics[matchInfo.hostteam.id];
-    let guestStatistics = statistics[matchInfo.guestteam.id];
+    let hostStatistics = statistics[matchInfo.hostTeam.id];
+    let guestStatistics = statistics[matchInfo.guestTeam.id];
     if (method == '/') {
       if (!require && hostStatistics[key[0]] == null && guestStatistics[key[0]] == null) {
         return null
