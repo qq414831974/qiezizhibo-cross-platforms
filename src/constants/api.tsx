@@ -93,6 +93,9 @@ export const API_GIFT_SEND_FREE_LIMIT = `${pay_service}/gift/free/limit`;
 export const API_GIFT_RANK_MATCH = (id) => `${pay_service}/gift/rank/match?matchId=${id}`;
 export const API_GIFT_RANK_LEAGUE = (id) => `${pay_service}/gift/rank/league?leagueId=${id}`;
 
+export const API_CHARGE_USER = `${football_service}/charge/user`;
+
+
 export const API_DEPOSIT = `${pay_service}/deposit`;
 export const API_DEPOSIT_LOGS = `${pay_service}/deposit/logs`;
 

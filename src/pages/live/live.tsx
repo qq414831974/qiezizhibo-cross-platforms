@@ -84,13 +84,11 @@ type Bulletin = {
 }
 type MatchCharge = {
   price: number,
-  secondPrice: number,
-  productId: number,
+  monthlyPrice: number,
   type: number,
   matchId: number,
   isMonopolyCharge: boolean,
   monopolyPrice: number,
-  monopolyProductId: number,
   monopolyOnly: boolean,
 }
 type PageStateProps = {
@@ -412,8 +410,7 @@ class Live extends Component<PageOwnProps, PageState> {
         this.getCollection(data.id);
         this.initSocket(data.id);
         data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
-        this.getMatchPayInfo(data, false);
-        this.getMatchNeedGift(data);
+        this.getUserChargeInfo(data, true);
         this.getSharePicture(data);
         this.enterTime = formatTimeSecond(new Date());
 
@@ -679,7 +676,7 @@ class Live extends Component<PageOwnProps, PageState> {
     const timerID_matchStatus = setInterval(() => {
       const {match} = this.props;
       this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
-        this.getMatchNeedGift(data);
+        this.getUserChargeInfo(data, false);
         if (match && match.status != FootballEventType.FINISH && data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
           this.getMatchDanmu(data.id, this.state.currentMedia);
@@ -757,7 +754,6 @@ class Live extends Component<PageOwnProps, PageState> {
   getMatchDanmu = (id, index) => {
     matchAction.getMatchDanmu({matchId: id, index: index});
   }
-
   getMatchInfo = (id) => {
     let userNo = null;
     if (this.props.userInfo && this.props.userInfo.userNo) {
@@ -786,6 +782,35 @@ class Live extends Component<PageOwnProps, PageState> {
       }
     })
     // })
+  }
+  getUserChargeInfo = (match, showPay) => {
+    new Request().get(api.API_CHARGE_USER, {matchId: match.id}, false).then((res: any) => {
+      if (res) {
+        this.setState({needGiftLive: res.needGiftLive})
+        let needPayRecord = res.needPayRecord;
+        let needPayLive = res.needPayLive;
+        if (match.status == FootballEventType.FINISH) {
+          if ((match.isRecordCharge && needPayRecord)) {
+            this.setState({needPay: true})
+          } else {
+            this.setState({needPay: false})
+          }
+        } else {
+          if ((match.isLiveCharge && needPayLive)) {
+            this.setState({needPay: true})
+          } else {
+            this.setState({needPay: false})
+          }
+        }
+        if (showPay) {
+          if (match.status == FootballEventType.FINISH && match.isRecordCharge && needPayRecord) {
+            this.showPay(this.getCharge(match, false))
+          } else if (match.status != FootballEventType.FINISH && match.isLiveCharge && needPayLive) {
+            this.showPay(this.getCharge(match, false))
+          }
+        }
+      }
+    })
   }
   getTeamHeatInfo = (id, type) => {
     let heatType = this.state.heatType;
@@ -1294,7 +1319,7 @@ class Live extends Component<PageOwnProps, PageState> {
         this.setState({phoneOpen: true})
       }
     })
-    this.getParamId() && this.getMatchInfo(this.getParamId());
+    this.getUserChargeInfo(this.props.match, false);
   }
 
   showPhone = async () => {
@@ -1432,9 +1457,7 @@ class Live extends Component<PageOwnProps, PageState> {
       this.getParamId() && payAction.getGiftList({matchId: this.getParamId()});
       this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
       this.state.leagueTeamHeatRefreshFunc && this.state.leagueTeamHeatRefreshFunc();
-      this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
-        this.getMatchNeedGift(data);
-      })
+      this.getUserChargeInfo(this.props.match, false);
     } else {
       this.getOrderStatus(orderId, ORDER_TYPE.gift);
     }
@@ -1455,79 +1478,34 @@ class Live extends Component<PageOwnProps, PageState> {
           this.getParamId() && this.getTeamHeatInfo(this.getParamId(), null);
           this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
           this.state.leagueTeamHeatRefreshFunc && this.state.leagueTeamHeatRefreshFunc();
-          this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
-            this.getMatchNeedGift(data);
-          })
+          this.getUserChargeInfo(this.props.match, false);
         } else {
           this.setState({needPay: false})
-          this.getParamId() && this.getMatchInfo(this.getParamId());
+          this.getUserChargeInfo(this.props.match, false);
           this.getParamId() && this.getMatchStatus(this.getParamId());
         }
       }
     });
   }
-  getMatchNeedGift = async (data) => {
-    if (data) {
-      this.setState({needGiftLive: data.needGiftLive})
-      let needPayRecord = data.needPayRecord;
-      let needPayLive = data.needPayLive;
-      if (data.status == FootballEventType.FINISH) {
-        if ((data.isRecordCharge && needPayRecord)) {
-          this.setState({needPay: true})
-        } else {
-          this.setState({needPay: false})
-        }
-      } else {
-        if ((data.isLiveCharge && needPayLive)) {
-          this.setState({needPay: true})
-        } else {
-          this.setState({needPay: false})
-        }
-      }
-    }
-  }
-  getMatchPayInfo = async (data, monopolyOnly) => {
-    let needPayRecord = data.needPayRecord;
-    let needPayLive = data.needPayLive;
-    if (!await this.isUserLogin()) {
-      needPayRecord = true;
-      needPayLive = true;
-    }
-    if (data.status == FootballEventType.FINISH) {
-      if ((data.isRecordCharge && needPayRecord) || monopolyOnly) {
-        this.setState({needPay: true})
-        this.showPay(this.getCharge(data, monopolyOnly))
-      }
-    } else {
-      if ((data.isLiveCharge && needPayLive) || monopolyOnly) {
-        this.setState({needPay: true})
-        this.showPay(this.getCharge(data, monopolyOnly))
-      }
-    }
-  }
   getCharge = (data, monopolyOnly): MatchCharge => {
     if (data.status == FootballEventType.FINISH) {
       return {
         price: data.recordPrice,
-        productId: data.recordProductId,
         type: ORDER_TYPE.record,
-        secondPrice: data.recordMonthPrice,
+        monthlyPrice: data.recordMonthPrice,
         matchId: data.id,
         isMonopolyCharge: data.isMonopolyCharge,
         monopolyPrice: data.monopolyPrice,
-        monopolyProductId: data.monopolyProductId,
         monopolyOnly: monopolyOnly
       }
     } else {
       return {
         price: data.livePrice,
-        productId: data.liveProductId,
         type: ORDER_TYPE.live,
-        secondPrice: data.liveMonthPrice,
+        monthlyPrice: data.liveMonthPrice,
         matchId: data.id,
         isMonopolyCharge: data.isMonopolyCharge,
         monopolyPrice: data.monopolyPrice,
-        monopolyProductId: data.monopolyProductId,
         monopolyOnly: monopolyOnly
       }
     }
@@ -1759,12 +1737,12 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   onPayClick = () => {
     const {match = null} = this.props;
-    this.getMatchPayInfo(match, false);
+    this.showPay(this.getCharge(match, false))
   }
   onMonopolyClick = () => {
     const {match = null} = this.props;
     if (!match.isMonopoly) {
-      this.getMatchPayInfo(match, true);
+      this.showPay(this.getCharge(match, true))
     }
   }
   getTabsList = (match) => {
