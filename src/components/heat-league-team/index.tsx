@@ -66,7 +66,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
 
   componentDidMount() {
     this.props.onTeamHeatRefresh && this.props.onTeamHeatRefresh(this.refresh);
-    this.refresh();
+    this.refresh(true);
     this.startTimer_CountDown();
   }
 
@@ -74,11 +74,15 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     this.clearTimer_CountDown();
   }
 
-  refresh = () => {
+  refresh = (first?) => {
     this.props.onGetTeamHeatInfo(1, 40, this.state.searchText).then((res) => {
-      this.setState({currentTeamHeat: res[0]},()=>{
+      if (first) {
+        this.setState({currentTeamHeat: res[0]}, () => {
         this.refreshCurrentTeam();
       })
+      } else {
+        this.refreshCurrentTeam();
+      }
     });
   }
   getStartDiffTime = () => {

@@ -131,6 +131,7 @@ class Home extends Component<PageOwnProps, PageState> {
         }
       })
     }
+    wx.preloadVideoAd(["adunit-8c18d21ba9b91eae"])
   }
 
   componentWillUnmount() {
