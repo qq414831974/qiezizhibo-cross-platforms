@@ -187,6 +187,7 @@ type PageState = {
   payConfirmShow: boolean;
   currentPrice: number;
   matchClips: any;
+  adAvailable: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -321,6 +322,7 @@ class Live extends Component<PageOwnProps, PageState> {
       payConfirmShow: false,
       currentPrice: 0,
       matchClips: null,
+      adAvailable: false,
     }
   }
 
@@ -389,8 +391,8 @@ class Live extends Component<PageOwnProps, PageState> {
     this.getParamId() && this.initCurtain(this.getParamId());
     this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
       if (data.activityId) {
-        if (data.leaguematchId) {
-          this.setState({leagueId: data.leaguematchId});
+        if (data.leagueId) {
+          this.setState({leagueId: data.leagueId});
         }
         if (data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
@@ -417,6 +419,9 @@ class Live extends Component<PageOwnProps, PageState> {
         this.getCommentList(this.props.match.id);
         this.initHeatCompetition(data);
         this.getMatchMediaClip(data.id);
+        if (data.leagueId) {
+          this.initAd(data.leagueId)
+        }
       }
       Taro.hideLoading();
     })
@@ -509,6 +514,15 @@ class Live extends Component<PageOwnProps, PageState> {
         if (curtain.curtain) {
           this.setState({curtain: curtain, curtainShow: true})
         }
+      }
+    });
+  }
+  initAd = (leagueId) => {
+    new Request().get(`${api.API_LEAGUE_AD}`, {leagueId: leagueId}).then((res: any) => {
+      if (res && res.available) {
+        this.setState({adAvailable: true});
+      } else {
+        this.setState({adAvailable: false});
       }
     });
   }
@@ -2087,7 +2101,7 @@ class Live extends Component<PageOwnProps, PageState> {
                 {match && <AtButton type='primary' onClick={this.switchToGiftSend}
                                     className="qz-live-match__video-poster-pay">投一票 看直播</AtButton>}
               </View>
-              : (match.status < 21 ?
+              : (match.status < 21 && match.status > -1?
                 <Video
                   id="videoPlayer"
                   ad-unit-id="adunit-8c18d21ba9b91eae"

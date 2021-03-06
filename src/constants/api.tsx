@@ -46,6 +46,7 @@ export const API_LEAGUE_TEAM = `${football_service}/league/rank/team`;
 export const API_LEAGUE_SERIES_LEAGUE = `${football_service}/league`;
 export const API_LEAGUE_REPORT = `${football_service}/league/report`;
 export const API_LEAGUE_RANK_SETTING = `${football_service}/league/rank/setting`;
+export const API_LEAGUE_AD = `${football_service}/ad/league`;
 
 //match
 export const API_MATCH = (id) => `${football_service}/match/${id}`;

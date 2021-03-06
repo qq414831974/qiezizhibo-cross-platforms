@@ -243,7 +243,7 @@ class Bet extends Component<PageOwnProps, PageState> {
     new Request().get(api.API_MATCH(id), null).then((data: any) => {
       if (data) {
         this.setState({match: data});
-        this.getBetRanks(data.leaguematchId);
+        this.getBetRanks(data.leagueId);
         new Request().get(api.API_MATCH_BET, {matchId: id}).then((betData: any) => {
           if (betData) {
             this.setState({betInfo: betData, loading: false}, () => {
