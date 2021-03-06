@@ -419,9 +419,9 @@ class Live extends Component<PageOwnProps, PageState> {
         this.getCommentList(this.props.match.id);
         this.initHeatCompetition(data);
         this.getMatchMediaClip(data.id);
-        if (data.leagueId) {
-          this.initAd(data.leagueId)
-        }
+        // if (data.leagueId) {
+        //   this.initAd(data.leagueId)
+        // }
       }
       Taro.hideLoading();
     })
@@ -2101,101 +2101,60 @@ class Live extends Component<PageOwnProps, PageState> {
                 {match && <AtButton type='primary' onClick={this.switchToGiftSend}
                                     className="qz-live-match__video-poster-pay">投一票 看直播</AtButton>}
               </View>
-              : (match.status < 21 && match.status > -1?
-                <Video
-                  id="videoPlayer"
-                  ad-unit-id="adunit-8c18d21ba9b91eae"
-                  className='qz-live-match__video'
-                  src={this.getPlayPath(match)}
-                  title={match.name}
-                  playBtnPosition="center"
-                  onFullscreenChange={this.bindFullScreen}
-                  onEnded={this.bindPlayEnd}
-                  onPlay={this.bindPlayStart}
-                  onError={this.bindPlayError}
-                  show-casting-button
-                  autoplay
-                  // enableDanmu
-                  // danmuList={danmuList}
-                  onTimeUpdate={this.handleVideoTime}
-                >
-                  {liveStatus != LiveStatus.FINISH && liveStatus != LiveStatus.ENABLED ?
-                    <View className="qz-live-match__video-poster">
-                      <Image src={match.poster} className="qz-live-match__video-poster-img"/>
-                      {liveStatus == LiveStatus.UNOPEN ?
-                        <View className="qz-live-match__video-poster-inner">
-                          {match.isBetEnable ?
-                            <View className="qz-live-match__video-poster-bet" onClick={this.onBetClick}>
-                              比分竞猜
-                            </View>
-                            : null}
-                          <View className="qz-live-match__video-poster-time" onClick={this.onSubscribeClick}>
-                            <View className='qz-live-match__video-poster-time__title'>
-                              <View>距比赛开始还有{diffDayTime.diffDay}</View>
-                            </View>
-                            <View className='qz-live-match__video-poster-time__time'>
-                              <View>{diffDayTime.diffTime}</View>
-                            </View>
-                            <View className='qz-live-match__video-poster-time__hint'>
-                              <View><View className='at-icon at-icon-bell'/>提醒我开始</View>
-                            </View>
+              :
+              <Video
+                id="videoPlayer"
+                className='qz-live-match__video'
+                src={this.getPlayPath(match)}
+                title={match.name}
+                playBtnPosition="center"
+                onFullscreenChange={this.bindFullScreen}
+                onEnded={this.bindPlayEnd}
+                onPlay={this.bindPlayStart}
+                onError={this.bindPlayError}
+                show-casting-button
+                autoplay
+                // enableDanmu
+                // danmuList={danmuList}
+                onTimeUpdate={this.handleVideoTime}
+                // autoplay
+              >
+                {liveStatus != LiveStatus.FINISH && liveStatus != LiveStatus.ENABLED ?
+                  <View className="qz-live-match__video-poster">
+                    <Image src={match.poster} className="qz-live-match__video-poster-img"/>
+                    {liveStatus == LiveStatus.UNOPEN ?
+                      <View className="qz-live-match__video-poster-inner">
+                        {match.isBetEnable ?
+                          <View className="qz-live-match__video-poster-bet" onClick={this.onBetClick}>
+                            比分竞猜
+                          </View>
+                          : null}
+                        <View className="qz-live-match__video-poster-time" onClick={this.onSubscribeClick}>
+                          <View className='qz-live-match__video-poster-time__title'>
+                            <View>距比赛开始还有{diffDayTime.diffDay}</View>
+                          </View>
+                          <View className='qz-live-match__video-poster-time__time'>
+                            <View>{diffDayTime.diffTime}</View>
+                          </View>
+                          <View className='qz-live-match__video-poster-time__hint'>
+                            <View><View className='at-icon at-icon-bell'/>提醒我开始</View>
                           </View>
                         </View>
-                        :
-                        <View className="qz-live-match__video-poster-text">
-                          <View className='qz-live-match__video-poster-text__text'>
-                            {liveStatus == LiveStatus.ONTIME ? <View>比赛还未开始请耐心等待...</View> : null}
-                            {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status == 14) ?
-                              <View>中场休息中...</View> : null}
-                            {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status != 14) ?
-                              <View>信号中断...</View> : null}
-                            {liveStatus == LiveStatus.LOADING ? <View>载入中...</View> : null}
-                          </View>
-                        </View>
-                      }
-                    </View>
-                    : <View
-                      className={`qz-live-match__video-controllers ${this.state.danmuUnable != true ? "qz-live-match__video-controllers-full" : ""}`}>
-                      {this.state.danmuUnable != true && this.state.danmuCurrent.map(item => (
-                        <View
-                          key={`danmu-${item.id}`}
-                          className="qz-live-match__video-controllers__danmu-container"
-                          style={{top: `${21 * (item.row + 1) + item.row * 8}px`}}>
-                          <View className="qz-live-match__video-controllers__danmu">
-                            <View className="qz-live-match__video-controllers__danmu-inner">
-                              <View className="qz-live-match__video-controllers__danmu-inner-container">
-                                <Image src={item.user && item.user.avatar ? item.user.avatar : defaultLogo}/>
-                                <Text>{item.text}</Text>
-                              </View>
-                            </View>
-                          </View>
-                        </View>
-                      ))}
-                      <View className="qz-live-match__video-controllers__views">
-                        <Image className="qz-live-match__video-controllers__views-img" src={views_icon}/>
-                        {this.props.match.chargeTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.match.online ? this.props.match.online : "0")}
                       </View>
-                    </View>
-                  }
-                </Video>
-                :
-                <Video
-                  id="videoPlayer"
-                  className='qz-live-match__video'
-                  src={this.getPlayPath(match)}
-                  title={match.name}
-                  playBtnPosition="center"
-                  onFullscreenChange={this.bindFullScreen}
-                  onEnded={this.bindPlayEnd}
-                  onPlay={this.bindPlayStart}
-                  onError={this.bindPlayError}
-                  show-casting-button
-                  autoplay
-                  // enableDanmu
-                  // danmuList={danmuList}
-                  onTimeUpdate={this.handleVideoTime}
-                >
-                  <View
+                      :
+                      <View className="qz-live-match__video-poster-text">
+                        <View className='qz-live-match__video-poster-text__text'>
+                          {liveStatus == LiveStatus.ONTIME ? <View>比赛还未开始请耐心等待...</View> : null}
+                          {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status == 14) ?
+                            <View>中场休息中...</View> : null}
+                          {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status != 14) ?
+                            <View>信号中断...</View> : null}
+                          {liveStatus == LiveStatus.LOADING ? <View>载入中...</View> : null}
+                        </View>
+                      </View>
+                    }
+                  </View>
+                  : <View
                     className={`qz-live-match__video-controllers ${this.state.danmuUnable != true ? "qz-live-match__video-controllers-full" : ""}`}>
                     {this.state.danmuUnable != true && this.state.danmuCurrent.map(item => (
                       <View
@@ -2214,7 +2173,7 @@ class Live extends Component<PageOwnProps, PageState> {
                     ))}
                     <View className="qz-live-match__video-controllers__views">
                       <Image className="qz-live-match__video-controllers__views-img" src={views_icon}/>
-                      {this.props.match.chargeTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.match.online ? this.props.match.online : "0")}
+                      {this.props.match.chargeTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
                     </View>
                     <View
                       className={`qz-live-match__video-controllers__right ${this.state.videoShowMore ? "qz-live-matc1h__video-controllers__right-more" : ""}`}>
@@ -2240,7 +2199,8 @@ class Live extends Component<PageOwnProps, PageState> {
                       }
                     </View>
                   </View>
-                </Video>))}
+                }
+              </Video>)}
           <View className='qz-live-tabs'>
             <AtTabs current={this.state.currentTab}
                     className="qz-live__top-tabs__content"
