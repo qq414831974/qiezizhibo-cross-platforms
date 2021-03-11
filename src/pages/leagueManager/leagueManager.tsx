@@ -154,7 +154,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       giftRanksOpen: false,
       heatRewardOpen: false,
       league: {},
-      leagueRankSetting: null,
+      leagueRankSetting: {},
       permissionShow: false,
       downLoading: false,
       shareMomentOpen: false,

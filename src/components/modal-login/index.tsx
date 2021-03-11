@@ -57,7 +57,7 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
       param.wechatType = 1;
       Taro.login().then(loginValue => {
         if (loginValue && loginValue.errMsg === "login:ok") {
-          new Request().post(`${api.API_LOGIN}?code=${loginValue.code}&wechatType=1`, param).then(async (res: any) => {
+          new Request().post(`${api.API_LOGIN}?code=${loginValue.code}&wechatType=0`, param).then(async (res: any) => {
             if (res.accessToken) {
               if (res.userNo && res.openId) {
                 await updateStorage({wechatOpenid: res.openId});

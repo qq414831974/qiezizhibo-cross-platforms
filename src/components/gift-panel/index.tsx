@@ -175,7 +175,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
       openId: openid,
       leagueId: this.props.leagueId,
       targetId: this.getTargetId(),
-      targetType: this.props.heatType,
+      heatType: this.props.heatType,
     };
     let tmplIds: any = [];
     let hintString: any = "";

@@ -87,7 +87,7 @@ class League extends Component<PageOwnProps, PageState> {
       pageNum: 1,
       pageSize: 10,
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
-      sortField: "remark",
+      sortField: "sortIndex",
       sortOrder: "desc",
       leagueType: 3,
     }).then(() => {
@@ -104,7 +104,7 @@ class League extends Component<PageOwnProps, PageState> {
       pageNum: this.props.leagueList.current + 1,
       pageSize: 10,
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
-      sortField: "remark",
+      sortField: "sortIndex",
       sortOrder: "desc",
       leagueType: 3,
     }).then(() => {

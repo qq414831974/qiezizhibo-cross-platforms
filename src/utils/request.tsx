@@ -155,6 +155,7 @@ const request = async (options) => {
           } else {
             //正常请求
             if (url.includes(API_LOGIN)) {
+              console.log(data.data)
               await updateStorage(data.data)
             }
             showLoading && Taro.hideNavigationBarLoading();

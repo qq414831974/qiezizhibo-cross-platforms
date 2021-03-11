@@ -50,7 +50,7 @@ class GiftNotify extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {detail, position = "left", row = 1, active = false} = this.props
+    const {detail = {}, position = "left", row = 1, active = false} = this.props
 
     return (
       <View

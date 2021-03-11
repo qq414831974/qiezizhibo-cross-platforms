@@ -1,6 +1,6 @@
 export const protocol_http = "https://";
 export const protocol_ws = "wss://";
-export const gateway_client_service = "www.qiezizhibo.com";
+export const gateway_client_service = "git.qiezizhibo.com";
 export const gateway_admin_service = `${protocol_http}${gateway_client_service}/gateway-admin`
 export const auth_service = `${protocol_http}${gateway_client_service}/service-auth`
 export const user_service = `${protocol_http}${gateway_client_service}/service-user`
@@ -30,7 +30,7 @@ export const API_GET_HEAT_COMPETITION_SHARE = `${system_service}/wx/ma/picture/h
 
 //user
 export const API_LOGIN = `${auth_service}/auth`;
-export const API_PHONENUMBER = `${auth_service}/auth/phone`;
+export const API_PHONENUMBER = `${auth_service}/user/phone`;
 export const API_AUTH_USER = `${auth_service}/auth/user`;
 export const API_USER = `${user_service}/user`;
 export const API_REFRESH_TOKEN = `${auth_service}/auth/refresh_token`;

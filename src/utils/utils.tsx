@@ -149,6 +149,11 @@ export const toLogin = () => {
 }
 
 export const updateStorage = (data = {}) => {
+  if (data['accessToken'] && data['refreshToken']) {
+    return Promise.all([Taro.setStorage({key: 'accessToken', data: data['accessToken'] || null}),
+      Taro.setStorage({key: 'refreshToken', data: data['refreshToken'] || null}),
+    ]);
+  }
   if (data['wechatOpenid']) {
     return Promise.all([
       Taro.setStorage({key: 'wechatOpenid', data: data['wechatOpenid'] || null})
@@ -157,11 +162,6 @@ export const updateStorage = (data = {}) => {
   if (data['userNo']) {
     return Promise.all([
       Taro.setStorage({key: 'userNo', data: data['userNo'] || null})
-    ]);
-  }
-  if (data['accessToken'] && data['refreshToken']) {
-    return Promise.all([Taro.setStorage({key: 'accessToken', data: data['accessToken'] || null}),
-      Taro.setStorage({key: 'refreshToken', data: data['refreshToken'] || null}),
     ]);
   }
   return Promise.all([Taro.setStorage({key: 'accessToken', data: data['accessToken'] || null}),

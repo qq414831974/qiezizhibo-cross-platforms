@@ -552,7 +552,7 @@ class Live extends Component<PageOwnProps, PageState> {
         } else if (res.data !== 'success') {
           const comment = JSON.parse(res.data);
           if (comment && comment.isBroadcast) {
-            const giftSendBroadcast = JSON.parse(comment);
+            const giftSendBroadcast = comment;
             context.addToGiftSendQueue(giftSendBroadcast);
             // let broadcastList = context.state.broadcastList;
             // let broadcastText = '';
@@ -1712,7 +1712,7 @@ class Live extends Component<PageOwnProps, PageState> {
   onShareMoment = () => {
     const {match = null} = this.props;
     this.setState({downLoading: true})
-    new Request().get(api.API_GET_SHARE_MOMENT_PICTURE, {id: match.id}).then((imageUrl: string) => {
+    new Request().get(api.API_GET_SHARE_MOMENT_PICTURE, {matchId: match.id}).then((imageUrl: string) => {
       if (imageUrl == null) {
         Taro.showToast({title: "获取图片失败", icon: "none"});
         this.setState({downLoading: false})
@@ -1736,7 +1736,7 @@ class Live extends Component<PageOwnProps, PageState> {
     })
   }
   getSharePicture = (data) => {
-    new Request().get(api.API_GET_SHARE_PICTURE, {id: data.id}).then((imageUrl: string) => {
+    new Request().get(api.API_GET_SHARE_PICTURE, {matchId: data.id}).then((imageUrl: string) => {
       if (imageUrl == null) {
         return;
       }

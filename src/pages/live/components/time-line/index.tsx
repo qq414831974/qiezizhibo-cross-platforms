@@ -47,7 +47,7 @@ class TimeLine extends Component<PageOwnProps, PageState> {
     return (
       <View className="qz_time-line-content">
         {timeline && timeline.map((item: any) => {
-          const secondPlayer = item.remark && item.remark.startsWith("{") ? JSON.parse(item.remark) : {}
+          const secondPlayer = item.secondPlayer ? item.secondPlayer : {}
           return (
             <View key={item.id} className="qz_time-line-item">
               <View className="qz_time-line-item-tail"/>
@@ -61,13 +61,13 @@ class TimeLine extends Component<PageOwnProps, PageState> {
                       <View className="qz_time-line-item-content__item-second-player-content">
                         <View className="qz_time-line-item-content__item-second-player">
                           <View className="qz_time-line-item-content__item-second-player-img">
-                            <Image src={item.remark && secondPlayer.headImg ? secondPlayer.headImg : noperson}/>
-                            {item.remark && secondPlayer.shirtNum &&
+                            <Image src={secondPlayer && secondPlayer.headImg ? secondPlayer.headImg : noperson}/>
+                            {secondPlayer && secondPlayer.shirtNum &&
                             <View className="qz_time-line-item-content__item-second-player-img__shirtnum">
                               <Text>{secondPlayer && secondPlayer.shirtNum}</Text>
                             </View>}
                           </View>
-                          <Text>{item.remark && secondPlayer.name}</Text>
+                          <Text>{secondPlayer && secondPlayer.name}</Text>
                         </View>
                         <View className="qz_time-line-item-content__item-second-player-dot">
                           <Image src={eventType[item.eventType].secondIcon.left}/>
@@ -113,13 +113,13 @@ class TimeLine extends Component<PageOwnProps, PageState> {
                         </View>
                         <View className="qz_time-line-item-content__item-second-player">
                           <View className="qz_time-line-item-content__item-second-player-img">
-                            <Image src={item.remark && secondPlayer.headImg ? secondPlayer.headImg : noperson}/>
-                            {item.remark && secondPlayer.shirtNum &&
+                            <Image src={secondPlayer && secondPlayer.headImg ? secondPlayer.headImg : noperson}/>
+                            {secondPlayer && secondPlayer.shirtNum &&
                             <View className="qz_time-line-item-content__item-second-player-img__shirtnum">
                               <Text>{secondPlayer && secondPlayer.shirtNum}</Text>
                             </View>}
                           </View>
-                          <Text>{item.remark && secondPlayer.name}</Text>
+                          <Text>{secondPlayer && secondPlayer.name}</Text>
                         </View>
                       </View>
                       : null}
