@@ -190,7 +190,7 @@ class Home extends Component<PageOwnProps, PageState> {
           } else if (systemData.platform == 'ios') {
             const list  = data.map(item=>item.content)
             // } else {
-            const weihu = list && list.length > 0 && (list.includes("升级维护中") || list.includes("因政策调整，iOS支付暂不可用"));Z
+            const weihu = list && list.length > 0 && (list.includes("升级维护中") || list.includes("因政策调整，iOS支付暂不可用"));
             if (weihu) {
               const userNo = await getStorage('userNo');
               if ((this.props.userInfo && this.props.userInfo.userNo) || userNo) {
