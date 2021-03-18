@@ -154,7 +154,9 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
       Taro.hideLoading();
       this.props.onPayClose && this.props.onPayClose();
       if (orderResult) {
-        handleConfirm(orderResult.orderId);
+        setTimeout(() => {
+          handleConfirm(orderResult.orderId);
+        }, 2000);
       } else {
         handleError(error.ERROR_PAY_ERROR);
       }
@@ -195,6 +197,7 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
       type = global.ORDER_TYPE.monopoly;
       attach = JSON.stringify({
         matchId: charge.matchId,
+        type: global.ORDER_TYPE.monopoly,
         anonymous: anonymous
       });
     }
@@ -222,7 +225,9 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
             paySign: unifiedResult.paySign,
             success: function (res) {
               if (res.errMsg == "requestPayment:ok") {
-                handleConfirm(unifiedResult.orderId);
+                setTimeout(() => {
+                  handleConfirm(unifiedResult.orderId);
+                }, 2000);
               }
             },
             fail: function (res) {

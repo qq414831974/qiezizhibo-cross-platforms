@@ -83,9 +83,9 @@ export const API_SEARCH = `${football_service}/search`;
 export const API_AREA = `${system_service}/sys/area`;
 
 //pay
-export const API_ORDER_CREATE = `${pay_service}/pay/jsapi`;
+export const API_ORDER_CREATE = `${pay_service}/order/jsapi`;
 export const API_ORDER_IS_NEED_BUY = `${pay_service}/order/isUserNeedByMatch`;
-export const API_ORDER_QUERY = `${pay_service}/pay/query`;
+export const API_ORDER_QUERY = `${pay_service}/order/query`;
 export const API_ORDER_USER = `${pay_service}/order/user`;
 
 export const API_GIFT_LIST = `${pay_service}/gift/list`;

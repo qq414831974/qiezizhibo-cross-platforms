@@ -554,6 +554,8 @@ class Live extends Component<PageOwnProps, PageState> {
           if (comment && comment.isBroadcast) {
             const giftSendBroadcast = comment;
             context.addToGiftSendQueue(giftSendBroadcast);
+            context.state.playerHeatRefreshFunc && context.state.playerHeatRefreshFunc();
+            context.state.leagueTeamHeatRefreshFunc && context.state.leagueTeamHeatRefreshFunc();
             // let broadcastList = context.state.broadcastList;
             // let broadcastText = '';
             // if (giftOrder && giftOrder.user && giftOrder.user.name) {
@@ -1326,6 +1328,7 @@ class Live extends Component<PageOwnProps, PageState> {
 
   onAuthSuccess = () => {
     this.setState({loginOpen: false})
+    this.initSocket(this.props.match.id)
     this.getUserInfo((res) => {
       const phone = res.payload.phone
       depositAction.getDeposit(res.userNo);
@@ -1482,7 +1485,7 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   getOrderStatus = async (orderId: string, type) => {
-    new Request().post(api.API_ORDER_QUERY, {orderId: orderId}).then((res) => {
+    new Request().get(api.API_ORDER_QUERY, {orderId: orderId}).then((res) => {
       if (res == ORDER_STAUTS.paid) {
         Taro.showToast({
           title: "支付成功",
@@ -2173,7 +2176,7 @@ class Live extends Component<PageOwnProps, PageState> {
                     ))}
                     <View className="qz-live-match__video-controllers__views">
                       <Image className="qz-live-match__video-controllers__views-img" src={views_icon}/>
-                      {this.props.match.chargeTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.matchStatus.online ? this.props.matchStatus.online : "0")}
+                      {this.props.match.chargeTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.match.online ? this.props.match.online : "0")}
                     </View>
                     <View
                       className={`qz-live-match__video-controllers__right ${this.state.videoShowMore ? "qz-live-matc1h__video-controllers__right-more" : ""}`}>

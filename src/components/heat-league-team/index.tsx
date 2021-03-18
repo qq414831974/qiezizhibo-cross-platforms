@@ -78,8 +78,8 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     this.props.onGetTeamHeatInfo(1, 40, this.state.searchText).then((res) => {
       if (first) {
         this.setState({currentTeamHeat: res[0]}, () => {
-        this.refreshCurrentTeam();
-      })
+          this.refreshCurrentTeam();
+        })
       } else {
         this.refreshCurrentTeam();
       }
@@ -235,7 +235,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
   }
   handleShareMoment = (teamHeat) => {
     let currentTeamHeat = this.state.currentTeamHeat;
-    if (teamHeat != null) {
+    if (teamHeat != null && teamHeat.teamId != null) {
       currentTeamHeat = teamHeat;
     }
     if (currentTeamHeat == null) {

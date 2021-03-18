@@ -210,7 +210,9 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
   }
   onGiftConfrim = (orderId: any) => {
     this.setState({giftConfirmOpen: false})
-    this.props.onHandlePaySuccess(orderId);
+    setTimeout(()=>{
+      this.props.onHandlePaySuccess(orderId);
+    },2000)
   }
   refreshDiscount = (gift) => {
     if (gift.type == global.GIFT_TYPE.FREE) {

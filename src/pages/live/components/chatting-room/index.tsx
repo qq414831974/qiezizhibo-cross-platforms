@@ -78,7 +78,7 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
     }
     return commentList;
   }
-  getGfitOrder = (content) => {
+  getGiftOrder = (content) => {
     return JSON.parse(content);
   }
 
@@ -109,13 +109,13 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
                           id={`message-${item.id}`}
                           className="qz-chatting-room__chat-item qz-chatting-room__chat-item-right">
                       <View className="qz-chatting-room__chat-text-container">
-                        {item.isHint ?
+                        {item.isBroadcast ?
                           <View className="qz-chatting-room__chat-text__text">
                             <View
-                              className="qz-chatting-room__chat-text__text-content">{`送给${this.getGfitOrder(item.content).targetName}`}
+                              className="qz-chatting-room__chat-text__text-content">{`送给${this.getGiftOrder(item.content).targetName}`}
                               <Image className="qz-chatting-room__chat-text__text-image"
-                                     src={this.getGfitOrder(item.content).giftPic}/>
-                              x{this.getGfitOrder(item.content).num}
+                                     src={this.getGiftOrder(item.content).giftHeadImg}/>
+                              x{this.getGiftOrder(item.content).giftNumber}
                             </View>
                           </View>
                           :
@@ -150,13 +150,13 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
                         </View>
                       </View>
                       <View className="qz-chatting-room__chat-text-container">
-                        {item.isHint ?
+                        {item.isBroadcast ?
                           <View className="qz-chatting-room__chat-text__text">
                             <View
-                              className="qz-chatting-room__chat-text__text-content">{`送给${this.getGfitOrder(item.content).targetName}`}
+                              className="qz-chatting-room__chat-text__text-content">{`送给${this.getGiftOrder(item.content).targetName}`}
                               <Image className="qz-chatting-room__chat-text__text-image"
-                                     src={this.getGfitOrder(item.content).giftPic}/>
-                              x{this.getGfitOrder(item.content).num}
+                                     src={this.getGiftOrder(item.content).giftHeadImg}/>
+                              x{this.getGiftOrder(item.content).giftNumber}
                             </View>
                           </View>
                           :

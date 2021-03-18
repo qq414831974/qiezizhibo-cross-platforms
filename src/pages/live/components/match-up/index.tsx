@@ -43,9 +43,9 @@ class MatchUp extends Component<PageOwnProps, PageState> {
   static defaultProps = {}
 
   onItemClick = () => {
-    if (this.props.matchInfo.activityid) {
-      this.props.onClick();
-    }
+    // if (this.props.matchInfo.activityId) {
+    //   this.props.onClick();
+    // }
   }
   onMonopolyClick = () => {
     this.props.onMonopolyClick();

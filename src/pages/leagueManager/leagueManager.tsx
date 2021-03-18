@@ -619,7 +619,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   getOrderStatus = async (orderId: string, type) => {
-    new Request().post(api.API_ORDER_QUERY, {orderId: orderId}).then((res) => {
+    new Request().get(api.API_ORDER_QUERY, {orderId: orderId}).then((res) => {
       if (res == global.ORDER_STAUTS.paid) {
         Taro.showToast({
           title: "支付成功",

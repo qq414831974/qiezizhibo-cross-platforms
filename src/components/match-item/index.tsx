@@ -48,7 +48,7 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
   static defaultProps = {}
 
   onItemClick = () => {
-    if (this.props.matchInfo.activityId || this.props.forceClick) {
+    if (this.props.matchInfo.available || this.props.forceClick) {
       this.props.onClick && this.props.onClick();
     }
   }
@@ -123,14 +123,14 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
                 <View className="qz-match-item__vs-match-status">
                   <View className="status-box">
                     <View
-                      className={`background ${matchInfo.activityId == null ? "" : eventType[matchInfo.status].color}`}>
-                      <Text className={matchInfo.activityId == null ? "text-disabled" : "text"}>
+                      className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status].color}`}>
+                      <Text className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
                         {eventType[matchInfo.status].text}
                       </Text>
                       <View
-                        className={`status-icon ${matchInfo.activityId == null ? "none" : eventType[matchInfo.status].color}`}>
+                        className={`status-icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status].color}`}>
                         <View
-                          className={`icon ${matchInfo.activityId == null ? "none" : eventType[matchInfo.status].color}`}/>
+                          className={`icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status].color}`}/>
                       </View>
                     </View>
                   </View>
@@ -170,14 +170,14 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
                 <View className="qz-match-item__vs-match-status">
                   <View className="status-box">
                     <View
-                      className={`background ${matchInfo.activityId == null ? "" : eventType[matchInfo.status].color}`}>
-                      <Text className={matchInfo.activityId == null ? "text-disabled" : "text"}>
+                      className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status].color}`}>
+                      <Text className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
                         {eventType[matchInfo.status].text}
                       </Text>
                       <View
-                        className={`status-icon ${matchInfo.activityId == null ? "none" : eventType[matchInfo.status].color}`}>
+                        className={`status-icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status].color}`}>
                         <View
-                          className={`icon ${matchInfo.activityId == null ? "none" : eventType[matchInfo.status].color}`}/>
+                          className={`icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status].color}`}/>
                       </View>
                     </View>
                   </View>
