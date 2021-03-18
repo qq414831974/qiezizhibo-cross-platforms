@@ -328,6 +328,7 @@ class Home extends Component<PageOwnProps, PageState> {
   getBannerConfig = () => {
     return configAction.getBannerConfig({
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
+      wechatType:0
     });
   }
   onProvinceSelect = (province) => {
