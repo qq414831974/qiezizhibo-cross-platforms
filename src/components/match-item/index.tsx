@@ -92,9 +92,7 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
               : null}
             <View className='qz-match-item__team'>
               <View className="qz-match-item__team-avatar">
-                <AtAvatar circle
-                          size="large"
-                          image={matchInfo.hostTeam && matchInfo.hostTeam.headImg ? matchInfo.hostTeam.headImg : defaultLogo}/>
+                <Image src={matchInfo.hostTeam && matchInfo.hostTeam.headImg ? matchInfo.hostTeam.headImg : defaultLogo}/>
               </View>
               <Text
                 className="qz-match-item__team-name">
@@ -142,9 +140,7 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
             </View>
             <View className='qz-match-item__team'>
               <View className="qz-match-item__team-avatar">
-                <AtAvatar circle
-                          size="large"
-                          image={matchInfo.guestTeam && matchInfo.guestTeam.headImg ? matchInfo.guestTeam.headImg : defaultLogo}/>
+                <Image src={matchInfo.guestTeam && matchInfo.guestTeam.headImg ? matchInfo.guestTeam.headImg : defaultLogo}/>
               </View>
               <Text
                 className="qz-match-item__team-name">

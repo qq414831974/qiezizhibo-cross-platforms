@@ -67,6 +67,15 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      image{
+        border-radius: 50%;
+        background-clip: border-box;
+        overflow: hidden;
+        width: 120px;
+        height: 120px;
+        font-size: 48px;
+        line-height: 120px;
+      }
     }
 
     &-name {

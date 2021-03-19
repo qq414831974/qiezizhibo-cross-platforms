@@ -7,7 +7,6 @@ import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
 
 import './home.scss'
 import configAction from "../../actions/config";
-import leagueAction from "../../actions/league";
 import areaAction from "../../actions/area";
 import ModalLocation from "../../components/modal-location";
 
@@ -41,7 +40,6 @@ type PageStateProps = {
   bulletinConfig: Array<Bulletin>,
   wechatConfig: any,
   locationConfig: any,
-  leagueList: any,
   areaList: any,
   userInfo: any;
 }
@@ -57,6 +55,7 @@ type PageState = {
   curtain: Bulletin | null,
   curtainShow: boolean,
   loadingMore: boolean,
+  leagueList: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -99,6 +98,7 @@ class Home extends Component<PageOwnProps, PageState> {
       curtain: null,
       curtainShow: false,
       loadingMore: false,
+      leagueList: {},
     }
   }
 
@@ -188,7 +188,7 @@ class Home extends Component<PageOwnProps, PageState> {
           if (systemData.platform == 'android') {
             //android
           } else if (systemData.platform == 'ios') {
-            const list  = data.map(item=>item.content)
+            const list = data.map(item => item.content)
             // } else {
             const weihu = list && list.length > 0 && (list.includes("升级维护中") || list.includes("因政策调整，iOS支付暂不可用"));
             if (weihu) {
@@ -249,8 +249,7 @@ class Home extends Component<PageOwnProps, PageState> {
   refresh = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getBannerConfig().then(() => {
-      leagueAction.getLeagueList_clear();
-      leagueAction.getLeagueList({
+      new Request().get(api.API_LEAGUES, {
         pageSize: 10,
         pageNum: 1,
         leagueType: 3,
@@ -259,11 +258,11 @@ class Home extends Component<PageOwnProps, PageState> {
         country: "中国",
         province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
         matchNum: 2,
-      }).then(() => {
+      }).then((data: any) => {
+        if (data) {
+          this.setState({leagueList: data});
+        }
         Taro.hideLoading();
-      }).catch(() => {
-        Taro.hideLoading();
-        Taro.showToast({title: "获取比赛信息失败", icon: "none"});
       });
     });
   }
@@ -272,18 +271,23 @@ class Home extends Component<PageOwnProps, PageState> {
       return;
     }
     this.setState({loadingMore: true})
-    leagueAction.getLeagueList_add({
+    new Request().get(api.API_LEAGUES, {
       pageSize: 10,
-      pageNum: this.props.leagueList.current + 1,
+      pageNum: this.state.leagueList.current + 1,
       leagueType: 3,
       sortField: "sortIndex",
       sortOrder: "desc",
       country: "中国",
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
       matchNum: 2,
-    }).then(() => {
-      this.setState({loadingMore: false})
-    })
+    }).then((data: any) => {
+      if (data) {
+        const leagueList = this.state.leagueList;
+        data.records = leagueList.records.concat(data.records);
+        this.setState({loadingMore: false, leagueList: data})
+      }
+      Taro.hideLoading();
+    });
   }
 
   // 小程序上拉加载
@@ -328,7 +332,7 @@ class Home extends Component<PageOwnProps, PageState> {
   getBannerConfig = () => {
     return configAction.getBannerConfig({
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
-      wechatType:0
+      wechatType: 0
     });
   }
   onProvinceSelect = (province) => {
@@ -394,7 +398,8 @@ class Home extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {leagueList = {}, locationConfig} = this.props
+    const {locationConfig} = this.props
+    const {leagueList} = this.state
     let loadingmoreStatus: any = "more";
     if (this.state.loadingMore) {
       loadingmoreStatus = "loading";
@@ -460,9 +465,7 @@ class Home extends Component<PageOwnProps, PageState> {
                                onClick={this.onLeagueItemClick.bind(this, item)}>
                     <Image src={hotIcon} className="qz-home-league-item-icon"/>
                     <View className="qz-home-league-item-avatar">
-                      <AtAvatar circle
-                                size="large"
-                                image={item.headImg}/>
+                      <Image src={item.headImg}/>
                     </View>
                     <Text className="qz-home-league-item-name">
                       {item.shortname ? item.shortname : item.name}
@@ -480,7 +483,7 @@ class Home extends Component<PageOwnProps, PageState> {
             <View key={item.id} className="qz-home-league-detail">
               <View className='qz-home-league-detail-content'>
                 <View className='qz-home-league-detail-title' onClick={this.onLeagueItemClick.bind(this, item)}>
-                  <AtAvatar size="small" circle image={item.headImg ? item.headImg : defaultLogo}/>
+                  <Image src={item.headImg ? item.headImg : defaultLogo}/>
                   <Text className='qz-home-league-detail-title-desc'>
                     {/*{item.shortname ? item.shortname : item.name}*/}
                     {item.name}
@@ -531,7 +534,6 @@ const mapStateToProps = (state) => {
     wechatConfig: state.config ? state.config.wechatConfig : {},
     locationConfig: state.config ? state.config.locationConfig : null,
     bulletinConfig: state.config ? state.config.bulletinConfig : null,
-    leagueList: state.league ? state.league.leagueList : {},
     areaList: state.area ? state.area.areas : {},
     shareSentence: state.config ? state.config.shareSentence : [],
     userInfo: state.user.userInfo,

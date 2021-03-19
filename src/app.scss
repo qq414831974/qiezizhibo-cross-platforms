@@ -645,3 +645,9 @@ $at-timeline-line-color: $color-border-lighter !default;
 .base-font-size{
   font-size: $font-size-sm;
 }
+.at-avatar{
+  background-color: $color-bg-transparent;
+  background: $color-bg-transparent;
+  color: $color-bg-transparent;
+  box-shadow: none;
+}

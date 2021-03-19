@@ -22,10 +22,10 @@ const interceptor = function (chain) {
     if (data) {
       for (let dataKey in data) {
         const params = data[dataKey];
-        if(Array.isArray(params)){
-          if(params.length > 0){
+        if (Array.isArray(params)) {
+          if (params.length > 0) {
             data[dataKey] = params.join()
-          }else{
+          } else {
             delete data[dataKey];
           }
         }
@@ -134,13 +134,15 @@ const request = async (options) => {
               }
             } else {
               //请求异常或无token
+              let title;
               let defaultMsg = (statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN) ? '登录失效' : '请求异常';
+              title = res && res.data && res.data.message || defaultMsg;
               if (url.includes("refresh_token")) {
-                defaultMsg = "登录失效，请重新登录"
+                title = "登录失效，请重新登录"
               }
               if (showToast) {
                 Taro.showToast({
-                  title: res && res.data && res.data.message || defaultMsg,
+                  title: title,
                   icon: 'none',
                   complete: () => {
                     if (statusCode == CODE_AUTH_EXPIRED || statusCode == CODE_AUTH_FORBIDDEN || url.includes("refresh_token")) {

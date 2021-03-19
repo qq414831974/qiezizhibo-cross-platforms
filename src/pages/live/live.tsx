@@ -2376,8 +2376,8 @@ class Live extends Component<PageOwnProps, PageState> {
           handleClose={this.onPhoneClose}
           handleError={this.onPhoneError}/>
         <ChargeModal
-          giftDiscount={match && match.giftWatchRecordEnable ? match.giftWatchRecordPrice != null : false}
-          giftDiscountPrice={match && match.giftWatchRecordEnable ? match.giftWatchRecordPrice : null}
+          giftDiscount={match && match.giftWatchRecordEnable ? match.giftWatchRecordEternalPrice != null : false}
+          giftDiscountPrice={match && match.giftWatchRecordEnable ? match.giftWatchRecordEternalPrice : null}
           charge={this.state.charge}
           isOpened={this.state.payOpen}
           handleConfirm={this.onPaySuccess}
@@ -2421,7 +2421,7 @@ class Live extends Component<PageOwnProps, PageState> {
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}>
           <GiftPanel
-            giftWatchPrice={match && match.giftWatchRecordEnable && match.giftWatchRecordPrice ? match.giftWatchRecordPrice : null}
+            giftWatchPrice={match && match.giftWatchRecordEnable && match.giftWatchRecordEternalPrice ? match.giftWatchRecordEternalPrice : null}
             giftWatchEternalPrice={match && match.giftWatchRecordEnable && match.giftWatchRecordEternalPrice ? match.giftWatchRecordEternalPrice : null}
             leagueId={this.state.leagueId}
             matchInfo={match}
