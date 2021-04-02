@@ -403,8 +403,8 @@ class Live extends Component<PageOwnProps, PageState> {
             this.getDiffTime(data)
           });
         }
-        this.getMatchStatus(data.id).then((status) => {
-          this.setUpNooice(status);
+        this.setUpNooice(data);
+        this.getMatchStatus(data.id).then(() => {
           this.startTimer_matchStatus(data.id);
         });
 
@@ -692,6 +692,7 @@ class Live extends Component<PageOwnProps, PageState> {
     const timerID_matchStatus = setInterval(() => {
       const {match} = this.props;
       this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
+        this.setUpNooice(data);
         this.getUserChargeInfo(data, false);
         if (match && match.status != FootballEventType.FINISH && data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
@@ -702,9 +703,7 @@ class Live extends Component<PageOwnProps, PageState> {
           }
         }
       })
-      this.getMatchStatus(id).then((status) => {
-        this.setUpNooice(status);
-      })
+      this.getMatchStatus(id);
       this.getTeamHeatInfo(id, null);
       this.getGiftRanks(id);
     }, 60000)
