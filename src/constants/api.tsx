@@ -56,6 +56,7 @@ export const API_MATCH_NOOICE = `${football_service}/match/nooice`;
 export const API_MATCH_COMMENT = `${chat_service}/comment`;
 export const API_MATCH_COMMENT_DANMU = `${chat_service}/comment/danmu`;
 export const API_MATCH_MEDIA = `${media_service}/media/match`;
+export const API_MATCH_ONLINE = `${football_service}/match/online`;
 
 //team
 export const API_TEAM = (id) => `${football_service}/team/${id}`;

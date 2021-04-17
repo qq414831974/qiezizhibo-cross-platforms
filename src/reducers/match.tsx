@@ -64,6 +64,8 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
       state.matchList = [];
       return state;
     case MATCH_COMMENT:
+      const commentList = action.payload.records.reverse()
+      action.payload.records = commentList;
       return {
         ...state,
         comment: action.payload
@@ -75,8 +77,11 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
       if (action.payload == null) {
         return state;
       }
-      const commentList = state.comment.records.concat(action.payload.records);
-      action.payload.records = commentList;
+      let commentListAdd = action.payload.records.reverse().concat(state.comment.records);
+      if (commentListAdd.length >= 10) {
+        commentListAdd = commentListAdd.slice(0, 9);
+      }
+      action.payload.records = commentListAdd;
       return {
         ...state,
         comment: action.payload

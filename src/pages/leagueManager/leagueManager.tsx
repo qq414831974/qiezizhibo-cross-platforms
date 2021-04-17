@@ -31,6 +31,7 @@ import ShareMoment from "../../components/share-moment";
 import BetRank from "../../components/bet-rank";
 import ModalPay from "../../components/modal-pay";
 import depositAction from "../../actions/deposit";
+import configAction from "../../actions/config";
 
 type PageStateProps = {
   leagueTeams: any;
@@ -40,6 +41,7 @@ type PageStateProps = {
   userInfo: any;
   giftList: any;
   deposit: any;
+  payEnabled: boolean;
 }
 
 type PageDispatchProps = {}
@@ -221,6 +223,10 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   componentDidMount() {
+    const {payEnabled} = this.props;
+    if (!payEnabled) {
+      this.initPayEnable();
+    }
     this.getParamId() && this.getLeagueInfo(this.getParamId());
     this.getParamId() && this.getBetRanks(this.getParamId());
     if (this.props.userInfo && this.props.userInfo.userNo) {
@@ -261,6 +267,21 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       return null;
     }
     return id;
+  }
+  initPayEnable = (userNo?) => {
+    if (userNo == null && this.props.userInfo && this.props.userInfo.userNo) {
+      userNo = this.props.userInfo.userNo;
+    }
+    if (userNo == null) {
+      return;
+    }
+    new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
+      if (ability && ability.enablePay) {
+        configAction.setPayEnabled(true);
+      } else {
+        configAction.setPayEnabled(false);
+      }
+    })
   }
   initHeatCompetition = (id) => {
     new Request().get(api.API_LEAUGE_HEAT, {leagueId: id}).then(async (data: any) => {
@@ -535,6 +556,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       if (res.payload != null && phone == null) {
         this.setState({phoneOpen: true})
       }
+      this.initPayEnable(res.userNo);
     })
   }
 
@@ -1056,6 +1078,7 @@ const mapStateToProps = (state) => {
     locationConfig: state.config.locationConfig,
     shareSentence: state.config ? state.config.shareSentence : [],
     giftList: state.pay ? state.pay.gifts : [],
+    payEnabled: state.config ? state.config.payEnabled : null,
   }
 }
 export default connect(mapStateToProps)(LeagueManager)

@@ -35,8 +35,9 @@ function withShare(opts: optsType) {
   return function demoComponent(Component) {
 
     class WithShare extends Component {
-      async componentWillMount() {
+      componentWillMount() {
         Taro.showShareMenu({
+          menus: ['shareAppMessage', 'shareTimeline'],
           withShareTicket: true
         });
 
@@ -79,9 +80,9 @@ function withShare(opts: optsType) {
         // 从继承的组件获取配置
         if (this.$setOnShareCallback && typeof this.$setOnShareCallback === 'function') {
           const callback = this.$setOnShareCallback;
-          setTimeout(()=>{
+          setTimeout(() => {
             callback();
-          },5000)
+          }, 5000)
         }
 
         return {
@@ -89,6 +90,52 @@ function withShare(opts: optsType) {
           path: path,
           imageUrl: imageUrl,
 
+        };
+      }
+
+      onShareTimeline() {
+
+        let {title = defalutTitle, imageUrl = null, path = defalutPath} = opts;
+
+        // 从继承的组件获取配置
+        if (this.$setSharePath && typeof this.$setSharePath === 'function') {
+          path = this.$setSharePath();
+        }
+
+        // 从继承的组件获取配置
+        if (this.$setShareTitle && typeof this.$setShareTitle === 'function') {
+          title = this.$setShareTitle();
+        }
+
+        // 从继承的组件获取配置
+        if (
+          this.$setShareImageUrl &&
+          typeof this.$setShareImageUrl === 'function'
+        ) {
+          imageUrl = this.$setShareImageUrl();
+        }
+
+        if (!path) {
+          path = defalutPath;
+        }
+
+        // 每条分享都补充用户的分享id
+        // 如果path不带参数，分享出去后解析的params里面会带一个{''： ''}
+        // const sharePath = `${path}&shareFromUser=${userInfo.shareId}`;
+
+        // 从继承的组件获取配置
+        if (this.$setOnShareCallback && typeof this.$setOnShareCallback === 'function') {
+          const callback = this.$setOnShareCallback;
+          setTimeout(() => {
+            callback();
+          }, 5000)
+        }
+
+        path = path.indexOf("?") > 0 ? path.split("?")[1] : null;
+        return {
+          title: title || defalutTitle,
+          query: path,
+          imageUrl: imageUrl,
         };
       }
 

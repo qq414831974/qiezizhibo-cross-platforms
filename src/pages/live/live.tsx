@@ -75,6 +75,7 @@ import {
   substitutionRight
 } from '../../utils/assets';
 import MatchClip from "./components/match-clip";
+import configAction from "../../actions/config";
 
 type Bulletin = {
   id: number,
@@ -380,6 +381,10 @@ class Live extends Component<PageOwnProps, PageState> {
 
   componentDidMount() {
     // componentDidShow() {
+    const {payEnabled} = this.props;
+    if(!payEnabled){
+      this.initPayEnable();
+    }
     this.iphoneXAdjust();
     matchAction.getMatchInfo_clear()
     matchAction.getMatchComment_clear()
@@ -416,7 +421,9 @@ class Live extends Component<PageOwnProps, PageState> {
         this.getSharePicture(data);
         this.enterTime = formatTimeSecond(new Date());
 
-        this.getCommentList(this.props.match.id);
+        if (data.type.includes(MATCH_TYPE.chattingRoom)) {
+          this.getCommentList(data.id);
+        }
         this.initHeatCompetition(data);
         this.getMatchMediaClip(data.id);
         // if (data.leagueId) {
@@ -526,11 +533,33 @@ class Live extends Component<PageOwnProps, PageState> {
       }
     });
   }
+  initPayEnable = (userNo?) => {
+    if (userNo == null && this.props.userInfo && this.props.userInfo.userNo) {
+      userNo = this.props.userInfo.userNo;
+    }
+    if (userNo == null) {
+      return;
+    }
+    new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
+      if (ability && ability.enablePay) {
+        configAction.setPayEnabled(true);
+      } else {
+        configAction.setPayEnabled(false);
+      }
+    })
+  }
   initSocket = async (matchId) => {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const context = this;
     const token = await getStorage('accessToken');
     const header = token ? {'Authorization': `Bearer ${token}`} : {};
+    const {match = null} = this.props;
+    if (match.type && !match.type.includes(MATCH_TYPE.chattingRoom)) {
+      new Request().post(api.API_MATCH_ONLINE, {matchId: match.id}).then((res: any) => {
+        console.log(res);
+      })
+      return;
+    }
     Taro.connectSocket({
       url: api.websocket(matchId),
       header: header
@@ -1112,6 +1141,8 @@ class Live extends Component<PageOwnProps, PageState> {
       pageSize: 10,
       matchId: matchId,
       // startTime: this.enterTime
+      sortField: "createdAt",
+      sortOrder: "desc"
     }).then(() => {
       // this.setState({commentIntoView: `message-${this.props.commentList.list.length}`})
       // const commentList: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
@@ -1135,7 +1166,11 @@ class Live extends Component<PageOwnProps, PageState> {
   getCommentList_next = () => {
     const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
     return new Promise((resolve, reject) => {
-      if (commentList.length > 10) {
+      if (commentList.length >= 10) {
+        resolve();
+        return;
+      }
+      if(this.props.commentList.current >= this.props.commentList.pages){
         resolve();
         return;
       }
@@ -1144,6 +1179,8 @@ class Live extends Component<PageOwnProps, PageState> {
         pageNum: this.props.commentList.current ? this.props.commentList.current + 1 : 1,
         pageSize: 10,
         matchId: this.props.match.id,
+        sortField: "createdAt",
+        sortOrder: "desc"
         // startTime: this.enterTime
       }).then(() => {
         // const commentList_next: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
@@ -1171,14 +1208,15 @@ class Live extends Component<PageOwnProps, PageState> {
     })
   }
   getCommentsList = (comments) => {
-    if (comments == null) {
-      return null;
-    }
-    return comments.sort((item1, item2) => {
-      const date1 = new Date(item1.date).getTime();
-      const date2 = new Date(item2.date).getTime();
-      return date1 > date2 ? 1 : (date1 == date2 ? 0 : -1)
-    });
+    // if (comments == null) {
+    //   return null;
+    // }
+    // return comments.sort((item1, item2) => {
+    //   const date1 = new Date(item1.date).getTime();
+    //   const date2 = new Date(item2.date).getTime();
+    //   return date1 > date2 ? 1 : (date1 == date2 ? 0 : -1)
+    // });
+    return comments;
   }
   setUpNooice = (status) => {
     this.setState({leftNooice: status.hostNooice, rightNooice: status.guestNooice})
@@ -1334,6 +1372,7 @@ class Live extends Component<PageOwnProps, PageState> {
       if (res.payload != null && phone == null) {
         this.setState({phoneOpen: true})
       }
+      this.initPayEnable(res.userNo);
     })
     this.getUserChargeInfo(this.props.match, false);
   }

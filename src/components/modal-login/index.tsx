@@ -24,7 +24,9 @@ type PageDispatchProps = {
 
 type PageOwnProps = {}
 
-type PageState = {}
+type PageState = {
+  canIUseGetUserProfile: boolean;
+}
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
@@ -43,46 +45,78 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
     handleError: () => {
     },
   }
-  handleConfirm = (value) => {
+
+  componentDidMount() {
+    if (wx.getUserProfile) {
+      this.setState({
+        canIUseGetUserProfile: true
+      })
+    }
+  }
+
+  handleGetUserInfoConfirm = (value) => {
     Taro.showLoading({title: global.LOADING_TEXT})
     const {handleCancel, handleConfirm, handleError} = this.props;
+    const userLogin = this.userLogin;
     if (value && value.detail && value.detail.errMsg === "getUserInfo:ok") {
       const userInfo = value.detail.userInfo;
-      let param: any = {};
-      param.avatar = userInfo.avatarUrl;
-      param.province = userInfo.province;
-      param.city = userInfo.city;
-      param.country = userInfo.country;
-      param.name = userInfo.nickName;
-      param.wechatType = 1;
-      Taro.login().then(loginValue => {
-        if (loginValue && loginValue.errMsg === "login:ok") {
-          new Request().post(`${api.API_LOGIN}?code=${loginValue.code}&wechatType=0`, param).then(async (res: any) => {
-            if (res.accessToken) {
-              if (res.userNo && res.openId) {
-                await updateStorage({wechatOpenid: res.openId});
-                await updateStorage({userNo: res.userNo});
-                handleConfirm();
-              }
-            } else {
-              handleError(error.ERROR_LOGIN);
-            }
-            Taro.hideLoading();
-          }).catch(reason => {
-            console.log(reason);
-            handleError(error.ERROR_LOGIN);
-          })
-        }
-        Taro.hideLoading();
-      }).catch(reason => {
-        console.log(reason);
-        handleError(error.ERROR_WX_LOGIN);
-        Taro.hideLoading();
-      });
+      userLogin(userInfo);
     } else {
       handleCancel();
       Taro.hideLoading();
     }
+  }
+
+  handleConfirm = () => {
+    Taro.showLoading({title: global.LOADING_TEXT})
+    const {handleCancel, handleConfirm, handleError} = this.props;
+    const userLogin = this.userLogin;
+    wx.getUserProfile({
+      desc: '请先登录再进行操作',
+      lang: 'zh_CN',
+      success: (value) => {
+        const userInfo = value.userInfo;
+        userLogin(userInfo);
+      },
+      fail: () => {
+        handleCancel();
+        Taro.hideLoading();
+      }
+    })
+  }
+  userLogin = (userInfo) => {
+    const {handleCancel, handleConfirm, handleError} = this.props;
+    let param: any = {};
+    param.avatar = userInfo.avatarUrl;
+    param.province = userInfo.province;
+    param.city = userInfo.city;
+    param.country = userInfo.country;
+    param.name = userInfo.nickName;
+    param.wechatType = 1;
+    Taro.login().then(loginValue => {
+      if (loginValue && loginValue.errMsg === "login:ok") {
+        new Request().post(`${api.API_LOGIN}?code=${loginValue.code}&wechatType=0`, param).then(async (res: any) => {
+          if (res.accessToken) {
+            if (res.userNo && res.openId) {
+              await updateStorage({wechatOpenid: res.openId});
+              await updateStorage({userNo: res.userNo});
+              handleConfirm();
+            }
+          } else {
+            handleError(error.ERROR_LOGIN);
+          }
+          Taro.hideLoading();
+        }).catch(reason => {
+          console.log(reason);
+          handleError(error.ERROR_LOGIN);
+        })
+      }
+      Taro.hideLoading();
+    }).catch(reason => {
+      console.log(reason);
+      handleError(error.ERROR_WX_LOGIN);
+      Taro.hideLoading();
+    });
   }
 
   render() {
@@ -105,7 +139,11 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
           <Button onClick={handleCancel}>
             <Text className="mini-gray">暂不登录</Text>
           </Button>
-          <Button open-type='getUserInfo' lang='zh_CN' onGetUserInfo={this.handleConfirm}>立即登录</Button>
+          {this.state.canIUseGetUserProfile ?
+            <Button onClick={this.handleConfirm}>立即登录</Button>
+            :
+            <Button open-type='getUserInfo' lang='zh_CN' onGetUserInfo={this.handleGetUserInfoConfirm}>立即登录</Button>
+          }
         </AtModalAction>
       </AtModal>
     )

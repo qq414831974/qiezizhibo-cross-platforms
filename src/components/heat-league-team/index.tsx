@@ -356,7 +356,6 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
                   </View>
                   <View className="qz-heat-team__list-item-right-share">
                     <RoundButton
-                      animation
                       margin="0 0 0 10px"
                       size={25}
                       img={share}
@@ -364,7 +363,6 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
                       onClick={() => {
                       }}/>
                     <RoundButton
-                      animation
                       margin="0 0 0 10px"
                       size={25}
                       img={moment}
@@ -405,7 +403,6 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
               }
               <View className="qz-heat-team-footer-left-share">
                 <RoundButton
-                  animation
                   margin="0 0 0 10px"
                   size={25}
                   img={share}
@@ -413,7 +410,6 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
                   onClick={() => {
                   }}/>
                 <RoundButton
-                  animation
                   margin="0 0 0 10px"
                   size={25}
                   img={moment}

@@ -68,15 +68,15 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
     });
   }
   getCommentsList = (comments) => {
-    let commentList: Array<any> = comments.sort((item1, item2) => {
-      const date1 = new Date(item1.date).getTime();
-      const date2 = new Date(item2.date).getTime();
-      return date1 > date2 ? 1 : (date1 == date2 ? 0 : -1)
-    });
-    if(commentList.length > 10){
-      commentList = commentList.slice(0,10)
-    }
-    return commentList;
+    //   let commentList: Array<any> = comments.sort((item1, item2) => {
+    //   const date1 = new Date(item1.date).getTime();
+    //   const date2 = new Date(item2.date).getTime();
+    //   return date1 > date2 ? 1 : (date1 == date2 ? 0 : -1)
+    // });
+    // if(commentList.length > 10){
+    //   commentList = commentList.slice(0,10)
+    // }
+    return comments;
   }
   getGiftOrder = (content) => {
     return JSON.parse(content);
@@ -86,7 +86,8 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
     const {comments = [], loading = false, intoView = ''} = this.props
     return (
       <View className={`qz-chatting-room ${this.props.isIphoneX ? "qz-chatting-room-iphoneX" : ""}`}>
-        <ScrollView scrollY={loading ? false : true} className="qz-chatting-room__chat-content"
+        <ScrollView scrollY={loading ? false : true}
+                    className="qz-chatting-room__chat-content"
                     scrollIntoView={intoView}
                     upper-threshold={20}
                     onScrollToUpper={this.onChatScroll}>

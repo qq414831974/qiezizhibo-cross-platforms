@@ -372,7 +372,6 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                   <View
                     className={`qz-heat-player__grid-item-popup ${currentPlayerHeat && currentPlayerHeat.id == data.id ? "qz-heat-player__grid-item-popup-active" : ""}`}>
                     <RoundButton
-                      animation
                       margin="0 5px"
                       size={25}
                       img={share}
@@ -380,7 +379,6 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                       onClick={() => {
                       }}/>
                     <RoundButton
-                      animation
                       margin="0 5px"
                       size={25}
                       img={moment}
@@ -428,7 +426,6 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
               }
               <View className="qz-heat-player-footer-left-share">
                 <RoundButton
-                  animation
                   margin="0 0 0 10px"
                   size={25}
                   img={share}
@@ -436,7 +433,6 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
                   onClick={() => {
                   }}/>
                 <RoundButton
-                  animation
                   margin="0 0 0 10px"
                   size={25}
                   img={moment}
