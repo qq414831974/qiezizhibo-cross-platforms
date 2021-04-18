@@ -283,7 +283,7 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
             <AtAvatar circle image={defaultLogo}/>
           </View>
           <Text className="center gray qz-pay-modal-content_text">
-            iOS端暂不提供观看
+            由于相关规范，iOS功能暂不可用
           </Text>
         </AtModalContent>
         <AtModalAction>

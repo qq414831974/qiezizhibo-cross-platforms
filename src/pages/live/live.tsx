@@ -416,7 +416,6 @@ class Live extends Component<PageOwnProps, PageState> {
         this.startTimer_CountDown();
         this.getCollection(data.id);
         this.initSocket(data.id);
-        data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
         this.getUserChargeInfo(data, true);
         this.getSharePicture(data);
         this.enterTime = formatTimeSecond(new Date());
@@ -540,11 +539,17 @@ class Live extends Component<PageOwnProps, PageState> {
     if (userNo == null) {
       return;
     }
-    new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
-      if (ability && ability.enablePay) {
+    Taro.getSystemInfo().then((systemData) => {
+      if (systemData.platform == 'android') {
         configAction.setPayEnabled(true);
-      } else {
-        configAction.setPayEnabled(false);
+      } else if (systemData.platform == 'ios') {
+        new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
+          if (ability && ability.enablePay) {
+            configAction.setPayEnabled(true);
+          } else {
+            configAction.setPayEnabled(false);
+          }
+        })
       }
     })
   }
@@ -1230,15 +1235,11 @@ class Live extends Component<PageOwnProps, PageState> {
     return false;
   }
   switchTab = (tab) => {
-    // const {match = null} = this.props;
-    // const tabs: Array<any> = [];
-    // let tabIndex = 0;
-    // match && match.type.map(item => {
-    //   if (item != 1) {
-    //     tabIndex = tabIndex + 1;
-    //     tabs[item] = tabIndex;
-    //   }
-    // })
+    const {match = null} = this.props;
+    let {tabs} = this.getTabsList(match);
+    if(tab == tabs[TABS_TYPE.lineUp]){
+      match.hostTeamId && this.getTeamPlayer(match.id, match.hostTeamId);
+    }
     this.setState({
       currentTab: tab
     })
@@ -2133,7 +2134,7 @@ class Live extends Component<PageOwnProps, PageState> {
             <View className='qz-live-match__video'>
               <Image src={match.poster} className="qz-live-match__video-poster-img"/>
               {match && <AtButton onClick={this.onPayClick} type='primary'
-                                  className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
+                                  className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "由于相关规范，iOS功能暂不可用"}</AtButton>}
             </View>
             :
             (payEnabled && this.state.needGiftLive && match.status != FootballEventType.FINISH && liveStatus != LiveStatus.UNOPEN && this.state.heatRule && this.state.heatRule.available ?

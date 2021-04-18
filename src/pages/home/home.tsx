@@ -187,6 +187,7 @@ class Home extends Component<PageOwnProps, PageState> {
         Taro.getSystemInfo().then(async (systemData) => {
           if (systemData.platform == 'android') {
             //android
+            configAction.setPayEnabled(true);
           } else if (systemData.platform == 'ios') {
             const list = data.map(item => item.content)
             // } else {

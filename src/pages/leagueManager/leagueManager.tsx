@@ -275,11 +275,17 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     if (userNo == null) {
       return;
     }
-    new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
-      if (ability && ability.enablePay) {
+    Taro.getSystemInfo().then((systemData) => {
+      if (systemData.platform == 'android') {
         configAction.setPayEnabled(true);
-      } else {
-        configAction.setPayEnabled(false);
+      } else if (systemData.platform == 'ios') {
+        new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
+          if (ability && ability.enablePay) {
+            configAction.setPayEnabled(true);
+          } else {
+            configAction.setPayEnabled(false);
+          }
+        })
       }
     })
   }

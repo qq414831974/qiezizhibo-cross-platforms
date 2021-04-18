@@ -157,7 +157,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
   onGiftSendClick =  () => {
     if (this.props.payEnabled != true) {
       Taro.showToast({
-        'title': "iOS暂不支持赠送",
+        'title': "由于相关规范，iOS功能暂不可用",
         'icon': 'none',
       })
       return;
@@ -298,7 +298,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
               </ScrollView>
               : <View className="qz-gifts__content y-center">
                 <View className="text-center w-full">
-                  iOS端暂不支持赠送
+                  由于相关规范，iOS功能暂不可用
                 </View>
                 <Button className="black" openType="contact">联系客服</Button>
               </View>}
