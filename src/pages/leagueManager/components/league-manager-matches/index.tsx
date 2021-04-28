@@ -6,6 +6,7 @@ import MatchList from '../match-list'
 
 import './index.scss'
 import matchAction from "../../../../actions/match";
+import * as global from "../../../../constants/global";
 
 type PageStateProps = {
   matchList?: any;
@@ -100,6 +101,9 @@ class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
     return res;
   }
   nextPage = (tab) => {
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      return;
+    }
     if (this.state.matchLoadingMore) {
       return;
     }

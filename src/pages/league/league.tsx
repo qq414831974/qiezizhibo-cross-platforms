@@ -5,12 +5,12 @@ import {connect} from '@tarojs/redux'
 
 import './league.scss'
 import LeagueItem from "../../components/league-item";
-import leagueAction from "../../actions/league";
 import * as global from "../../constants/global";
 import withShare from "../../utils/withShare";
+import Request from "../../utils/request";
+import * as api from "../../constants/api";
 
 type PageStateProps = {
-  leagueList: any;
   locationConfig: { city: string, province: string }
 }
 
@@ -20,8 +20,9 @@ type PageOwnProps = {}
 
 type PageState = {
   searchText: string;
-  loadingmore: boolean;
+  loadingMore: boolean;
   loading: boolean;
+  leagueList: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -29,6 +30,7 @@ type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 interface League {
   props: IProps;
 }
+
 @withShare({})
 class League extends Component<PageOwnProps, PageState> {
 
@@ -83,14 +85,21 @@ class League extends Component<PageOwnProps, PageState> {
   getLeagueList = () => {
     this.setState({loading: true})
     Taro.showLoading({title: global.LOADING_TEXT})
-    leagueAction.getLeagueSeriesList({
+    let url = api.API_LEAGUE_SERIES;
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      url = api.API_CACHED_LEAGUE_LEAGUE;
+    }
+    new Request().get(url, {
       pageNum: 1,
       pageSize: 10,
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
       sortField: "sortIndex",
       sortOrder: "desc",
       leagueType: 3,
-    }).then(() => {
+    }).then((data: any) => {
+      if (data) {
+        this.setState({leagueList: data});
+      }
       this.setState({loading: false})
       Taro.hideLoading();
     }).catch(() => {
@@ -99,16 +108,27 @@ class League extends Component<PageOwnProps, PageState> {
     });
   }
   nextPage = () => {
-    this.setState({loadingmore: true})
-    leagueAction.getLeagueSeriesList_add({
-      pageNum: this.props.leagueList.current + 1,
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      return;
+    }
+    if (this.state.loadingMore) {
+      return;
+    }
+    this.setState({loadingMore: true})
+    new Request().get(api.API_LEAGUE_SERIES, {
+      pageNum: this.state.leagueList.current + 1,
       pageSize: 10,
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
       sortField: "sortIndex",
       sortOrder: "desc",
       leagueType: 3,
-    }).then(() => {
-      this.setState({loadingmore: false})
+    }).then((data: any) => {
+      if (data) {
+        const leagueList = this.state.leagueList;
+        data.records = leagueList.records.concat(data.records);
+        this.setState({loadingMore: false, leagueList: data})
+      }
+      Taro.hideLoading();
     })
   }
 
@@ -116,22 +136,24 @@ class League extends Component<PageOwnProps, PageState> {
   onReachBottom() {
     this.nextPage();
   }
+
   onPullDownRefresh() {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getLeagueList();
     Taro.stopPullDownRefresh();
   }
+
   render() {
-    const {leagueList} = this.props
+    const {leagueList} = this.state
 
     if (leagueList && (leagueList.total <= 0 || leagueList.total == null)) {
       return <AtLoadMore status="noMore" noMoreText={this.state.loading ? "加载中..." : "搜一下"}/>
     }
-    let loadingmoreStatus: any = "more";
-    if (this.state.loadingmore||this.state.loading) {
-      loadingmoreStatus = "loading";
-    } else if (leagueList.records && (leagueList.total <= leagueList.records.length)) {
-      loadingmoreStatus = "noMore"
+    let loadingMoreStatus: any = "more";
+    if (this.state.loadingMore || this.state.loading) {
+      loadingMoreStatus = "loading";
+    } else if (leagueList == null || leagueList.records == null || leagueList.records.length <= 0 || leagueList.total <= leagueList.records.length) {
+      loadingMoreStatus = "noMore"
     }
 
     return (
@@ -153,7 +175,7 @@ class League extends Component<PageOwnProps, PageState> {
             </View>
           </View>
         ) : null}
-        <AtLoadMore status={loadingmoreStatus} loadingText="加载中..."/>
+        <AtLoadMore status={loadingMoreStatus} loadingText="加载中..."/>
       </View>
     )
   }
@@ -161,7 +183,6 @@ class League extends Component<PageOwnProps, PageState> {
 
 const mapStateToProps = (state) => {
   return {
-    leagueList: state.league.leagueSeriesList,
     locationConfig: state.config.locationConfig
   }
 }

@@ -4,6 +4,7 @@ import * as api from '../constants/api'
 import store from '../store'
 import {createApiAction, createAction} from './index'
 import Request from '../utils/request'
+import * as global from "../constants/global";
 
 type MatchParam = {
   id: number,
@@ -26,9 +27,6 @@ type CommentParams = {
   pageSize: number,
   matchId: number,
 }
-type CommentCountParams = {
-  matchId: number,
-}
 type MathNooiceParams = {
   matchId: number,
   teamId: number,
@@ -43,9 +41,22 @@ type DanmuParams = {
   matchId: number,
   index: number,
 }
-export const getMatchInfo: any = createApiAction(match.MATCH, (param: MatchParam) => new Request().get(api.API_MATCH(param.id), param))
+export const getMatchInfo: any = createApiAction(match.MATCH, (param: MatchParam) => {
+  let url = api.API_MATCH(param.id);
+  if (global.CacheManager.getInstance().CACHE_ENABLED) {
+    url = api.API_CACHED_MATCH(param.id);
+  }
+  return new Request().get(url, null);
+})
 export const getMatchInfo_clear: any = createAction(match.MATCH_CLEAR)
-export const getMatchList: any = createApiAction(match.MATCHES, (params: MatchParams) => new Request().get(api.API_MATCHES, params))
+export const getMatchList: any = createApiAction(match.MATCHES, (params: MatchParams | any) => {
+  let url = api.API_MATCHES;
+  if (global.CacheManager.getInstance().CACHE_ENABLED && params.round != null) {
+    url = api.API_CACHED_MATCHES(params.leagueId, params.round);
+    params = null;
+  }
+  return new Request().get(url, params);
+})
 export const getMatchList_add: any = createApiAction(match.MATCHES_ADD, (params: MatchParams) => new Request().get(api.API_MATCHES, params))
 export const getMatchList_clear: any = createAction(match.MATCHES_CLEAR)
 export const getMatchStatus: any = createApiAction(match.MATCH_STATUS, (params: MatchStatusParams) => new Request().get(api.API_MATCH_STATUS, params))

@@ -2,13 +2,12 @@ import Taro, {Component, Config} from '@tarojs/taro'
 import {View} from '@tarojs/components'
 import {AtSearchBar, AtTabs, AtTabsPane} from "taro-ui"
 import {connect} from '@tarojs/redux'
-import matchAction from "../../actions/match";
 
 import './match.scss'
 import MatchList from "./components/match-list";
 import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
-import {API_MATCHES} from "../../constants/api";
+import * as api from "../../constants/api";
 import Request from '../../utils/request'
 
 type PageStateProps = {
@@ -73,7 +72,6 @@ class Match extends Component<PageOwnProps, PageState> {
     //     bottom: number
     //   }).top;
     // }).exec();
-    matchAction.getMatchList_clear();
     this.switchTab(0);
   }
 
@@ -103,7 +101,6 @@ class Match extends Component<PageOwnProps, PageState> {
   }
   switchTab = (tab) => {
     const getMatchList = this.getMatchList;
-    matchAction.getMatchList_clear()
     this.setState({
       currentTab: tab
     }, () => {
@@ -124,7 +121,13 @@ class Match extends Component<PageOwnProps, PageState> {
         break;
     }
     this.setState({loading: true})
-    new Request().get(API_MATCHES, {
+    let url = api.API_MATCHES;
+    if (global.CacheManager.getInstance().CACHE_ENABLED && status != null && status == "finish") {
+      url = api.API_CACHED_MATCHES_FINISH;
+    } else if (global.CacheManager.getInstance().CACHE_ENABLED && status != null && status == "unfinish") {
+      url = api.API_CACHED_MATCHES_UNFINISH;
+    }
+    new Request().get(url, {
       status: status,
       pageNum: 1,
       pageSize: 10,
@@ -137,6 +140,9 @@ class Match extends Component<PageOwnProps, PageState> {
     });
   }
   nextPage = (tab) => {
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      return;
+    }
     if (typeof (tab) != 'number') {
       tab = this.state.currentTab
     }
@@ -156,7 +162,7 @@ class Match extends Component<PageOwnProps, PageState> {
       return;
     }
     this.setState({loadingmore: true})
-    new Request().get(API_MATCHES, {
+    new Request().get(api.API_MATCHES, {
       status: status,
       pageNum: this.state.matchList.current + 1,
       pageSize: 10,

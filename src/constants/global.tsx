@@ -146,6 +146,19 @@ export const BET_TYPE = {
   FREE: 0,
   CHARGE: 1,
 }
+
+export class CacheManager {
+  static instance: CacheManager;
+  CACHE_ENABLED: boolean;
+
+  static getInstance() {
+    if (!CacheManager.instance) {
+      CacheManager.instance = new CacheManager();
+    }
+    return CacheManager.instance;
+  }
+}
+
 export const LEVEL_COLOR = {
   1: "#FF851B",
   2: "#3D9970",

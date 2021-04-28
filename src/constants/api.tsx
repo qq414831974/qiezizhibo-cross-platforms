@@ -125,3 +125,21 @@ export const API_BET_FREE = `${football_service}/bet/free`;
 
 //subscribe
 export const API_SUBSCRIBE = `${system_service}/subscribe`;
+
+//cached
+export const cached_service = `${protocol_http}qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/cached/football`;
+
+export const API_CACHED_CONTROLLER = `${cached_service}/controller.json`;
+
+export const API_CACHED_HOME_LEAGUES = `${cached_service}/leagues.json`;
+export const API_CACHED_LEAGUE = (leagueId) => `${cached_service}/league/${leagueId}.json`;
+export const API_CACHED_LEAGUE_LEAGUE = `${cached_service}/series.json`;
+
+export const API_CACHED_MATCHES = (leagueId, round) => `${cached_service}/league/match/${leagueId}/${round}.json`;
+export const API_CACHED_MATCH = (id) => `${cached_service}/match/${id}.json`;
+
+export const API_CACHED_LIVE_MANUAL = (id) => `${cached_service}/live/${id}.json`;
+
+export const API_CACHED_LEAGUE_IN_SERIES_LEAGUE = (id) => `${cached_service}/inSeriesLeague/${id}.json`;
+export const API_CACHED_MATCHES_FINISH = `${cached_service}/match/finish.json`;
+export const API_CACHED_MATCHES_UNFINISH = `${cached_service}/match/live.json`;

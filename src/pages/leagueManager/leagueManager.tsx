@@ -730,7 +730,11 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   getLeagueInfo = (id) => {
     this.setState({loading: true})
     Taro.showLoading({title: global.LOADING_TEXT})
-    new Request().get(api.API_LEAGUE(id), null).then((data: any) => {
+    let url = api.API_LEAGUE(id);
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      url = api.API_CACHED_LEAGUE(id);
+    }
+    new Request().get(url, null).then((data: any) => {
       this.setState({league: data}, () => {
         this.getLeagueList(id);
         this.getLeagueRankSetting(id);
