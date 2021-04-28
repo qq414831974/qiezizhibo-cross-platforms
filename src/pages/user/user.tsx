@@ -1,7 +1,7 @@
 // import {ComponentClass} from 'react'
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, Text, Image, Button} from '@tarojs/components'
-import {AtAvatar, AtIcon} from 'taro-ui'
+import {AtIcon} from 'taro-ui'
 import {connect} from '@tarojs/redux'
 import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
 import configAction from "../../actions/config";
@@ -27,6 +27,7 @@ type PageStateProps = {
     name: string,
     userNo: string,
     phone: string,
+    userExp: any,
   },
   locationConfig: any,
   payEnabled: boolean,
@@ -401,15 +402,29 @@ class User extends Component<PageOwnProps, PageState> {
     }
     Taro.navigateTo({url: `../deposit/deposit`});
   }
+  getUserExpProgress = (userExp) => {
+    const userExpValue = userExp.exp;
+    const expMin = userExp.expInfo.minExp;
+    const expMax = userExp.expInfo.maxExp;
+    const expRange = expMax - expMin;
+    const userExpOffset = userExpValue - expMin;
+    return userExpOffset * 100 / expRange;
+  }
 
   render() {
     const {userInfo, locationConfig, payEnabled} = this.props
-    const {avatar = logo, name = null} = userInfo;
+    const {avatar = logo, name = null, userExp = {}} = userInfo;
     return (
       <View className='qz-user-content'>
         <Image className='qz-user-account-bg' src={account_bg}/>
         <View className='qz-user-user-info' onClick={this.login}>
-          <AtAvatar className='avatar' circle image={avatar}/>
+          <Image className='avatar' src={avatar}/>
+          {/*{userExp && userExp.expInfo ?*/}
+          {/*  <View className='level'*/}
+          {/*        style={{backgroundColor: global.LEVEL_COLOR[Math.floor(userExp.expInfo.level / 10)]}}>*/}
+          {/*    Lv.{userExp.expInfo.level}*/}
+          {/*  </View>*/}
+          {/*  : null}*/}
           {
             name && name.length > 0 ?
               <Text className='username'>{name}</Text>
@@ -417,6 +432,21 @@ class User extends Component<PageOwnProps, PageState> {
               <Text className='username'>点击登录</Text>
           }
         </View>
+        {/*<View className='qz_user-info-exp'>*/}
+        {/*  {userExp && userExp.expInfo ? <View className='exp-bar-controller'>*/}
+        {/*      /!*<View className='exp-level exp-level-pre'>*!/*/}
+        {/*      /!*  Lv.{userExp.expInfo.level}*!/*/}
+        {/*      /!*</View>*!/*/}
+        {/*      <View className='exp-bar'>*/}
+        {/*        <View className='bar' style={{width: this.getUserExpProgress(userExp) + "%"}}>*/}
+        {/*        </View>*/}
+        {/*      </View>*/}
+        {/*      /!*<View className='exp-level exp-level-next'>*!/*/}
+        {/*      /!*  Lv.{userExp.expInfo.level + 1}*!/*/}
+        {/*      /!*</View>*!/*/}
+        {/*    </View>*/}
+        {/*    : null}*/}
+        {/*</View>*/}
         <View className='qz-user-info-view'>
           {/*<View className='bio'>111</View>*/}
           <View className='item_view'>
@@ -439,20 +469,22 @@ class User extends Component<PageOwnProps, PageState> {
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
-          <Button onClick={this.onBetClick} className='list button-list'>
-            <View className='list_title'>
-              <AtIcon className='list-title-icon' value='shopping-bag' size='18' color='#333'/>
-              {payEnabled ? "我的竞猜" : "我的竞猜"}
-            </View>
-            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
-          </Button>
-          <Button onClick={this.onDepositClick} className='list button-list'>
-            <View className='list_title'>
-              <AtIcon className='list-title-icon' value='money' size='18' color='#333'/>
-              {payEnabled ? "我的茄币" : "我的茄币"}
-            </View>
-            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
-          </Button>
+          {payEnabled ? <Button onClick={this.onBetClick} className='list button-list'>
+              <View className='list_title'>
+                <AtIcon className='list-title-icon' value='shopping-bag' size='18' color='#333'/>
+                我的竞猜
+              </View>
+              <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
+            </Button>
+            : null}
+          {payEnabled ? <Button onClick={this.onDepositClick} className='list button-list'>
+              <View className='list_title'>
+                <AtIcon className='list-title-icon' value='money' size='18' color='#333'/>
+                我的茄币
+              </View>
+              <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
+            </Button>
+            : null}
         </View>
         <View className='qz-user-list-view'>
           <Button onClick={this.onAddressClick} className='list button-list'>

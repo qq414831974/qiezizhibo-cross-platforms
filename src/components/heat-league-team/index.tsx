@@ -272,10 +272,14 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
       }
     })
   }
-
+  handleFeedbackClick = () => {
+    Taro.navigateTo({
+      url: "/pages/feedback/feedback",
+    })
+  }
   render() {
     const {startDiffDayTime, endDiffDayTime, currentTeamHeat = null, pulldownRefresh = false} = this.state
-    const {hidden = false, totalHeat} = this.props
+    const {hidden = false} = this.props
     let teamHeats = this.props.teamHeats;
     let topTeamHeats = this.props.topTeamHeats;
     let isTopTeamHeat = this.isTopTeamHeat;
@@ -300,24 +304,37 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
             />
           </View>
           <View className="qz-heat-team-header__status">
+            <View className="qz-heat-team-header__status-feedback">
+              <AtButton
+                className="vertical-middle"
+                size="small"
+                type="primary"
+                full
+                circle
+                onClick={this.handleFeedbackClick}
+              >
+                投诉与反馈
+              </AtButton>
+            </View>
             <View className="at-row">
-              <View className="at-col at-col-4">
-                <View className="w-full center qz-heat-team-header__status-title">
-                  参赛球队
-                </View>
-                <View className="w-full center qz-heat-team-header__status-value">
-                  {teamHeats && teamHeats.total ? teamHeats.total : 0}
-                </View>
-              </View>
-              <View className="at-col at-col-4">
-                <View className="w-full center qz-heat-team-header__status-title">
-                  累计人气值
-                </View>
-                <View className="w-full center qz-heat-team-header__status-value">
-                  {totalHeat ? totalHeat : 0}
-                </View>
-              </View>
-              <View className="at-col at-col-4">
+              {/*<View className="at-col at-col-4">*/}
+              {/*  <View className="w-full center qz-heat-team-header__status-title">*/}
+              {/*    参赛球队*/}
+              {/*  </View>*/}
+              {/*  <View className="w-full center qz-heat-team-header__status-value">*/}
+              {/*    {teamHeats && teamHeats.total ? teamHeats.total : 0}*/}
+              {/*  </View>*/}
+              {/*</View>*/}
+              {/*<View className="at-col at-col-4">*/}
+              {/*  <View className="w-full center qz-heat-team-header__status-title">*/}
+              {/*    累计人气值*/}
+              {/*  </View>*/}
+              {/*  <View className="w-full center qz-heat-team-header__status-value">*/}
+              {/*    {totalHeat ? totalHeat : 0}*/}
+              {/*  </View>*/}
+              {/*</View>*/}
+              {/*<View className="at-col at-col-4">*/}
+              <View className="at-col at-col-12">
                 <View className="w-full center qz-heat-team-header__status-title">
                   活动结束倒计时
                 </View>

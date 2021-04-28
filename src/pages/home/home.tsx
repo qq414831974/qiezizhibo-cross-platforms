@@ -1,7 +1,7 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, Text, Button, Image, Swiper, SwiperItem, Navigator, ScrollView} from '@tarojs/components'
 import {connect} from '@tarojs/redux'
-import {AtNoticebar, AtAvatar, AtIcon, AtCurtain, AtLoadMore} from 'taro-ui'
+import {AtNoticebar, AtIcon, AtCurtain, AtLoadMore} from 'taro-ui'
 import NavigationBar from './components/navigation-search-bar'
 import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
 
@@ -103,7 +103,7 @@ class Home extends Component<PageOwnProps, PageState> {
   }
 
   $loginCallback = () => {
-    this.initBulletin();
+    this.initPayConfig();
   }
 
   componentWillMount() {
@@ -114,6 +114,7 @@ class Home extends Component<PageOwnProps, PageState> {
     this.getAreas();
     configAction.setVisit();
     configAction.getShareSentence();
+    this.initBulletin();
     if (this.$router.params.id && this.$router.params.page) {
       let url = '/pages/' + this.$router.params.page + '/' + this.$router.params.page + '?id=' + this.$router.params.id;
       Taro.navigateTo({
@@ -175,6 +176,35 @@ class Home extends Component<PageOwnProps, PageState> {
   componentDidHide() {
   }
 
+  initPayConfig = () => {
+    Taro.getSystemInfo().then((systemInfo) => {
+      new Request().get(api.API_SYS_PAYMENT_CONFIG, null).then(async (config: any) => {
+        const userNo = await getStorage('userNo');
+        if ((this.props.userInfo && this.props.userInfo.userNo) || userNo) {
+          new Request().get(api.API_USER_ABILITY, {userNo: userNo ? userNo : this.props.userInfo.userNo}).then((ability: any) => {
+            if (ability && ability.enablePay) {
+              configAction.setPayEnabled(true);
+              configAction.setGiftEnabled(true);
+            } else {
+              if (systemInfo.platform == 'ios') {
+                configAction.setPayEnabled(config && config.enablePay ? true : false);
+              } else {
+                configAction.setPayEnabled(true);
+              }
+              configAction.setGiftEnabled(config && config.enableGift ? true : false);
+            }
+          });
+        } else {
+          if (systemInfo.platform == 'ios') {
+            configAction.setPayEnabled(config && config.enablePay ? true : false);
+          } else {
+            configAction.setPayEnabled(true);
+          }
+          configAction.setGiftEnabled(config && config.enableGift ? true : false);
+        }
+      })
+    });
+  }
   initBulletin = () => {
     configAction.getBulletinConfig({
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
@@ -184,32 +214,6 @@ class Home extends Component<PageOwnProps, PageState> {
         this.setCurtain();
         this.setBulletin(this.bulletinIndex);
         this.startTimer_bulletin();
-        Taro.getSystemInfo().then(async (systemData) => {
-          if (systemData.platform == 'android') {
-            //android
-            configAction.setPayEnabled(true);
-          } else if (systemData.platform == 'ios') {
-            const list = data.map(item => item.content)
-            // } else {
-            const weihu = list && list.length > 0 && (list.includes("升级维护中") || list.includes("因政策调整，iOS支付暂不可用"));
-            if (weihu) {
-              const userNo = await getStorage('userNo');
-              if ((this.props.userInfo && this.props.userInfo.userNo) || userNo) {
-                new Request().get(api.API_USER_ABILITY, {userNo: userNo ? userNo : this.props.userInfo.userNo}).then((ability: any) => {
-                  if (ability && ability.enablePay) {
-                    configAction.setPayEnabled(true);
-                  } else {
-                    configAction.setPayEnabled(false);
-                  }
-                })
-              } else {
-                configAction.setPayEnabled(false);
-              }
-            } else {
-              configAction.setPayEnabled(true);
-            }
-          }
-        })
       }
     });
   }

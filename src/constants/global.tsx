@@ -146,3 +146,10 @@ export const BET_TYPE = {
   FREE: 0,
   CHARGE: 1,
 }
+export const LEVEL_COLOR = {
+  1: "#FF851B",
+  2: "#3D9970",
+  3: "#2D8CF0",
+  4: "#ff4136",
+  5: "#B10DC9",
+}

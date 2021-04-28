@@ -49,6 +49,9 @@ class App extends Component {
       'pages/betOrders/betOrders',
       'pages/deposit/deposit',
       'pages/media/media',
+      'pages/feedback/feedback',
+      'pages/feedbackDetail/feedbackDetail',
+      'pages/feedbackSuccess/feedbackSuccess',
     ],
     window: {
       backgroundTextStyle: 'light',

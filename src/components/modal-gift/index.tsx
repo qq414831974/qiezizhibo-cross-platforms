@@ -40,6 +40,7 @@ interface SignType {
 type PageStateProps = {
   isOpened: boolean,
   payEnabled: boolean;
+  giftEnabled: boolean;
   userInfo: any;
   deposit: number;
 }
@@ -369,6 +370,7 @@ const mapStateToProps = (state) => {
     deposit: state.deposit.depositInfo ? state.deposit.depositInfo.deposit : 0,
     userInfo: state.user.userInfo,
     payEnabled: state.config ? state.config.payEnabled : null,
+    giftEnabled: state.config ? state.config.giftEnabled : null,
   }
 }
 export default connect(mapStateToProps)(ModalGift)

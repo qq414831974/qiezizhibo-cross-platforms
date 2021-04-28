@@ -13,6 +13,7 @@ import Request from "../../utils/request";
 type PageStateProps = {
   userInfo: any;
   payEnabled: any;
+  giftEnabled: any;
 }
 
 type PageDispatchProps = {
@@ -154,7 +155,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
     this.setState({currentNum: value})
     return value;
   }
-  onGiftSendClick =  () => {
+  onGiftSendClick = () => {
     if (this.props.payEnabled != true) {
       Taro.showToast({
         'title': "由于相关规范，iOS功能暂不可用",
@@ -210,9 +211,9 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
   }
   onGiftConfrim = (orderId: any) => {
     this.setState({giftConfirmOpen: false})
-    setTimeout(()=>{
+    setTimeout(() => {
       this.props.onHandlePaySuccess(orderId);
-    },2000)
+    }, 2000)
   }
   refreshDiscount = (gift) => {
     if (gift.type == global.GIFT_TYPE.FREE) {
@@ -247,7 +248,8 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
   }
 
   render() {
-    const {gifts = [], loading = false, heatType = 0, hidden = false, giftWatchPrice = null, giftWatchEternalPrice = null, payEnabled} = this.props
+    const {loading = false, heatType = 0, hidden = false, giftWatchPrice = null, giftWatchEternalPrice = null, payEnabled, giftEnabled} = this.props
+    let {gifts = []}= this.props
     const {currentGift = null, currentNum = 0} = this.state
     const discountPrice = this.getGiftDiscountPriceByNum(currentGift, currentNum);
     const realPrice = this.getGiftRealPriceByNum(currentGift, currentNum);
@@ -256,7 +258,9 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
     const freeBet = this.getGiftGrowthByType(this.state.currentGift, global.GROWTH_TYPE.FREE_BET, currentNum)
     const onGiftClick = this.onGiftClick;
     const giftInfo = {price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp, freeBetTime: freeBet}
-
+    if (!giftEnabled) {
+      gifts = gifts.slice(0,1);
+    }
     return (
       <View className="qz-gifts">
         {loading || hidden ?
@@ -381,6 +385,7 @@ const mapStateToProps = (state) => {
   return {
     userInfo: state.user.userInfo,
     payEnabled: state.config ? state.config.payEnabled : null,
+    giftEnabled: state.config ? state.config.giftEnabled : null,
   }
 }
 export default connect(mapStateToProps)(GiftPanel)

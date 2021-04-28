@@ -1,0 +1,53 @@
+@import '../../app.scss';
+
+.qz-feedback-success {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+
+  &__title {
+    height: 15%;
+    width: 100%;
+    font-size: 38px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    color: $color-text-base;
+  }
+  &__text {
+    padding: 0 10vw;
+    text-align: center;
+  }
+
+  &-icon-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;
+  }
+
+  &-icon {
+    background: #07c160;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    min-width: 100px;
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  &-confirm {
+    width: 50%;
+    color: #07c160;
+    border: none;
+    background: $color-border-grey-light;
+    position: absolute;
+    bottom: 300px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

@@ -1,0 +1,69 @@
+@import '../../app.scss';
+
+.qz-feedback {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+
+  &__title {
+    height: 15%;
+    width: 100%;
+    font-size: 38px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    color: $color-text-base;
+  }
+
+  &__option {
+    &-hint {
+      padding: 0 10vw;
+
+      &__title {
+        padding: 15px 0;
+        font-size: $font-size-base;
+        color: $color-black-2;
+        border-bottom: 1px solid tint($color-border-grey, 70%);
+      }
+    }
+
+    &-cell {
+      width: 100%;
+      padding: 0 10vw;
+
+      &-container {
+        border-bottom: 1px solid tint($color-border-grey, 70%);
+        position: relative;
+        width: 80vw;
+        padding: 25px 0;
+      }
+
+      &__title {
+        color: $color-text-base;
+        font-size: 33px;
+
+      }
+
+      &__hint {
+        color: $color-black-2;
+        font-size: 26px;
+        margin-top: 15px;
+        padding-right: 30px;
+        line-height: $line-height-zh;
+      }
+
+      &__arrow {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+
+    &-cell:active {
+      background-color: tint($color-border-grey, 70%);
+    }
+  }
+}

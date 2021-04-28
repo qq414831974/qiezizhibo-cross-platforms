@@ -49,6 +49,12 @@
       color: $color-grey-1;
       white-space: nowrap;
     }
+    &-feedback {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+    }
   }
 }
 

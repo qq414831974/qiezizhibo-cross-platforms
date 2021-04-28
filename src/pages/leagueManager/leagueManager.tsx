@@ -42,6 +42,7 @@ type PageStateProps = {
   giftList: any;
   deposit: any;
   payEnabled: boolean;
+  giftEnabled: boolean;
 }
 
 type PageDispatchProps = {}
@@ -225,7 +226,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   componentDidMount() {
     const {payEnabled} = this.props;
     if (!payEnabled) {
-      this.initPayEnable();
+      this.initPayConfig();
     }
     this.getParamId() && this.getLeagueInfo(this.getParamId());
     this.getParamId() && this.getBetRanks(this.getParamId());
@@ -268,26 +269,36 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     }
     return id;
   }
-  initPayEnable = (userNo?) => {
+  initPayConfig = (userNo?) => {
     if (userNo == null && this.props.userInfo && this.props.userInfo.userNo) {
       userNo = this.props.userInfo.userNo;
     }
-    if (userNo == null) {
-      return;
-    }
-    Taro.getSystemInfo().then((systemData) => {
-      if (systemData.platform == 'android') {
-        configAction.setPayEnabled(true);
-      } else if (systemData.platform == 'ios') {
-        new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
-          if (ability && ability.enablePay) {
-            configAction.setPayEnabled(true);
+    Taro.getSystemInfo().then((systemInfo) => {
+      new Request().get(api.API_SYS_PAYMENT_CONFIG, null).then((config: any) => {
+        if (userNo) {
+          new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
+            if (ability && ability.enablePay) {
+              configAction.setPayEnabled(true);
+              configAction.setGiftEnabled(true);
+            } else {
+              if (systemInfo.platform == 'ios') {
+                configAction.setPayEnabled(config && config.enablePay ? true : false);
+              } else {
+                configAction.setPayEnabled(true);
+              }
+              configAction.setGiftEnabled(config && config.enableGift ? true : false);
+            }
+          });
+        } else {
+          if (systemInfo.platform == 'ios') {
+            configAction.setPayEnabled(config && config.enablePay ? true : false);
           } else {
-            configAction.setPayEnabled(false);
+            configAction.setPayEnabled(true);
           }
-        })
-      }
-    })
+          configAction.setGiftEnabled(config && config.enableGift ? true : false);
+        }
+      })
+    });
   }
   initHeatCompetition = (id) => {
     new Request().get(api.API_LEAUGE_HEAT, {leagueId: id}).then(async (data: any) => {
@@ -322,6 +333,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       }
     })
   }
+
   async getUserInfo(onSuccess?: Function | null) {
     if (await hasLogin()) {
       const openid = await getStorage('wechatOpenid');
@@ -388,9 +400,9 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             })
           }
         })
-        new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.getParamId()}).then((data: any) => {
-          this.setState({playerHeatTotal: data})
-        })
+        // new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.getParamId()}).then((data: any) => {
+        //   this.setState({playerHeatTotal: data})
+        // })
       }
     });
   }
@@ -446,9 +458,9 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             })
           }
         })
-        new Request().get(api.API_LEAGUE_TEAM_HEAT_TOTAL, {leagueId: this.getParamId()}).then((data: any) => {
-          this.setState({teamHeatTotal: data})
-        })
+        // new Request().get(api.API_LEAGUE_TEAM_HEAT_TOTAL, {leagueId: this.getParamId()}).then((data: any) => {
+        //   this.setState({teamHeatTotal: data})
+        // })
       }
     })
   }
@@ -562,7 +574,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       if (res.payload != null && phone == null) {
         this.setState({phoneOpen: true})
       }
-      this.initPayEnable(res.userNo);
+      this.initPayConfig(res.userNo);
     })
   }
 
@@ -872,6 +884,11 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   handleDepositConfirm = () => {
     this.state.payCallback && this.state.payCallback(global.PAY_TYPE.DEPOSIT)
   }
+  handleFeedbackClick = () => {
+    Taro.navigateTo({
+      url: "/pages/feedback/feedback",
+    })
+  }
 
   render() {
     const {leaguePlayers, leagueTeams} = this.props
@@ -921,7 +938,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
                 leagueId={this.getParamId()}
                 heatType={this.state.heatType}
                 onPlayerHeatRefresh={this.onPlayerHeatRefresh}
-                totalHeat={this.state.playerHeatTotal}
+                // totalHeat={this.state.playerHeatTotal}
                 topPlayerHeats={this.state.topPlayerHeats}
                 startTime={this.state.heatStartTime}
                 endTime={this.state.heatEndTime}
@@ -941,7 +958,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
                 leagueId={this.getParamId()}
                 heatType={this.state.heatType}
                 onTeamHeatRefresh={this.onTeamHeatRefresh}
-                totalHeat={this.state.teamHeatTotal}
+                // totalHeat={this.state.teamHeatTotal}
                 topTeamHeats={this.state.topTeamHeats}
                 startTime={this.state.heatStartTime}
                 endTime={this.state.heatEndTime}
@@ -1085,6 +1102,7 @@ const mapStateToProps = (state) => {
     shareSentence: state.config ? state.config.shareSentence : [],
     giftList: state.pay ? state.pay.gifts : [],
     payEnabled: state.config ? state.config.payEnabled : null,
+    giftEnabled: state.config ? state.config.giftEnabled : null,
   }
 }
 export default connect(mapStateToProps)(LeagueManager)

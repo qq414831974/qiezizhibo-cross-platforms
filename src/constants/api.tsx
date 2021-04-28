@@ -27,6 +27,8 @@ export const API_GET_SHARE_MOMENT_PICTURE = `${system_service}/wx/ma/picture/mom
 export const API_GET_SHARE_SENTENCE = `${system_service}/sys/share/sentence`;
 export const API_GET_SHARE_PICTURE = `${system_service}/wx/ma/picture/share`;
 export const API_GET_HEAT_COMPETITION_SHARE = `${system_service}/wx/ma/picture/heat`;
+export const API_SYS_PAYMENT_CONFIG = `${system_service}/sys/config/payment`;
+export const API_SYS_FEEDBACK = `${system_service}/sys/feedback`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth`;
@@ -36,6 +38,7 @@ export const API_USER = `${user_service}/user`;
 export const API_REFRESH_TOKEN = `${auth_service}/auth/refresh_token`;
 export const API_USER_ABILITY = `${user_service}/user/ability`;
 export const API_USER_ADDRESS = `${user_service}/user/address`;
+export const API_USER_EXP = `${user_service}/user/exp`;
 
 //league
 export const API_LEAGUE = (id) => `${football_service}/league/${id}`;

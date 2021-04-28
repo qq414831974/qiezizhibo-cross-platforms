@@ -126,9 +126,10 @@
 
 .qz-league-manager-fab-betrank {
   position: fixed;
-  bottom: 20%;
-  right: 16px;
+  bottom: 35%;
+  left: 16px;
 }
+
 .qz-league-manager-fab-close {
   position: absolute;
   top: -5px;
@@ -136,6 +137,7 @@
   height: 30px;
   width: 30px;
 }
+
 .qz-league-manager-fab {
   background: $color-bg-transparent;
 
@@ -164,11 +166,23 @@
     border-radius: 5px;
   }
 }
+
+.qz-league-manager-fab-round {
+  .at-fab {
+    border-radius: 50%;
+  }
+
+  .qz-league-manager-fab-image {
+    border-radius: 50%;
+  }
+}
+
 .qz-gift-float {
-  .layout-header__title{
+  .layout-header__title {
     font-size: $font-size-sm;
     white-space: pre;
   }
+
   .at-float-layout__container {
     height: 590px;
     min-height: 590px;
@@ -188,6 +202,7 @@
     max-height: 506px;
   }
 }
+
 @keyframes zoom {
   0% {
     transform: scale(1);
