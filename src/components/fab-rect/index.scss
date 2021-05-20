@@ -1,0 +1,59 @@
+@import '../../app.scss';
+
+.qz-fab-rect {
+  position: fixed;
+  top: 30%;
+  right: 0;
+  z-index: $zindex-modal;
+  background: $color-white;
+  box-shadow: 0 0 10px #000;
+  padding: 0 10px 0 10px;
+  transition: 0.6s;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(50%);
+}
+
+.qz-fab-rect-single-line {
+  height: 66px;
+  border-radius: 33px 0 0 33px;
+
+  image {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  text {
+    display: inline-block;
+    vertical-align: middle;
+    margin: auto 0 auto 10px;
+    color: $color-text-base;
+    font-size: $font-size-sm;
+    //text-shadow: 1px 1px 1px $color-grey-0;
+  }
+
+  &:before {
+    content: '';
+    height: 100%;
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+.qz-fab-rect-multi-line {
+  border-radius: 42px 0 0 42px;
+  //height: 80px;
+}
+
+.qz-fab-rect:active {
+  transform: translateX(0%) scale(1.1);
+}
+
+.qz-fab-rect-active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0%);
+}

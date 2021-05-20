@@ -61,6 +61,7 @@
     height: $font-size-base;
     animation: zoom ease-in-out 1s infinite;
   }
+
   &-text {
     animation: zoom ease-in-out 1s infinite;
   }
@@ -92,6 +93,33 @@
     margin-left: $spacing-v-xs;
   }
 }
+
+.qz-pay-modal-leauge-member {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  border-radius: 33px 0 0 33px;
+  z-index: $zindex-flot-layout;
+  background: $color-white;
+  box-shadow: 0 0 10px #000;
+  height: 66px;
+  padding: 0 10px 0 10px;
+  image{
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  text{
+    display: inline-block;
+    vertical-align: middle;
+    margin: auto 0 auto 10px;
+    color: $color-white;
+    font-size: $font-size-sm;
+  }
+}
+
 @keyframes zoom {
   0% {
     transform: scale(1);

@@ -52,12 +52,13 @@ class App extends Component {
       'pages/feedback/feedback',
       'pages/feedbackDetail/feedbackDetail',
       'pages/feedbackSuccess/feedbackSuccess',
+      'pages/memberOrder/memberOrder',
     ],
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
       navigationBarTitleText: '茄子TV',
-      navigationBarTextStyle: 'black'
+      navigationBarTextStyle: 'black',
     },
     tabBar: {
       color: "#666",

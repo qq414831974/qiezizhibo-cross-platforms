@@ -29,6 +29,7 @@ export const API_GET_SHARE_PICTURE = `${system_service}/wx/ma/picture/share`;
 export const API_GET_HEAT_COMPETITION_SHARE = `${system_service}/wx/ma/picture/heat`;
 export const API_SYS_PAYMENT_CONFIG = `${system_service}/sys/config/payment`;
 export const API_SYS_FEEDBACK = `${system_service}/sys/feedback`;
+export const API_SYS_EXP = `${system_service}/sys/exp`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth`;
@@ -122,6 +123,10 @@ export const API_MATCH_USER_BET = `${football_service}/bet`;
 export const API_MATCH_USER_BET_CASH = `${football_service}/bet/cash`;
 export const API_BET_RANK = `${football_service}/bet/rank`;
 export const API_BET_FREE = `${football_service}/bet/free`;
+
+//league member
+export const API_LEAGUE_MEMBER = `${football_service}/charge/member/league`;
+export const API_USER_LEAGUE_MEMBER = `${football_service}/charge/member/user`;
 
 //subscribe
 export const API_SUBSCRIBE = `${system_service}/subscribe`;

@@ -3,7 +3,8 @@ import {View, Image, Button} from '@tarojs/components'
 import {AtModal, AtModalContent, AtModalAction} from "taro-ui"
 import './index.scss'
 import NoUser from '../../assets/no-user.png'
-import {getYuan} from "../../utils/utils";
+import {getExpInfoByExpValue, getYuan} from "../../utils/utils";
+import * as global from "../../constants/global";
 
 
 type PageStateProps = {}
@@ -16,6 +17,7 @@ type PageOwnProps = {
   betRanks: any,
   loading: any,
   isOpened: boolean,
+  expInfo: any,
 }
 
 type PageState = {}
@@ -69,6 +71,12 @@ class BetRank extends Component<PageOwnProps, PageState> {
                           </View>
                           <View className='qz-betrank-list__item-avatar'>
                             <Image mode='scaleToFill' src={item.user && item.user.avatar ? item.user.avatar : NoUser}/>
+                            {item.user.userExp?
+                              <View className='qz-betrank-list__item-level'
+                                    style={{backgroundColor: global.LEVEL_COLOR[Math.floor(getExpInfoByExpValue(this.props.expInfo, item.user.userExp.exp).level / 10)]}}>
+                                Lv.{getExpInfoByExpValue(this.props.expInfo, item.user.userExp.exp).level}
+                              </View>
+                              : null}
                           </View>
                           <View className='qz-betrank-list__item-content item-content'>
                             <View className='item-content__info'>

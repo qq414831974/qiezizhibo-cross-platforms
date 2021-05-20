@@ -157,17 +157,17 @@ class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
       </View>
     }
     return (
-      <View className='qz-league-manager-matches__result'>
+      <View className='qz-league-manager-matches__result' style={this.props.tabContainerStyle}>
         <AtTabs
           scroll
           swipeable
           current={this.state.currentTab}
           tabList={tabList}
-          className="qz-bottom-tabs qz-bottom-tabs__league-manager"
+          className="qz-bottom-tabs"
           onClick={this.switchTab}>
           {tabList.map((item: any) => {
             return <AtTabsPane current={this.state.currentTab} index={item.index} key={`pane-${item.index}`}>
-              <ScrollView scrollY onScrollToLower={this.onReachBottom}>
+              <ScrollView scrollY style={this.props.tabScrollStyle} onScrollToLower={this.onReachBottom}>
                 <MatchList
                   showRound={item.title === "决赛"}
                   loading={this.state.matchLoading}

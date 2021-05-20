@@ -8,6 +8,7 @@ import MatchList from "./components/match-list";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import {getStorage} from "../../utils/utils";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {}
 
@@ -29,6 +30,7 @@ interface Orders {
 }
 
 class Orders extends Component<PageOwnProps, PageState> {
+  navRef = null;
 
   /**
    * 指定config的类型声明为: Taro.Config
@@ -41,6 +43,7 @@ class Orders extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '已购比赛',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
 
   componentWillMount() {
@@ -108,6 +111,13 @@ class Orders extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-orders-content'>
+        <NavBar
+          title='已购比赛'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         {orderList && orderList.length > 0 ? (
           <MatchList
             matchList={orderList}/>

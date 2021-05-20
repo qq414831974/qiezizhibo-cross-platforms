@@ -7,6 +7,7 @@ import './address.scss'
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import {toLogin} from "../../utils/utils";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   userInfo: any;
@@ -29,7 +30,7 @@ interface Address {
 }
 
 class Address extends Component<PageOwnProps | any, PageState> {
-
+  navRef = null;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -41,6 +42,7 @@ class Address extends Component<PageOwnProps | any, PageState> {
     navigationBarTitleText: '我的地址',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
 
   componentWillMount() {
@@ -110,6 +112,13 @@ class Address extends Component<PageOwnProps | any, PageState> {
     }
     return (
       <View className='qz-address-content'>
+        <NavBar
+          title='我的地址'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         {address != null ? <View className='qz-address-address' onClick={this.onAddressAddClick}>
           <AtList>
             <AtListItem

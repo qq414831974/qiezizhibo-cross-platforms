@@ -209,12 +209,12 @@ class ModalGift extends Component<PageOwnProps | any, PageState> {
             package: unifiedResult.packageValue,
             signType: unifiedResult.signType,
             paySign: unifiedResult.paySign,
-            success: function (res) {
+            success: (res) => {
               if (res.errMsg == "requestPayment:ok") {
                 handleConfirm(unifiedResult.orderId);
               }
             },
-            fail: function (res) {
+            fail: (res) => {
               if (res.errMsg == "requestPayment:fail cancel") {
                 handleError(error.ERROR_PAY_CANCEL);
               } else {

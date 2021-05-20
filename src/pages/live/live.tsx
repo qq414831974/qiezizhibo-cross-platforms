@@ -17,7 +17,7 @@ import payAction from "../../actions/pay";
 import depositAction from "../../actions/deposit";
 import {
   clearLoginToken,
-  formatTimeSecond,
+  formatTimeSecond, getExpInfoByExpValue,
   getStorage,
   getTimeDifference,
   hasLogin,
@@ -37,6 +37,7 @@ import {
   TABS_TYPE,
   SUBSCRIBE_TEMPLATES,
   PAY_TYPE,
+  CacheManager, default as global
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import star from '../../assets/live/star.png'
@@ -76,6 +77,10 @@ import {
 } from '../../utils/assets';
 import MatchClip from "./components/match-clip";
 import configAction from "../../actions/config";
+import LevelUpModal from "../../components/modal-level-up";
+import NavBar from "../../components/nav-bar";
+import LeagueMember from "../../components/league-member";
+import RectFab from "../../components/fab-rect";
 
 type Bulletin = {
   id: number,
@@ -105,6 +110,7 @@ type PageStateProps = {
   shareSentence: any;
   giftList: any;
   deposit: number;
+  expInfo: any;
 }
 
 type PageDispatchProps = {}
@@ -190,6 +196,10 @@ type PageState = {
   currentPrice: number;
   matchClips: any;
   adAvailable: boolean;
+  levelUpShow: boolean;
+  currentLevel: number;
+  leagueMemberRule: any;
+  leagueMemberOpen: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -226,6 +236,7 @@ class Live extends Component<PageOwnProps, PageState> {
    * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
+  navRef = null;
   socketTask: Taro.SocketTask | null
   videoContext: Taro.VideoContext | null
   animElemIds: any = {};
@@ -241,6 +252,7 @@ class Live extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
 
   constructor(props) {
@@ -325,6 +337,10 @@ class Live extends Component<PageOwnProps, PageState> {
       currentPrice: 0,
       matchClips: null,
       adAvailable: false,
+      levelUpShow: false,
+      currentLevel: 0,
+      leagueMemberRule: null,
+      leagueMemberOpen: false,
     }
   }
 
@@ -399,6 +415,7 @@ class Live extends Component<PageOwnProps, PageState> {
       if (data.activityId) {
         if (data.leagueId) {
           this.setState({leagueId: data.leagueId});
+          this.initLeagueMember(data.leagueId);
         }
         if (data.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
@@ -497,6 +514,15 @@ class Live extends Component<PageOwnProps, PageState> {
         this.startTimer_Gift();
       }
     })
+  }
+  initLeagueMember = (leagueId) => {
+    new Request().get(api.API_LEAGUE_MEMBER, {
+      leagueId: leagueId,
+    }).then((data: any) => {
+      if (data.available) {
+        this.setState({leagueMemberRule: data})
+      }
+    });
   }
   getParamId = () => {
     let id;
@@ -830,7 +856,11 @@ class Live extends Component<PageOwnProps, PageState> {
   getLiveInfo = (id, callback?) => {
     this.setState({liveLoading: true})
     // liveAction.livePing(id).then((res) => {
-    new Request().get(api.API_ACTIVITY_PING, {activityId: id}, false).then((res: any) => {
+    let url = api.API_ACTIVITY_PING;
+    if (CacheManager.getInstance().CACHE_ENABLED) {
+      url = api.API_CACHED_LIVE_MANUAL(id);
+    }
+    new Request().get(url, {activityId: id}, false).then((res: any) => {
       if (res.isPushing) {
         this.setState({ping: res, liveLoaded: true, liveLoading: false}, () => {
           callback && callback()
@@ -1546,13 +1576,27 @@ class Live extends Component<PageOwnProps, PageState> {
           this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
           this.state.leagueTeamHeatRefreshFunc && this.state.leagueTeamHeatRefreshFunc();
           this.getUserChargeInfo(this.props.match, false);
+        } else if (type != null && type == ORDER_TYPE.leagueMember) {
+          this.setState({needPay: false})
+          this.getUserChargeInfo(this.props.match, false);
+          this.getParamId() && this.getMatchStatus(this.getParamId());
         } else {
           this.setState({needPay: false})
           this.getUserChargeInfo(this.props.match, false);
           this.getParamId() && this.getMatchStatus(this.getParamId());
         }
+        // this.isUserLevelUp();
       }
     });
+  }
+  isUserLevelUp = () => {
+    const level = getExpInfoByExpValue(this.props.expInfo, this.props.userInfo.userExp.exp).level
+    this.getUserInfo((userInfo) => {
+      const currentLevel = getExpInfoByExpValue(this.props.expInfo, userInfo.payload.userExp.exp).level
+      if (currentLevel >= (Math.ceil(level / 10)) * 10) {
+        this.setState({levelUpShow: true, currentLevel: currentLevel})
+      }
+    })
   }
   getCharge = (data, monopolyOnly): MatchCharge => {
     if (data.status == FootballEventType.FINISH) {
@@ -2132,6 +2176,43 @@ class Live extends Component<PageOwnProps, PageState> {
       url: "/pages/feedback/feedback",
     })
   }
+  onLevelUpConfirm = () => {
+    this.setState({levelUpShow: false})
+  }
+  onLeagueMemberShow = () => {
+    this.setState({leagueMemberOpen: true, payOpen: false})
+  }
+  onLeagueMemberClose = () => {
+    this.setState({leagueMemberOpen: false})
+  }
+  onLeagueMemberPaySuccess = (orderId) => {
+    this.setState({leagueMemberOpen: false})
+    if (orderId) {
+      this.getOrderStatus(orderId, ORDER_TYPE.leagueMember);
+    }
+    Taro.showToast({
+      title: "开通成功",
+      icon: 'none',
+    });
+  }
+  onLeagueMemberPayError = (reason) => {
+    switch (reason) {
+      case error.ERROR_PAY_CANCEL: {
+        Taro.showToast({
+          title: "支付失败,用户取消支付",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_PAY_ERROR: {
+        Taro.showToast({
+          title: "支付失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
@@ -2145,6 +2226,13 @@ class Live extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-live-content'>
+        <NavBar
+          title='茄子TV'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <View className='qz-live-match__content'>
           {this.state.needPay ?
             <View className='qz-live-match__video'>
@@ -2259,7 +2347,8 @@ class Live extends Component<PageOwnProps, PageState> {
                   </View>
                 }
               </Video>)}
-          <View className='qz-live-tabs'>
+          <View className='qz-live-tabs'
+                style={{top: `calc(9 / 16 * 100vw + ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px)`}}>
             <AtTabs current={this.state.currentTab}
                     className="qz-live__top-tabs__content"
                     tabList={tabList}
@@ -2267,6 +2356,8 @@ class Live extends Component<PageOwnProps, PageState> {
               {this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
                   <HeatPlayer
+                    tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                    tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 85px - 42px)`}}
                     matchId={this.getParamId()}
                     leagueId={this.state.leagueId}
                     heatType={this.state.heatType}
@@ -2288,6 +2379,8 @@ class Live extends Component<PageOwnProps, PageState> {
               {this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatLeagueTeam]}>
                   <HeatLeagueTeam
+                    tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                    tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 85px - 42px)`}}
                     matchId={this.getParamId()}
                     leagueId={this.state.leagueId}
                     heatType={this.state.heatType}
@@ -2307,9 +2400,15 @@ class Live extends Component<PageOwnProps, PageState> {
                 </AtTabsPane>
                 : null}
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.matchUp]}>
-                <ScrollView className="qz-live-match-up__scroll-content">
+                <ScrollView
+                  className="qz-live-match-up__scroll-content"
+                  style={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                >
                   {this.state.currentTab != tabs[TABS_TYPE.matchUp] ? <View/> : (
-                    <View className="qz-live-match-up__content">
+                    <View
+                      className="qz-live-match-up__content"
+                      style={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                    >
                       <MatchUp className="qz-live-match-up__match-up" matchInfo={match}
                                matchStatus={matchStatus}
                                onlytime={this.isThisYear(new Date(match.startTime))}
@@ -2368,6 +2467,10 @@ class Live extends Component<PageOwnProps, PageState> {
                         ) : null}
                       {match.type && match.type.indexOf(MATCH_TYPE.chattingRoom) != -1 &&
                       <ChattingRoom
+                        tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px)`}}
+                        tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 40px)`}}
+                        tabContainerStyleIphoneX={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 34px)`}}
+                        tabScrollStyleIphoneX={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 40px - 34px)`}}
                         isIphoneX={this.state.isIphoneX}
                         matchInfo={this.props.match}
                         userInfo={this.props.userInfo}
@@ -2376,6 +2479,7 @@ class Live extends Component<PageOwnProps, PageState> {
                         intoView={this.state.commentIntoView}
                         sendMessage={this.sendMessage}
                         comments={this.state.comments}
+                        expInfo={this.props.expInfo}
                       />}
                     </View>
                   )}
@@ -2391,7 +2495,11 @@ class Live extends Component<PageOwnProps, PageState> {
               </AtTabsPane>}
               {match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1 &&
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.statistics]}>
-                <ScrollView scrollY className="qz-live-statistics">
+                <ScrollView
+                  scrollY
+                  className="qz-live-statistics"
+                  style={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                >
                   {this.state.currentTab != tabs[TABS_TYPE.statistics] ? <View/>
                     :
                     (
@@ -2409,11 +2517,14 @@ class Live extends Component<PageOwnProps, PageState> {
               </AtTabsPane>}
               {match.type && match.type.indexOf(MATCH_TYPE.lineUp) != -1 &&
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.lineUp]}>
-                <LineUp players={this.props.playerList}
-                        matchInfo={this.props.match}
-                        switchTab={this.switchTeamPlayer}
-                        loading={this.state.playerLoading}
-                        hidden={this.state.currentTab != tabs[TABS_TYPE.lineUp]}/>
+                <LineUp
+                  tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                  tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 5vw - 28px)`}}
+                  players={this.props.playerList}
+                  matchInfo={this.props.match}
+                  switchTab={this.switchTeamPlayer}
+                  loading={this.state.playerLoading}
+                  hidden={this.state.currentTab != tabs[TABS_TYPE.lineUp]}/>
               </AtTabsPane>}
             </AtTabs>
           </View>
@@ -2442,7 +2553,9 @@ class Live extends Component<PageOwnProps, PageState> {
           handleToGiftSend={this.switchToGiftSend}
           payEnabled={payEnabled}
           onPayConfirm={this.onPayConfirm}
-          onPayClose={this.onPayConfirmClose}/>
+          onPayClose={this.onPayConfirmClose}
+          leagueMemberRule={this.state.leagueMemberRule}
+          onLeagueMemberShow={this.onLeagueMemberShow}/>
         <HeatReward
           heatRule={this.state.heatRule}
           loading={this.state.heatRule == null}
@@ -2452,7 +2565,8 @@ class Live extends Component<PageOwnProps, PageState> {
           giftRanks={this.state.giftRanks}
           loading={this.state.giftRanksLoading}
           isOpened={this.state.giftRanksOpen}
-          handleCancel={this.hideGfitRank}/>
+          handleCancel={this.hideGfitRank}
+          expInfo={this.props.expInfo}/>
         <AtCurtain
           isOpened={this.state.curtainShow}
           onClose={this.onCurtainClose}
@@ -2506,6 +2620,11 @@ class Live extends Component<PageOwnProps, PageState> {
           onCancel={this.onPayConfirmClose}
           onWechatPay={this.handleWechatConfirm}
           onDepositPay={this.handleDepositConfirm}/>
+        <LevelUpModal
+          level={this.state.currentLevel}
+          isOpened={this.state.levelUpShow}
+          handleConfirm={this.onLevelUpConfirm}
+        />
         {this.state.giftSendQueue && this.state.giftSendQueue.map((data: any) => (
           <GiftNotify
             active={data.active}
@@ -2541,6 +2660,28 @@ class Live extends Component<PageOwnProps, PageState> {
           </View>
           : null
         }
+        {this.state.payOpen && this.state.leagueMemberRule && this.state.leagueMemberRule.available ?
+          <RectFab
+            className="qz-fab-rect-single-line"
+            onClick={this.onLeagueMemberShow}
+            background="linear-gradient(90deg,#f8e2c4,#f3bb6c);"
+            top="30%"
+          >
+            <Image src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/crown.png"/>
+            <Text style={{color: "#754e19"}}>联赛会员，比赛随心看</Text>
+          </RectFab>
+          : null}
+        {this.state.leagueId ?
+          <LeagueMember
+            league={this.props.match.league}
+            isOpened={this.state.leagueMemberOpen}
+            leagueMemberRule={this.state.leagueMemberRule}
+            onClose={this.onLeagueMemberClose}
+            onHandlePaySuccess={this.onLeagueMemberPaySuccess}
+            onHandlePayError={this.onLeagueMemberPayError}
+            onPayConfirm={this.onPayConfirm}
+            onPayClose={this.onPayConfirmClose}
+          /> : null}
       </View>
     )
   }
@@ -2560,6 +2701,7 @@ const mapStateToProps = (state) => {
     giftEnabled: state.config ? state.config.giftEnabled : null,
     shareSentence: state.config ? state.config.shareSentence : [],
     giftList: state.pay ? state.pay.gifts : [],
+    expInfo: state.config ? state.config.expInfo : [],
   }
 }
 export default connect(mapStateToProps)(Live)

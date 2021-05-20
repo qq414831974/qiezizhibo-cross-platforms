@@ -56,11 +56,11 @@ export default class Request {
     return request({url, payload, showLoading, autoLogin})
   }
 
-  post(url: string, payload: Object, showLoading?: boolean, autoLogin?: boolean) {
+  post(url: string, payload: any, showLoading?: boolean, autoLogin?: boolean) {
     return request({url, payload, method: 'POST', showLoading, autoLogin})
   }
 
-  put(url: string, payload: Object, showLoading?: boolean, autoLogin?: boolean) {
+  put(url: string, payload: any, showLoading?: boolean, autoLogin?: boolean) {
     return request({url, payload, method: 'PUT', showLoading, autoLogin})
   }
 

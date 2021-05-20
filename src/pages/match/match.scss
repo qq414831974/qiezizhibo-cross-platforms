@@ -12,8 +12,8 @@
   &-search {
     width: 100%;
     position: fixed;
-    height: 85px;
-    top: 0;
+    //height: 85px;
+    //top: 0;
     z-index: $zindex-drawer;
     background-color: $color-bg-blue-main;
 
@@ -33,7 +33,7 @@
 
 .qz-match-tabs {
   width: 100%;
-  padding-top: 185px
+  padding-top: 85px
 }
 
 .qz-match__top-tabs__content {
@@ -43,7 +43,10 @@
 .qz-match__top-tabs__content--fixed {
   .at-tabs__header {
     position: fixed;
-    top: 85px;
+    //top: 85px;
     z-index: $zindex-drawer;
+  }
+  .at-tabs__body{
+    padding-top: 85px;
   }
 }

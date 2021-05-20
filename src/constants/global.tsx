@@ -80,6 +80,7 @@ export const ORDER_TYPE = {
   "gift": 4,
   "bet": 5,
   "deposit": 6,
+  "leagueMember": 7,
 }
 export const ORDER_STAUTS = {
   "notpaid": 0,
@@ -160,9 +161,9 @@ export class CacheManager {
 }
 
 export const LEVEL_COLOR = {
-  1: "#FF851B",
-  2: "#3D9970",
-  3: "#2D8CF0",
-  4: "#ff4136",
-  5: "#B10DC9",
+  0: "#FF851B",
+  1: "#3D9970",
+  2: "#2D8CF0",
+  3: "#ff4136",
+  4: "#B10DC9",
 }

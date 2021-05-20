@@ -8,7 +8,7 @@ import configAction from "../../actions/config";
 
 import './user.scss'
 
-import {hasLogin, getStorage, clearLoginToken} from "../../utils/utils";
+import {hasLogin, getStorage, clearLoginToken, getExpInfoByExpValue} from "../../utils/utils";
 import account_bg from '../../assets/user/account_bg.png'
 import logo from '../../assets/default-logo.png'
 import withShare from "../../utils/withShare";
@@ -20,6 +20,7 @@ import * as error from "../../constants/error";
 import ModalLocation from "../../components/modal-location";
 import LocationSelecter from "./components/location-selecter";
 import areaAction from "../../actions/area";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   userInfo: {
@@ -31,6 +32,7 @@ type PageStateProps = {
   },
   locationConfig: any,
   payEnabled: boolean,
+  expInfo: any,
 }
 
 type PageDispatchProps = {}
@@ -60,6 +62,7 @@ interface User {
 class User extends Component<PageOwnProps, PageState> {
 
   qqmapsdk: qqmapjs;
+  navRef = null;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -71,6 +74,7 @@ class User extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
     enablePullDownRefresh: true
   }
 
@@ -402,51 +406,73 @@ class User extends Component<PageOwnProps, PageState> {
     }
     Taro.navigateTo({url: `../deposit/deposit`});
   }
+  onLeagueMemberClick = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      this.setState({loginOpen: true})
+      return;
+    }
+    Taro.navigateTo({url: `../memberOrder/memberOrder`});
+  }
   getUserExpProgress = (userExp) => {
+    const {expInfo} = this.props
+    const userExpInfo = getExpInfoByExpValue(expInfo, userExp.exp)
     const userExpValue = userExp.exp;
-    const expMin = userExp.expInfo.minExp;
-    const expMax = userExp.expInfo.maxExp;
+    const expMin = userExpInfo.minExp;
+    const expMax = userExpInfo.maxExp;
     const expRange = expMax - expMin;
     const userExpOffset = userExpValue - expMin;
     return userExpOffset * 100 / expRange;
   }
 
   render() {
-    const {userInfo, locationConfig, payEnabled} = this.props
+    const {userInfo, locationConfig, payEnabled, expInfo} = this.props
     const {avatar = logo, name = null, userExp = {}} = userInfo;
+    const userExpInfo = getExpInfoByExpValue(expInfo, userExp.exp);
+
     return (
       <View className='qz-user-content'>
-        <Image className='qz-user-account-bg' src={account_bg}/>
+        <NavBar
+          title=''
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
+        <Image className='qz-user-account-bg'
+               style={{top: `${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px`}}
+               src={account_bg}/>
         <View className='qz-user-user-info' onClick={this.login}>
-          <Image className='avatar' src={avatar}/>
-          {/*{userExp && userExp.expInfo ?*/}
-          {/*  <View className='level'*/}
-          {/*        style={{backgroundColor: global.LEVEL_COLOR[Math.floor(userExp.expInfo.level / 10)]}}>*/}
-          {/*    Lv.{userExp.expInfo.level}*/}
-          {/*  </View>*/}
-          {/*  : null}*/}
+          <View className='qz-user-user-info-avatar-container'>
+            <Image className='qz-user-user-info-avatar' src={avatar}/>
+            {userExp && userExpInfo ?
+              <View className='qz-user-user-info-level'
+                    style={{backgroundColor: global.LEVEL_COLOR[Math.floor(userExpInfo.level / 10)]}}>
+                Lv.{userExpInfo.level}
+              </View>
+              : null}
+          </View>
           {
             name && name.length > 0 ?
-              <Text className='username'>{name}</Text>
+              <Text className='qz-user-user-info-username'>{name}</Text>
               :
-              <Text className='username'>点击登录</Text>
+              <Text className='qz-user-user-info-username'>点击登录</Text>
           }
         </View>
-        {/*<View className='qz_user-info-exp'>*/}
-        {/*  {userExp && userExp.expInfo ? <View className='exp-bar-controller'>*/}
-        {/*      /!*<View className='exp-level exp-level-pre'>*!/*/}
-        {/*      /!*  Lv.{userExp.expInfo.level}*!/*/}
-        {/*      /!*</View>*!/*/}
-        {/*      <View className='exp-bar'>*/}
-        {/*        <View className='bar' style={{width: this.getUserExpProgress(userExp) + "%"}}>*/}
-        {/*        </View>*/}
-        {/*      </View>*/}
-        {/*      /!*<View className='exp-level exp-level-next'>*!/*/}
-        {/*      /!*  Lv.{userExp.expInfo.level + 1}*!/*/}
-        {/*      /!*</View>*!/*/}
-        {/*    </View>*/}
-        {/*    : null}*/}
-        {/*</View>*/}
+        <View className='qz_user-info-exp'>
+          {userExp && userExpInfo ? <View className='exp-bar-controller'>
+              {/*<View className='exp-level exp-level-pre'>*/}
+              {/*  Lv.{userExp.expInfo.level}*/}
+              {/*</View>*/}
+              <View className='exp-bar'>
+                <View className='bar' style={{width: this.getUserExpProgress(userExp) + "%"}}>
+                </View>
+              </View>
+              {/*<View className='exp-level exp-level-next'>*/}
+              {/*  Lv.{userExp.expInfo.level + 1}*/}
+              {/*</View>*/}
+            </View>
+            : null}
+        </View>
         <View className='qz-user-info-view'>
           {/*<View className='bio'>111</View>*/}
           <View className='item_view'>
@@ -485,6 +511,13 @@ class User extends Component<PageOwnProps, PageState> {
               <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
             </Button>
             : null}
+          <Button onClick={this.onLeagueMemberClick} className='list button-list'>
+            <View className='list_title'>
+              <AtIcon className='list-title-icon' value='sketch' size='18' color='#333'/>
+              我的联赛会员
+            </View>
+            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
+          </Button>
         </View>
         <View className='qz-user-list-view'>
           <Button onClick={this.onAddressClick} className='list button-list'>
@@ -558,6 +591,7 @@ class User extends Component<PageOwnProps, PageState> {
 const mapStateToProps = (state) => {
   return {
     userInfo: state.user.userInfo,
+    expInfo: state.config ? state.config.expInfo : null,
     locationConfig: state.config ? state.config.locationConfig : null,
     payEnabled: state.config ? state.config.payEnabled : null,
   }

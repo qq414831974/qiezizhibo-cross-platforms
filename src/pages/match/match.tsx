@@ -9,6 +9,7 @@ import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
 import * as api from "../../constants/api";
 import Request from '../../utils/request'
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   locationConfig: { city: string, province: string }
@@ -32,6 +33,7 @@ type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 @withShare({})
 class Match extends Component<PageOwnProps, PageState> {
 
+  navRef = null;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -43,6 +45,7 @@ class Match extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
     enablePullDownRefresh: true
   }
 
@@ -57,6 +60,7 @@ class Match extends Component<PageOwnProps, PageState> {
       matchList: {},
     }
   }
+
   $setSharePath = () => `/pages/home/home?page=match`
 
   componentWillMount() {
@@ -202,15 +206,21 @@ class Match extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-match-scroll-content'>
+        <NavBar
+          title='茄子TV'
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
+        <View className='qz-match-content-search' onClick={this.onSearchClick}>
+          <AtSearchBar
+            value={this.state.searchText}
+            onChange={this.onSearchChange}
+            disabled
+            className='qz-match-content-search-bar'
+          />
+        </View>
         <View className='qz-match-content'>
-          <View className='qz-match-content-search' onClick={this.onSearchClick}>
-            <AtSearchBar
-              value={this.state.searchText}
-              onChange={this.onSearchChange}
-              disabled
-              className='qz-match-content-search-bar'
-            />
-          </View>
           <View className='qz-match-tabs'>
             <AtTabs current={this.state.currentTab}
                     className="qz-match__top-tabs__content qz-custom-tabs qz-match__top-tabs__content--fixed"

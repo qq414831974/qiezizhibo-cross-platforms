@@ -2,7 +2,7 @@
 
 .qz-chatting-room {
   position: relative;
-  height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px); //减去tab的高度
+  //height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px); //减去tab的高度
   background-color: $color-bg-grey;
 
   &__loading {
@@ -16,11 +16,11 @@
   &__chat-content {
     position: absolute;
     top: 0;
-    height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 110px); //减去tab的高度
+    //height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 110px); //减去tab的高度
     width: 100vw;
 
     &__container {
-      min-height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 110px); //减去tab的高度
+      //min-height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 110px); //减去tab的高度
       width: 94vw;
       padding: 3vw;
     }
@@ -95,7 +95,24 @@
       width: 100px;
       display: flex;
       justify-content: center;
+      position: relative;
 
+      .level {
+        display: block;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        margin: 0;
+        padding: 4px 4px 3px 4px;
+        border: 1px solid #fff;
+        box-sizing: border-box;
+        color: #fff;
+        background-color: #000;
+        font-size: $font-size-xxs;
+        line-height: $line-height-base;
+        font-weight: normal;
+        transform: translateY(-100%);
+      }
       image {
         width: 60px;
         height: 60px;
@@ -184,7 +201,7 @@
 }
 
 .qz-chatting-room-iphoneX {
-  height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 34px); //减去tab的高度
+  //height: calc(100vh - (9 / 16 * 100vw) - 48px - 1.45 * 28px - 208px - 88px - 48px - 34px); //减去tab的高度
 }
 
 .none {

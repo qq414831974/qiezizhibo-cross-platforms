@@ -6,6 +6,7 @@ import {AtActivityIndicator} from 'taro-ui'
 import './media.scss'
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   userInfo: any;
@@ -27,7 +28,7 @@ interface Media {
 }
 
 class Media extends Component<PageOwnProps, PageState> {
-
+  navRef = null;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -39,6 +40,7 @@ class Media extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
 
   componentWillMount() {
@@ -95,6 +97,13 @@ class Media extends Component<PageOwnProps, PageState> {
     }
     return (
       <View className='qz-media-container'>
+        <NavBar
+          title='茄子TV'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <Video
           id="videoPlayer"
           className='qz-media__video'

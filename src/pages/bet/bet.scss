@@ -235,10 +235,18 @@
     &-item {
       width: 100%;
 
-      view {
+      &-view {
         font-size: $font-size-base;
         color: $color-text-paragraph;
         background-color: $color-bg-lighter;
+        text-align: center;
+        padding: 10px 0;
+        margin-bottom: 10px;
+      }
+      &-view-hover {
+        font-size: $font-size-base;
+        color: $color-text-base-inverse;
+        background-color: $color-bg-blue-main;
         text-align: center;
         padding: 10px 0;
         margin-bottom: 10px;

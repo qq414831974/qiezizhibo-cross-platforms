@@ -1,5 +1,5 @@
 import Taro, {Component, Config} from '@tarojs/taro'
-import {View, Image} from '@tarojs/components'
+import {View, Image, Text} from '@tarojs/components'
 import {AtActivityIndicator, AtTabs, AtTabsPane, AtMessage, AtFloatLayout, AtFab, AtToast} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import defaultLogo from '../../assets/default-logo.png'
@@ -13,7 +13,7 @@ import LeaguePlayerTable from "./components/league-player-table";
 import LeagueRegulations from "./components/league-regulations";
 import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
-import {clearLoginToken, getStorage, hasLogin, random_weight} from "../../utils/utils";
+import {clearLoginToken, getExpInfoByExpValue, getStorage, hasLogin, random_weight} from "../../utils/utils";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import payAction from "../../actions/pay";
@@ -21,6 +21,7 @@ import userAction from "../../actions/user";
 import * as error from "../../constants/error";
 import LoginModal from "../../components/modal-login";
 import PhoneModal from "../../components/modal-phone";
+import LevelUpModal from "../../components/modal-level-up";
 import GiftPanel from "../../components/gift-panel";
 import HeatPlayer from "../../components/heat-player";
 import HeatLeagueTeam from "../../components/heat-league-team";
@@ -32,6 +33,12 @@ import BetRank from "../../components/bet-rank";
 import ModalPay from "../../components/modal-pay";
 import depositAction from "../../actions/deposit";
 import configAction from "../../actions/config";
+import NavBar from "../../components/nav-bar";
+import RectFab from "../../components/fab-rect";
+import LeagueMember from "../../components/league-member";
+import noperson from "../../assets/no-person.png";
+import hotIcon from "../../assets/home/hot-icon.png";
+import HeatRank from "../../components/heat-rank";
 
 type PageStateProps = {
   leagueTeams: any;
@@ -43,6 +50,7 @@ type PageStateProps = {
   deposit: any;
   payEnabled: boolean;
   giftEnabled: boolean;
+  expInfo: any;
 }
 
 type PageDispatchProps = {}
@@ -96,6 +104,13 @@ type PageState = {
   payCallback: any;
   payConfirmShow: boolean;
   currentPrice: number;
+  levelUpShow: boolean;
+  currentLevel: number;
+  leagueMemberRule: any;
+  leagueMemberOpen: boolean;
+  userHaveLeagueMember: any;
+  topSixHeats: any,
+  heatRankShow: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -106,6 +121,7 @@ interface LeagueManager {
 
 @withShare({})
 class LeagueManager extends Component<PageOwnProps, PageState> {
+  navRef = null;
   tabsY: number;
   socketTask: Taro.SocketTask | null
   timeout_gift: any = {};
@@ -123,6 +139,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
 
   constructor(props) {
@@ -174,6 +191,12 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       payCallback: null,
       payConfirmShow: false,
       currentPrice: 0,
+      levelUpShow: false,
+      currentLevel: 0,
+      leagueMemberRule: null,
+      leagueMemberOpen: false,
+      userHaveLeagueMember: false,
+      topSixHeats: null,
     }
   }
 
@@ -248,7 +271,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   componentDidShow() {
-    console.log("componentDidShow")
+    this.initLeagueMember(this.getParamId())
   }
 
   componentDidHide() {
@@ -334,6 +357,26 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     })
   }
 
+  initLeagueMember = (leagueId) => {
+    new Request().get(api.API_LEAGUE_MEMBER, {
+      leagueId: leagueId,
+    }).then((data: any) => {
+      if (data.available) {
+        this.setState({leagueMemberRule: data})
+        if (this.props.userInfo && this.props.userInfo.userNo) {
+          new Request().get(api.API_USER_LEAGUE_MEMBER, {
+            pageSize: 10,
+            pageNum: 1,
+            userNo: this.props.userInfo.userNo,
+            leagueId: leagueId
+          }).then((userData: any) => {
+            this.setState({userHaveLeagueMember: userData.total != null && userData.total > 0 ? true : false})
+          });
+        }
+      }
+    });
+  }
+
   async getUserInfo(onSuccess?: Function | null) {
     if (await hasLogin()) {
       const openid = await getStorage('wechatOpenid');
@@ -389,7 +432,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
         param.leagueId = this.getParamId();
         this.setState({playerHeatLoading: true})
         new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
-          this.setState({playerHeatLoading: false})
+          this.setState({playerHeatLoading: false, topSixHeats: this.getTopSixHeat(data.records)})
           if (name) {
             this.setState({playerHeats: data}, () => {
               resolve(data.records);
@@ -447,7 +490,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
         param.leagueId = this.getParamId();
         this.setState({teamHeatLoading: true})
         new Request().get(api.API_LEAGUE_TEAM_HEAT, param).then((data: any) => {
-          this.setState({teamHeatLoading: false})
+          this.setState({teamHeatLoading: false, topSixHeats: this.getTopSixHeat(data.records)})
           if (name) {
             this.setState({teamHeats: data}, () => {
               resolve(data.records);
@@ -518,6 +561,37 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     }
     return sorted;
   }
+  getTopSixHeat = (heatObjects) => {
+    let sorted: any = [];
+    let index = 1;
+    for (let i = 0; i < heatObjects.length; i++) {
+      let heat = this.getHeat(heatObjects[i]);
+      if (heat == 0) {
+        continue;
+      }
+      if (i < 6) {
+        heatObjects[i].number = i + 1;
+        if (i == 0) {
+          index = 1;
+          heatObjects[i].index = index;
+          sorted.push(heatObjects[i]);
+          continue;
+        }
+        let heatPre = this.getHeat(heatObjects[i - 1]);
+        if (heat == heatPre) {
+          heatObjects[i].index = index;
+          sorted.push(heatObjects[i]);
+        } else {
+          index = index + 1;
+          if (index <= 6) {
+            heatObjects[i].index = index;
+            sorted.push(heatObjects[i]);
+          }
+        }
+      }
+    }
+    return sorted;
+  }
   getHeat = (heatObject) => {
     let heat = 0;
     if (heatObject.heat) {
@@ -575,6 +649,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
         this.setState({phoneOpen: true})
       }
       this.initPayConfig(res.userNo);
+      this.initLeagueMember(this.getParamId());
     })
   }
 
@@ -669,8 +744,18 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
           this.state.teamHeatRefreshFunc && this.state.teamHeatRefreshFunc();
         }
+        // this.isUserLevelUp();
       }
     });
+  }
+  isUserLevelUp = () => {
+    const level = getExpInfoByExpValue(this.props.expInfo, this.props.userInfo.userExp.exp).level
+    this.getUserInfo((userInfo) => {
+      const currentLevel = getExpInfoByExpValue(this.props.expInfo, userInfo.payload.userExp.exp).level
+      if (currentLevel >= (Math.ceil(level / 10)) * 10) {
+        this.setState({levelUpShow: true, currentLevel: currentLevel})
+      }
+    })
   }
   isUserLogin = async () => {
     const token = await getStorage('accessToken');
@@ -740,7 +825,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
         this.getLeagueRankSetting(id);
         let {tabs} = this.getTabsList();
         this.switchTab(tabs[global.LEAGUE_TABS_TYPE.leagueMatch]);
-        this.initHeatCompetition(this.getParamId());
+        this.initHeatCompetition(id);
       })
     })
   }
@@ -893,6 +978,49 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       url: "/pages/feedback/feedback",
     })
   }
+  onLevelUpConfirm = () => {
+    this.setState({levelUpShow: false})
+  }
+  onLeagueMemberShow = () => {
+    this.setState({leagueMemberOpen: true})
+  }
+  onLeagueMemberClose = () => {
+    this.setState({leagueMemberOpen: false})
+  }
+  onLeagueMemberPaySuccess = (orderId) => {
+    this.setState({leagueMemberOpen: false})
+    if (orderId) {
+      this.getOrderStatus(orderId, global.ORDER_TYPE.leagueMember);
+    }
+    Taro.showToast({
+      title: "开通成功",
+      icon: 'none',
+    });
+  }
+  onLeagueMemberPayError = (reason) => {
+    switch (reason) {
+      case error.ERROR_PAY_CANCEL: {
+        Taro.showToast({
+          title: "支付失败,用户取消支付",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_PAY_ERROR: {
+        Taro.showToast({
+          title: "支付失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
+  handleHeatRankClick = () => {
+    this.setState({heatRankShow: true});
+  }
+  handleHeatRankCancel = () => {
+    this.setState({heatRankShow: false});
+  }
 
   render() {
     const {leaguePlayers, leagueTeams} = this.props
@@ -905,17 +1033,25 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-league-manager-content'>
+        <NavBar
+          title='茄子TV'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <View className='qz-league-manager-header'>
           {league &&
           <View className='qz-league-manager-header-container'>
-            <Image className="img"
+            <Image className="img img-round"
                    src={league.headImg ? league.headImg : defaultLogo}/>
             <View className='text'>{league.shortName ? league.shortName : league.name}</View>
+            {this.state.userHaveLeagueMember ? <Image className="img" src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/vip_card.png"/> : null}
           </View>
           }
         </View>
-
-        <View className='qz-league-manager-tabs'>
+        <View className='qz-league-manager-tabs'
+              style={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px)`}}>
           {league && league.round &&
           <AtTabs
             swipeable={false}
@@ -925,12 +1061,15 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             onClick={this.switchTab}>
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.leagueRule]}>
               <LeagueRegulations
+                tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
                 leagueMatch={league}
                 loading={this.state.tabloading}
                 visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueRule]}/>
             </AtTabsPane>
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.leagueMatch]}>
               <LeagueManagerMatches
+                tabContainerStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
+                tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px - 44px)`}}
                 leagueMatch={league}
                 loading={this.state.tabloading}
                 visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueMatch]}/>
@@ -939,6 +1078,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.heatPlayer]}>
               <HeatPlayer
                 isLeauge
+                tabContainerStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
+                tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px - 85px - 42px)`}}
                 leagueId={this.getParamId()}
                 heatType={this.state.heatType}
                 onPlayerHeatRefresh={this.onPlayerHeatRefresh}
@@ -959,6 +1100,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.heatTeam]}>
               <HeatLeagueTeam
                 isLeague
+                tabContainerStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
+                tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px - 85px - 42px)`}}
                 leagueId={this.getParamId()}
                 heatType={this.state.heatType}
                 onTeamHeatRefresh={this.onTeamHeatRefresh}
@@ -978,6 +1121,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             {leagueRankSetting.showLeagueTeam &&
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.leagueTeam]}>
               <LeagueTeamTable
+                tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
                 leagueMatch={league}
                 loading={this.state.tabloading}
                 visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueTeam]}
@@ -986,6 +1130,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             {leagueRankSetting.showLeaguePlayer &&
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.leaguePlayer]}>
               <LeaguePlayerTable
+                tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
                 leagueMatch={league}
                 loading={this.state.tabloading}
                 visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leaguePlayer]}
@@ -1032,7 +1177,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           loading={this.state.giftRanksLoading}
           isOpened={this.state.giftRanksOpen}
           handleCancel={this.hideGfitRank}
-        />
+          expInfo={this.props.expInfo}/>
         <HeatReward
           heatRule={this.state.heatRule}
           loading={this.state.heatRule == null}
@@ -1057,6 +1202,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           loading={this.state.betRanksLoading}
           isOpened={this.state.betRankShow}
           handleCancel={this.handleBetRankCancel}
+          expInfo={this.props.expInfo}
         />
         <ModalPay
           isOpened={this.state.payConfirmShow}
@@ -1064,6 +1210,11 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           onCancel={this.onPayConfirmClose}
           onWechatPay={this.handleWechatConfirm}
           onDepositPay={this.handleDepositConfirm}/>
+        <LevelUpModal
+          level={this.state.currentLevel}
+          isOpened={this.state.levelUpShow}
+          handleConfirm={this.onLevelUpConfirm}
+        />
         {this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.heatPlayer] || this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.heatTeam] ?
           <View>
             <View className="qz-league-manager-fab qz-league-manager-fab-square qz-league-manager-fab-giftrank">
@@ -1091,6 +1242,56 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           </View>
           : null
         }
+        {!this.state.userHaveLeagueMember && this.state.leagueMemberRule && this.state.leagueMemberRule.available && this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueMatch] ?
+          <RectFab
+            className="qz-fab-rect-single-line"
+            onClick={this.onLeagueMemberShow}
+            background="linear-gradient(90deg,#f8e2c4,#f3bb6c);"
+            top={`calc(${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px + 35px + 44px)`}
+          >
+            <Image src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/crown.png"/>
+            <Text style={{color: "#754e19"}}>开通联赛会员</Text>
+          </RectFab>
+          : null}
+        <LeagueMember
+          league={this.state.league}
+          isOpened={this.state.leagueMemberOpen}
+          leagueMemberRule={this.state.leagueMemberRule}
+          onClose={this.onLeagueMemberClose}
+          onHandlePaySuccess={this.onLeagueMemberPaySuccess}
+          onHandlePayError={this.onLeagueMemberPayError}
+          onPayConfirm={this.onPayConfirm}
+          onPayClose={this.onPayConfirmClose}
+        />
+        {/*<RectFab*/}
+        {/*  className="qz-fab-rect-multi-line"*/}
+        {/*  onClick={this.handleHeatRankClick}*/}
+        {/*  background="#ECF5FD"*/}
+        {/*  top={`calc(${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px + 35px + 44px + 42px)`}*/}
+        {/*>*/}
+        {/*  <View className="qz-league-manager-heat">*/}
+        {/*    <View className="w-full center">*/}
+        {/*      <Image className="qz-league-manager-heat-title" src={hotIcon}/>*/}
+        {/*    </View>*/}
+        {/*    <View className="w-full center qz-league-manager-heat-items">*/}
+        {/*      {this.state.topSixHeats && this.state.topSixHeats.filter(record => record.number <= 3).map(data => {*/}
+        {/*        if (this.state.heatType && (this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT)) {*/}
+        {/*          return <Image key={data.id} className="qz-league-manager-heat-img-overlap"*/}
+        {/*                        src={data.player && data.player.headImg ? data.player.headImg : noperson}/>*/}
+        {/*        }*/}
+        {/*        return <Image key={data.id} className="qz-league-manager-heat-img-overlap"*/}
+        {/*                      src={data.team && data.team.headImg ? data.team.headImg : noperson}/>*/}
+        {/*      })}*/}
+        {/*    </View>*/}
+        {/*    <View className='at-icon at-icon-chevron-right qz-league-manager-heat-arrow'/>*/}
+        {/*  </View>*/}
+        {/*</RectFab>*/}
+        {/*<HeatRank*/}
+        {/*  heatRanks={this.state.topSixHeats}*/}
+        {/*  loading={this.state.teamHeatLoading || this.state.playerHeatLoading}*/}
+        {/*  isOpened={this.state.heatRankShow}*/}
+        {/*  handleCancel={this.handleHeatRankCancel}*/}
+        {/*  heatType={this.state.heatType}/>*/}
       </View>
     )
   }
@@ -1107,6 +1308,7 @@ const mapStateToProps = (state) => {
     giftList: state.pay ? state.pay.gifts : [],
     payEnabled: state.config ? state.config.payEnabled : null,
     giftEnabled: state.config ? state.config.giftEnabled : null,
+    expInfo: state.config ? state.config.expInfo : [],
   }
 }
 export default connect(mapStateToProps)(LeagueManager)

@@ -1,0 +1,102 @@
+@import '../../../../app.scss';
+
+.qz-league-list {
+  &-loading {
+    width: 100vw;
+    height: 10vw;
+    position: relative;
+    margin-top: $spacing-v-md;
+  }
+  &-content {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: $spacing-v-md;
+    overflow: hidden;
+    &__inner {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      width: 100%;
+      overflow: hidden;
+      padding: 0 5%;
+    }
+    &__charge {
+      position: absolute;
+      top: $spacing-v-md;
+      left: 5%;
+      font-size: $font-size-xs;
+      color: $color-white;
+      background-color: $color_warning;
+      border-radius: $border-radius-md;
+      padding: $spacing-v-xxs $spacing-v-xs;
+      z-index: $zindex-divider;
+    }
+  }
+  &-time{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $color-bg-grey;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    color: $color-text-base;
+  }
+  &-order{
+    border-radius: 10px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+    margin: 0 5%;
+    padding: $spacing-v-sm $spacing-v-sm 0 $spacing-v-sm;
+    &__item{
+      font-size: $font-size-sm;
+      color: $color-grey-2;
+      width: 100%;
+      padding: 0 $spacing-h-sm;
+    }
+  }
+  .item_view {
+    background-color: #fff;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 10px;
+
+    .line {
+      background-color: #7f7f7f;
+      width: 1px;
+      height: 40px;
+    }
+
+    .item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #fff;
+      width: 30%;
+
+      .title_number {
+        text-align: center;
+        color: #333;
+        font-size: $font-size-xl;
+        font-weight: bold;
+      }
+
+      .title {
+        text-align: center;
+        color: #333;
+        font-size: $font-size-lg;
+        font-weight: bold;
+      }
+
+      .desc {
+        text-align: center;
+        color: #7f7f7f;
+        font-size: $font-size-sm;
+      }
+    }
+  }
+}

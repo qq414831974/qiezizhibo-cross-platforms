@@ -13,6 +13,7 @@ import * as api from "../../constants/api";
 import {getStorage, getYuan, toLogin} from "../../utils/utils";
 import * as error from "../../constants/error";
 import DepositModal from "./components/modal-deposit";
+import NavBar from "../../components/nav-bar";
 
 type UnifiedJSAPIOrderResult = {
   appId: string,
@@ -58,7 +59,7 @@ interface Deposit {
 }
 
 class Deposit extends Component<PageOwnProps, PageState> {
-
+  navRef = null;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -70,6 +71,7 @@ class Deposit extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '我的茄币',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
 
   componentWillMount() {
@@ -293,6 +295,13 @@ class Deposit extends Component<PageOwnProps, PageState> {
     }
     return (
       <View className='qz-deposit-container'>
+        <NavBar
+          title='我的茄币'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <View className='qz-deposit-header'>
           <View className='qz-deposit-header__title'>
             {loading ? "-" : getYuan(deposit)}

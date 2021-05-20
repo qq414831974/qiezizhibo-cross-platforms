@@ -314,3 +314,14 @@ export const random_weight = (arr: Array<any>) => {
   // console.log(rand);
   return arr[index[rand]];
 }
+export const getExpInfoByExpValue = (expInfoList, expValue) => {
+  for (let expInfo of expInfoList) {
+    if (expValue >= expInfo.minExp && expValue < expInfo.maxExp) {
+      return expInfo;
+    }
+  }
+  return expInfoList[0];
+}
+export const isFunction = (value) => {
+  return typeof value === 'function';
+}

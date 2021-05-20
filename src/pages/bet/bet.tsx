@@ -13,6 +13,7 @@ import BetModal from "./components/modal-bet";
 import {FootballEventType} from "../../constants/global";
 import BetRank from "../../components/bet-rank";
 import * as error from "../../constants/error";
+import NavBar from "../../components/nav-bar";
 
 const eventType: { [key: number]: { text: string, color: string }; } = {};
 eventType[-1] = {text: "未开始", color: "unopen"};
@@ -147,6 +148,7 @@ const STATUS = {
 }
 type PageStateProps = {
   userInfo: any;
+  expInfo: any;
 }
 
 type PageDispatchProps = {}
@@ -167,6 +169,7 @@ type PageState = {
   ruleShow: boolean;
   betShow: boolean;
   currentBetScore: any;
+  currentBetScoreSelect: any;
   betRanks: any;
   betRanksLoading: any;
   freeBetLoading: boolean;
@@ -174,6 +177,7 @@ type PageState = {
   betInputShow: boolean;
   betInputHost: any;
   betInputGuest: any;
+  costomType: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -183,6 +187,7 @@ interface Bet {
 }
 
 class Bet extends Component<PageOwnProps, PageState> {
+  navRef = null;
 
   /**
    * 指定config的类型声明为: Taro.Config
@@ -195,6 +200,7 @@ class Bet extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '比分竞猜',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
 
   componentWillMount() {
@@ -367,7 +373,7 @@ class Bet extends Component<PageOwnProps, PageState> {
   handleBetRuleCancel = () => {
     this.setState({ruleShow: false});
   }
-  handleBetClick = (score) => {
+  handleBetClick = (score, select) => {
     // if (this.state.betStatus != STATUS.open) {
     //   Taro.showToast({
     //     'title': "不在竞猜时间段内",
@@ -375,7 +381,7 @@ class Bet extends Component<PageOwnProps, PageState> {
     //   })
     //   return;
     // }
-    this.setState({betShow: true, currentBetScore: score});
+    this.setState({betShow: true, currentBetScore: score, currentBetScoreSelect: select});
   }
   handleBetCancel = () => {
     this.setState({betShow: false});
@@ -407,8 +413,8 @@ class Bet extends Component<PageOwnProps, PageState> {
       'duration': 5000,
     })
   }
-  onInputScoreClick = () => {
-    this.setState({betInputShow: true, betInputHost: null, betInputGuest: null})
+  onInputScoreClick = (type) => {
+    this.setState({betInputShow: true, betInputHost: null, betInputGuest: null, costomType: type})
   }
   onBetInputHide = () => {
     this.setState({betInputShow: false})
@@ -433,7 +439,7 @@ class Bet extends Component<PageOwnProps, PageState> {
       return;
     }
     this.setState({betInputShow: false})
-    this.handleBetClick(`${this.state.betInputHost}-${this.state.betInputGuest}`)
+    this.handleBetClick(`${this.state.betInputHost}-${this.state.betInputGuest}`, `${this.state.costomType}-costom`)
   }
 
   render() {
@@ -443,6 +449,13 @@ class Bet extends Component<PageOwnProps, PageState> {
     }
     return (
       <View className='qz-bet-content'>
+        <NavBar
+          title='比分竞猜'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <View className='qz-bet-match-up'>
           <View className='qz-bet-match-up__team'>
             <View className='qz-bet-match-up__team-avatar'>
@@ -516,13 +529,16 @@ class Bet extends Component<PageOwnProps, PageState> {
             <View className='qz-bet-score-content-item-list'>
               <View className='qz-bet-score-content-item'>
                 {scoreList["host"].map(item =>
-                  <View key={item.score} onClick={this.handleBetClick.bind(this, item.score)}>
+                  <View key={item.score}
+                        className={item.score == this.state.currentBetScoreSelect ? "qz-bet-score-content-item-view-hover" : "qz-bet-score-content-item-view"}
+                        onClick={this.handleBetClick.bind(this, item.score, item.score)}>
                     {item.title}
                   </View>
                 )}
               </View>
-              <View className='qz-bet-score-content-item' onClick={this.onInputScoreClick}>
-                <View>
+              <View className='qz-bet-score-content-item' onClick={this.onInputScoreClick.bind(this, "win")}>
+                <View
+                  className={"win-costom" == this.state.currentBetScoreSelect ? "qz-bet-score-content-item-view-hover" : "qz-bet-score-content-item-view"}>
                   自定义
                 </View>
               </View>
@@ -530,13 +546,16 @@ class Bet extends Component<PageOwnProps, PageState> {
             <View className='qz-bet-score-content-item-list'>
               <View className='qz-bet-score-content-item'>
                 {scoreList["draw"].map(item =>
-                  <View key={item.score} onClick={this.handleBetClick.bind(this, item.score)}>
+                  <View key={item.score}
+                        className={item.score == this.state.currentBetScoreSelect ? "qz-bet-score-content-item-view-hover" : "qz-bet-score-content-item-view"}
+                        onClick={this.handleBetClick.bind(this, item.score, item.score)}>
                     {item.title}
                   </View>
                 )}
               </View>
-              <View className='qz-bet-score-content-item' onClick={this.onInputScoreClick}>
-                <View>
+              <View className='qz-bet-score-content-item' onClick={this.onInputScoreClick.bind(this, "draw")}>
+                <View
+                  className={"draw-costom" == this.state.currentBetScoreSelect ? "qz-bet-score-content-item-view-hover" : "qz-bet-score-content-item-view"}>
                   自定义
                 </View>
               </View>
@@ -544,13 +563,16 @@ class Bet extends Component<PageOwnProps, PageState> {
             <View className='qz-bet-score-content-item-list'>
               <View className='qz-bet-score-content-item'>
                 {scoreList["guest"].map(item =>
-                  <View key={item.score} onClick={this.handleBetClick.bind(this, item.score)}>
+                  <View key={item.score}
+                        className={item.score == this.state.currentBetScoreSelect ? "qz-bet-score-content-item-view-hover" : "qz-bet-score-content-item-view"}
+                        onClick={this.handleBetClick.bind(this, item.score, item.score)}>
                     {item.title}
                   </View>
                 )}
               </View>
-              <View className='qz-bet-score-content-item' onClick={this.onInputScoreClick}>
-                <View>
+              <View className='qz-bet-score-content-item' onClick={this.onInputScoreClick.bind(this, "lost")}>
+                <View
+                  className={"lost-costom" == this.state.currentBetScoreSelect ? "qz-bet-score-content-item-view-hover" : "qz-bet-score-content-item-view"}>
                   自定义
                 </View>
               </View>
@@ -617,6 +639,7 @@ class Bet extends Component<PageOwnProps, PageState> {
           loading={this.state.betRanksLoading}
           isOpened={this.state.rankShow}
           handleCancel={this.handleBetRankCancel}
+          expInfo={this.props.expInfo}
         />
         <AtModal isOpened={this.state.betInputShow} onClose={this.onBetInputHide}>
           <AtModalContent>
@@ -660,6 +683,7 @@ class Bet extends Component<PageOwnProps, PageState> {
 const mapStateToProps = (state) => {
   return {
     userInfo: state.user.userInfo,
+    expInfo: state.config ? state.config.expInfo : [],
   }
 }
 export default connect(mapStateToProps)(Bet)

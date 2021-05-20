@@ -6,7 +6,8 @@ import {
   CONFIG_WECHAT,
   CONFIG_PAY_ENABLED,
   CONFIG_GIFT_ENABLED,
-  CONFIG_GET_SHARE_SENTENCE
+  CONFIG_GET_SHARE_SENTENCE,
+  CONFIG_EXP
 } from '../constants/config'
 
 const INITIAL_STATE = {
@@ -18,6 +19,7 @@ const INITIAL_STATE = {
   payEnabled: true,
   giftEnabled: true,
   shareSentence: [],
+  expInfo: [],
 }
 
 export default function config(state = INITIAL_STATE, action) {
@@ -61,6 +63,11 @@ export default function config(state = INITIAL_STATE, action) {
       return {
         ...state,
         shareSentence: action.payload
+      }
+    case CONFIG_EXP:
+      return {
+        ...state,
+        expInfo: action.payload
       }
     default:
       return state

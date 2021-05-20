@@ -52,18 +52,20 @@
 }
 
 .qz-home-banner {
-  height: 40vw;
   width: 100vw;
   background: transparent;
+  height: auto;
   //overflow: hidden;
 }
 
 .qz-home-banner__s_n {
   padding-top: calc(164px + 2vw);
+  height: 36vw;
 }
 
 .qz-home-banner_s {
   padding-top: calc(104px + 2vw);
+  height: 36vw;
 }
 
 .qz-home-banner__swiper {

@@ -1,0 +1,30 @@
+@import '../../app.scss';
+
+.mini-gray {
+  color: $color-grey-3;
+}
+
+.light-gray {
+  color: $color-grey-2;
+}
+
+.gray {
+  color: $color-grey-1;
+}
+
+.qz-login-modal-title {
+  font-weight: bold;
+  font-size: $font-size-lg;
+  margin-bottom: $spacing-v-sm;
+}
+
+.qz-login-modal-content_text {
+  font-size: $font-size-base;
+  margin-top: $spacing-v-sm;
+}
+
+.qz-login-modal-content_tip {
+  text-align: left;
+  padding: 0 $spacing-h-md;
+  font-size: $font-size-sm;
+}

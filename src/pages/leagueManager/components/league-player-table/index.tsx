@@ -71,7 +71,7 @@ class LeaguePlayerTable extends Component<PageOwnProps | any, PageState> {
       </View>
     }
     return (
-      <ScrollView scrollY className='qz-league-player-table__result'>
+      <ScrollView scrollY className='qz-league-player-table__result' style={this.props.tabScrollStyle}>
         <View className='qz-league-player-table__result-header'>
           <View>球员</View>
           <View>进球</View>

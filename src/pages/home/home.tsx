@@ -20,6 +20,7 @@ import withShare from "../../utils/withShare";
 import Request from '../../utils/request'
 import * as api from "../../constants/api";
 import {getStorage} from "../../utils/utils";
+import NavBar from "../../components/nav-bar";
 
 // import {getStorage, hasLogin} from "../../utils/utils";
 
@@ -42,6 +43,7 @@ type PageStateProps = {
   locationConfig: any,
   areaList: any,
   userInfo: any;
+  expInfo: any;
 }
 
 type PageDispatchProps = {}
@@ -73,6 +75,7 @@ class Home extends Component<PageOwnProps, PageState> {
     wechatConfig: {},
     locationConfig: null,
   }
+  navRef = null;
   bulletinIndex: number = 0;
   qqmapsdk: qqmapjs;
   /**
@@ -86,6 +89,7 @@ class Home extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
     disableScroll: true,
   }
 
@@ -114,6 +118,7 @@ class Home extends Component<PageOwnProps, PageState> {
     this.getAreas();
     configAction.setVisit();
     configAction.getShareSentence();
+    configAction.getExpInfo();
     this.initBulletin();
     if (this.$router.params.id && this.$router.params.page) {
       let url = '/pages/' + this.$router.params.page + '/' + this.$router.params.page + '?id=' + this.$router.params.id;
@@ -395,6 +400,16 @@ class Home extends Component<PageOwnProps, PageState> {
       }
     }
   }
+  getBannerTop = () => {
+    let top = 84;
+    if (this.state.bulletin && this.state.bulletin.content) {
+      top = 84 + 30;
+    }
+    if (this.navRef && this.navRef.state.configStyle.navHeight) {
+      top = top + this.navRef.state.configStyle.navHeight;
+    }
+    return top;
+  }
 
   render() {
     const {locationConfig} = this.props
@@ -406,122 +421,132 @@ class Home extends Component<PageOwnProps, PageState> {
       loadingmoreStatus = "noMore"
     }
     return (
-      <ScrollView scrollY onScrollToLower={this.onReachBottom} className='qz-home-content'>
-        <View className='qz-home-top'>
-          {this.state.bulletin && this.state.bulletin.content ?
-            <View className='qz-home-notice-content' onClick={this.onNoticeBarClick.bind(this, this.state.bulletin)}>
-              <AtNoticebar className='qz-home-notice-content-bar' icon='volume-plus' marquee>
-                {this.state.bulletin.content}
-              </AtNoticebar>
-            </View> : null}
-          <NavigationBar
-            location={locationConfig}
-            onProvinceSelect={this.onProvinceSelect}
-            getLocation={this.getLocation}/>
-        </View>
-        <View className='qz-home-bg'>
-          <View className='qz-home-content-bg'>
-            <Image className='qz-home-content-bg-img' src={defaultLogoHorizontal}/>
+      <View>
+        <NavBar
+          title='茄子TV'
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
+        <ScrollView scrollY onScrollToLower={this.onReachBottom} className='qz-home-content'>
+          <View className='qz-home-top'>
+            {this.state.bulletin && this.state.bulletin.content ?
+              <View className='qz-home-notice-content' onClick={this.onNoticeBarClick.bind(this, this.state.bulletin)}>
+                <AtNoticebar className='qz-home-notice-content-bar' icon='volume-plus' marquee>
+                  {this.state.bulletin.content}
+                </AtNoticebar>
+              </View> : null}
+            <NavigationBar
+              location={locationConfig}
+              onProvinceSelect={this.onProvinceSelect}
+              getLocation={this.getLocation}/>
           </View>
-          <View className='qz-home-content-bg-bottom'/>
-        </View>
-        <View
-          className={`qz-home-banner ${this.state.bulletin && this.state.bulletin.content ? "qz-home-banner__s_n" : "qz-home-banner_s"}`}>
-          <Swiper
-            className='qz-home-banner__swiper'
-            indicatorColor='#999'
-            indicatorActiveColor='#333'
-            circular
-            indicatorDots
-            autoplay>
-            {this.props.bannerConfig.map((item) => {
-              if (item.url === "contactUs") {
-                return <SwiperItem key={item.position} className="qz-home-banner__swiper-item">
-                  <Button className="qz-home-banner__swiper-item-button" open-type="contact">
-                    <Image className="qz-home-banner__swiper-item-img" src={item.img}/>
-                  </Button>
-                </SwiperItem>
-              }
-              return <Navigator url={item.url}>
-                <SwiperItem key={item.position} className="qz-home-banner__swiper-item">
-                  <Image className="qz-home-banner__swiper-item-img" src={item.img}/>
-                </SwiperItem>
-              </Navigator>
-            })}
-          </Swiper>
-        </View>
-        {leagueList.records ?
-          <View className='qz-home-league'>
-            <View className='qz-home-league-title' onClick={this.onLeagueMoreClick}>
-              <Text className='qz-home-league-title-desc'>热门赛事</Text>
-              <Text className='qz-home-league-title-more'>{`查看更多赛事>`}</Text>
+          <View className='qz-home-bg'>
+            <View className='qz-home-content-bg'>
+              <Image className='qz-home-content-bg-img' src={defaultLogoHorizontal}/>
             </View>
-            <View className='qz-home-league-content'>
-              <View
-                className={`qz-home-league-content__inner ${leagueList.records.length <= 3 ? "qz-home-league-content__inner-center" : ""}`}>
-                {leagueList.records.map((item) => {
-                  return <View key={item.id} className="qz-home-league-item"
-                               onClick={this.onLeagueItemClick.bind(this, item)}>
-                    <Image src={hotIcon} className="qz-home-league-item-icon"/>
-                    <View className="qz-home-league-item-avatar">
-                      <Image src={item.headImg}/>
+            <View className='qz-home-content-bg-bottom'/>
+          </View>
+          <View
+            className='qz-home-banner'
+            style={{paddingTop: `${this.getBannerTop()}rpx`}}
+          >
+            <Swiper
+              className='qz-home-banner__swiper'
+              indicatorColor='#999'
+              indicatorActiveColor='#333'
+              circular
+              indicatorDots
+              autoplay>
+              {this.props.bannerConfig.map((item) => {
+                if (item.url === "contactUs") {
+                  return <SwiperItem key={item.position} className="qz-home-banner__swiper-item">
+                    <Button className="qz-home-banner__swiper-item-button" open-type="contact">
+                      <Image className="qz-home-banner__swiper-item-img" src={item.img}/>
+                    </Button>
+                  </SwiperItem>
+                }
+                return <Navigator url={item.url}>
+                  <SwiperItem key={item.position} className="qz-home-banner__swiper-item">
+                    <Image className="qz-home-banner__swiper-item-img" src={item.img}/>
+                  </SwiperItem>
+                </Navigator>
+              })}
+            </Swiper>
+          </View>
+          {leagueList.records ?
+            <View className='qz-home-league'>
+              <View className='qz-home-league-title' onClick={this.onLeagueMoreClick}>
+                <Text className='qz-home-league-title-desc'>热门赛事</Text>
+                <Text className='qz-home-league-title-more'>{`查看更多赛事>`}</Text>
+              </View>
+              <View className='qz-home-league-content'>
+                <View
+                  className={`qz-home-league-content__inner ${leagueList.records.length <= 3 ? "qz-home-league-content__inner-center" : ""}`}>
+                  {leagueList.records.map((item) => {
+                    return <View key={item.id} className="qz-home-league-item"
+                                 onClick={this.onLeagueItemClick.bind(this, item)}>
+                      <Image src={hotIcon} className="qz-home-league-item-icon"/>
+                      <View className="qz-home-league-item-avatar">
+                        <Image src={item.headImg ? item.headImg : defaultLogo}/>
+                      </View>
+                      <Text className="qz-home-league-item-name">
+                        {item.shortName ? item.shortName : item.name}
+                      </Text>
                     </View>
-                    <Text className="qz-home-league-item-name">
-                      {item.shortname ? item.shortname : item.name}
+                  })}
+                </View>
+              </View>
+            </View> : null}
+          {leagueList.records && leagueList.records.map((item) => {
+            if (item.matchs == null || (item.matchs != null && item.matchs.length == 0)) {
+              return <View/>;
+            }
+            return (
+              <View key={item.id} className="qz-home-league-detail">
+                <View className='qz-home-league-detail-content'>
+                  <View className='qz-home-league-detail-title' onClick={this.onLeagueItemClick.bind(this, item)}>
+                    <Image src={item.headImg ? item.headImg : defaultLogo}/>
+                    <Text className='qz-home-league-detail-title-desc'>
+                      {/*{item.shortName ? item.shortName : item.name}*/}
+                      {item.name}
                     </Text>
                   </View>
-                })}
-              </View>
-            </View>
-          </View> : null}
-        {leagueList.records && leagueList.records.map((item) => {
-          if (item.matchs == null || (item.matchs != null && item.matchs.length == 0)) {
-            return <View/>;
-          }
-          return (
-            <View key={item.id} className="qz-home-league-detail">
-              <View className='qz-home-league-detail-content'>
-                <View className='qz-home-league-detail-title' onClick={this.onLeagueItemClick.bind(this, item)}>
-                  <Image src={item.headImg ? item.headImg : defaultLogo}/>
-                  <Text className='qz-home-league-detail-title-desc'>
-                    {/*{item.shortname ? item.shortname : item.name}*/}
-                    {item.name}
-                  </Text>
-                </View>
-                <View className='qz-home-league-detail-content__inner'>
-                  {item.matchs && item.matchs.map((match) => (
-                    <MatchItem key={match.id} matchInfo={match}
-                               onBetClick={this.onMatchItemBetClick.bind(this, match)}
-                               onClick={this.onMatchItemClick.bind(this, match)}/>
-                  ))}
-                </View>
-                <View className='qz-home-league-detail-bottom' onClick={this.onLeagueItemClick.bind(this, item)}>
-                  <Text className='qz-home-league-detail-bottom-text'>查看更多比赛</Text>
-                  <View className='qz-home-league-detail-bottom-arrow'>
-                    <AtIcon value="chevron-right" size="18"/>
+                  <View className='qz-home-league-detail-content__inner'>
+                    {item.matchs && item.matchs.map((match) => (
+                      <MatchItem key={match.id} matchInfo={match}
+                                 onBetClick={this.onMatchItemBetClick.bind(this, match)}
+                                 onClick={this.onMatchItemClick.bind(this, match)}/>
+                    ))}
+                  </View>
+                  <View className='qz-home-league-detail-bottom' onClick={this.onLeagueItemClick.bind(this, item)}>
+                    <Text className='qz-home-league-detail-bottom-text'>查看更多比赛</Text>
+                    <View className='qz-home-league-detail-bottom-arrow'>
+                      <AtIcon value="chevron-right" size="18"/>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </View>)
-        })}
-        <AtLoadMore status={loadingmoreStatus} loadingText="加载中..." onClick={this.nextPage}/>
-        <ModalLocation
-          isOpened={this.state.locationShow}
-          handleConfirm={this.onLocationSuccess}
-          handleCancel={this.onLocationCancel}
-          handleClose={this.onLocationClose}
-        />
-        <AtCurtain
-          isOpened={this.state.curtainShow}
-          onClose={this.onCurtainClose}
-        >
-          <Image
-            mode="widthFix"
-            src={this.state.curtain ? this.state.curtain.content : ""}
-            onClick={this.handleCurtainClick}
+              </View>)
+          })}
+          <AtLoadMore status={loadingmoreStatus} loadingText="加载中..." onClick={this.nextPage}/>
+          <ModalLocation
+            isOpened={this.state.locationShow}
+            handleConfirm={this.onLocationSuccess}
+            handleCancel={this.onLocationCancel}
+            handleClose={this.onLocationClose}
           />
-        </AtCurtain>
-      </ScrollView>
+          <AtCurtain
+            isOpened={this.state.curtainShow}
+            onClose={this.onCurtainClose}
+          >
+            <Image
+              mode="widthFix"
+              src={this.state.curtain ? this.state.curtain.content : ""}
+              onClick={this.handleCurtainClick}
+            />
+          </AtCurtain>
+        </ScrollView>
+      </View>
     )
   }
 }
@@ -536,6 +561,7 @@ const mapStateToProps = (state) => {
     areaList: state.area ? state.area.areas : {},
     shareSentence: state.config ? state.config.shareSentence : [],
     userInfo: state.user.userInfo,
+    expInfo: state.config ? state.config.expInfo : [],
   }
 }
 export default connect(mapStateToProps)(Home)

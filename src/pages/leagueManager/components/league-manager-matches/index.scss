@@ -1,6 +1,7 @@
 @import '../../../../app.scss';
 
 .qz-league-manager-matches__result {
+  position: relative;
   &-loading {
     width: 100vw;
     height: 10vw;

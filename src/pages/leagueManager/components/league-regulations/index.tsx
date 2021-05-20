@@ -132,7 +132,7 @@ class LeagueRegulations extends Component<PageOwnProps | any, PageState> {
       </View>
     }
     return (
-      <ScrollView scrollY className='qz-league-regulations__result'>
+      <ScrollView scrollY className='qz-league-regulations__result' style={this.props.tabScrollStyle}>
         {leagueMatch.poster ?
           <Image
             onClick={this.openSheet.bind(this, leagueMatch.poster)}

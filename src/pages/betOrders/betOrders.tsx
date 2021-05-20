@@ -9,6 +9,7 @@ import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import {getStorage} from "../../utils/utils";
 import {BET_STATUS} from "../../constants/global";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   userInfo: any;
@@ -36,7 +37,7 @@ interface BetOrders {
 }
 
 class BetOrders extends Component<PageOwnProps, PageState> {
-
+  navRef = null;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -48,6 +49,7 @@ class BetOrders extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '我的竞猜',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
 
   componentWillMount() {
@@ -154,6 +156,13 @@ class BetOrders extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-orders-content'>
+        <NavBar
+          title='我的竞猜'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <AtTabs current={this.state.currentTab}
                 tabList={[{title: '全部'}, {title: '竞猜中'}, {title: '已结束'}, {title: '已猜中'}]}
                 onClick={this.switchTab}>

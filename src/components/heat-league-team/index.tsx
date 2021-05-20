@@ -35,6 +35,8 @@ type PageOwnProps = {
   isLeague?: any;
   leagueId?: any;
   matchId?: any;
+  tabContainerStyle?: any;
+  tabScrollStyle?: any;
 }
 
 type PageState = {
@@ -291,7 +293,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     }
 
     return (
-      <View className={`${this.props.isLeague ? "qz-heat-team-container-league" : "qz-heat-team-container"}`}>
+      <View className={`${this.props.isLeague ? "qz-heat-team-container-league" : "qz-heat-team-container"}`} style={this.props.tabContainerStyle}>
         <View className="qz-heat-team-header">
           <View className="qz-heat-team-header__search">
             <AtSearchBar
@@ -304,18 +306,18 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
             />
           </View>
           <View className="qz-heat-team-header__status">
-            <View className="qz-heat-team-header__status-feedback">
-              <AtButton
-                className="vertical-middle"
-                size="small"
-                type="primary"
-                full
-                circle
-                onClick={this.handleFeedbackClick}
-              >
-                投诉与反馈
-              </AtButton>
-            </View>
+            {/*<View className="qz-heat-team-header__status-feedback">*/}
+            {/*  <AtButton*/}
+            {/*    className="vertical-middle"*/}
+            {/*    size="small"*/}
+            {/*    type="primary"*/}
+            {/*    full*/}
+            {/*    circle*/}
+            {/*    onClick={this.handleFeedbackClick}*/}
+            {/*  >*/}
+            {/*    投诉与反馈*/}
+            {/*  </AtButton>*/}
+            {/*</View>*/}
             <View className="at-row">
               {/*<View className="at-col at-col-4">*/}
               {/*  <View className="w-full center qz-heat-team-header__status-title">*/}
@@ -348,7 +350,9 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
           </View>
         </View>
         <AtDivider height={12} lineColor="#E5E5E5"/>
-        <ScrollView scrollY className="qz-heat-team-content"
+        <ScrollView scrollY
+                    className="qz-heat-team-content"
+                    style={this.props.tabScrollStyle}
                     upperThreshold={20}
                     lowerThreshold={20}
                     onScrollToUpper={this.onPullDownRefresh}

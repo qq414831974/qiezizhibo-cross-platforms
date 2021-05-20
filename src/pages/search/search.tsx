@@ -9,6 +9,7 @@ import SearchAll from "./components/search-all";
 import SearchLeague from "./components/search-league";
 import SearchMatch from "./components/search-match";
 import withShare from "../../utils/withShare";
+import NavBar from "../../components/nav-bar";
 
 // import {getStorage, hasLogin} from "../../utils/utils";
 
@@ -42,6 +43,7 @@ class Search extends Component<PageOwnProps, PageState> {
   static defaultProps = {}
   tabsY: number;
   scrollTop: number;
+  navRef = null;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -53,6 +55,7 @@ class Search extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
 
   constructor(props) {
@@ -182,6 +185,13 @@ class Search extends Component<PageOwnProps, PageState> {
     return (
       <ScrollView scrollY onScrollToLower={this.onReachBottom}
                   className='qz-search-scroll-content'>
+        <NavBar
+          title='茄子TV'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <View className='qz-search-content'>
           <View className='qz-search__top-search-bar__content'>
             <AtSearchBar

@@ -9,6 +9,7 @@ import * as global from "../../constants/global";
 import withShare from "../../utils/withShare";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   locationConfig: { city: string, province: string }
@@ -33,7 +34,7 @@ interface League {
 
 @withShare({})
 class League extends Component<PageOwnProps, PageState> {
-
+  navRef = null;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -45,6 +46,7 @@ class League extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
     enablePullDownRefresh: true
   }
   $setSharePath = () => `/pages/home/home?page=league`
@@ -158,6 +160,12 @@ class League extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-league-content'>
+        <NavBar
+          title='茄子TV'
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <View className='qz-league-content-search' onClick={this.onSearchClick}>
           <AtSearchBar
             value={this.state.searchText}

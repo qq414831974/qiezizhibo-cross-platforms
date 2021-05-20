@@ -13,7 +13,7 @@ type PageDispatchProps = {}
 
 type PageOwnProps = {
   leagueInfo: any;
-  onClick: any | null;
+  onClick?: any | null;
   pictureOnly?: boolean | null;
   withoutName?: boolean | null;
 }

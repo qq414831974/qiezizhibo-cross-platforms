@@ -8,6 +8,7 @@ import './series.scss'
 import LeagueItem from "../../components/league-item";
 import leagueAction from "../../actions/league";
 import withShare from "../../utils/withShare";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   leagueList: any;
@@ -33,7 +34,7 @@ interface Series {
 
 @withShare({})
 class Series extends Component<PageOwnProps, PageState> {
-
+  navRef = null;
   /**
    * 指定config的类型声明为: Taro.Config
    *
@@ -45,6 +46,7 @@ class Series extends Component<PageOwnProps, PageState> {
     navigationBarTitleText: '茄子TV',
     navigationBarBackgroundColor: '#2d8cf0',
     navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   }
   $setSharePath = () => `/pages/home/home?id=${this.getParamId()}&page=series`
 
@@ -64,15 +66,16 @@ class Series extends Component<PageOwnProps, PageState> {
 
   componentDidHide() {
   }
-  getParamId = () =>{
+
+  getParamId = () => {
     let id;
-    if(this.$router.params){
-      if(this.$router.params.id == null){
+    if (this.$router.params) {
+      if (this.$router.params.id == null) {
         id = this.$router.params.scene
-      }else{
+      } else {
         id = this.$router.params.id
       }
-    }else{
+    } else {
       return null;
     }
     return id;
@@ -103,6 +106,13 @@ class Series extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-series-content'>
+        <NavBar
+          title='茄子TV'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <View className='qz-series-content-header'>
           {league &&
           <View className='qz-series-content-header-container'>

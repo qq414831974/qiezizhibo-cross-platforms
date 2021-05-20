@@ -1,7 +1,6 @@
 /**
  * Default variables
  */
-
 @function tint(
   $color,
   $percent
@@ -514,7 +513,8 @@ $at-timeline-line-color: $color-border-lighter !default;
 
   .at-tabs__header {
     position: absolute;
-    bottom: 0;
+    bottom: 20px;
+    height: 75px;
     z-index: $zindex-tab;
     //box-shadow: 0 -1px 1px -1px rgba(0, 0, 0, 0.3);
     border-top: 0.5px solid rgba(0, 0, 0, 0.3);
@@ -529,7 +529,7 @@ $at-timeline-line-color: $color-border-lighter !default;
   .at-tabs__body {
     .at-tabs-pane--active {
       scroll-view {
-        height: calc(100vh - 70px - 28px * 1.3 - 48px - 1px - 28px * 1.3 - 48px - 20px);
+        //height: calc(100vh - 70px - 64px - 85px - 90px);
         overflow-x: hidden;
         overflow-y: scroll;
         background-color: $color-bg;
@@ -539,7 +539,7 @@ $at-timeline-line-color: $color-border-lighter !default;
 }
 
 .qz-bottom-tabs__league-manager {
-  height: calc(100vh - 70px - 28px * 1.3 - 48px - 20px - 1px);
+  //height: calc(100vh - 70px - 28px * 1.3 - 48px - 20px - 1px - 44px);
 }
 
 .qz-input-no-padding {
@@ -602,12 +602,15 @@ $at-timeline-line-color: $color-border-lighter !default;
   justify-content: center;
   align-items: center;
 }
-.flex-important{
+
+.flex-important {
   display: flex !important;
 }
-.text-center{
+
+.text-center {
   text-align: center;
 }
+
 .w-full {
   width: 100%;
 }
@@ -638,16 +641,26 @@ $at-timeline-line-color: $color-border-lighter !default;
     padding: 0;
   }
 }
-.white{
+
+.white {
   background: $color-bg;
   box-shadow: none;
 }
-.base-font-size{
+
+.base-font-size {
   font-size: $font-size-sm;
 }
-.at-avatar{
+
+.at-avatar {
   background-color: $color-bg-transparent;
   background: $color-bg-transparent;
   color: $color-bg-transparent;
   box-shadow: none;
+}
+
+.qz-nav-bar__right-feeback {
+  border: 1px solid rgba(222, 222, 222, 0.3) !important;
+  background: rgba(0, 0, 0, 0.15) !important;
+  border-radius: 46px !important;
+  height: 60px !important;
 }

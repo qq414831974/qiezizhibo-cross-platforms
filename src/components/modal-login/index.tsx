@@ -71,6 +71,7 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
     Taro.showLoading({title: global.LOADING_TEXT})
     const {handleCancel, handleConfirm, handleError} = this.props;
     const userLogin = this.userLogin;
+    console.log("getUserProfile")
     wx.getUserProfile({
       desc: '请先登录再进行操作',
       lang: 'zh_CN',

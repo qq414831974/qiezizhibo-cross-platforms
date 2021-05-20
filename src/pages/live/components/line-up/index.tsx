@@ -16,6 +16,8 @@ type PageOwnProps = {
   switchTab: any;
   loading: boolean;
   hidden: any;
+  tabContainerStyle?: any;
+  tabScrollStyle?: any;
 }
 
 type PageState = {
@@ -54,13 +56,13 @@ class LineUp extends Component<PageOwnProps, PageState> {
       return <View/>
     }
     return (
-      <View className="qz-lineup">
+      <View className="qz-lineup" style={this.props.tabContainerStyle}>
         <AtSegmentedControl
           values={[hostTeam.name, guestTeam.name]}
           onClick={this.handleClick}
           current={this.state.current}
         />
-        <ScrollView scrollY className="qz-lineup-scroll-content">
+        <ScrollView scrollY className="qz-lineup-scroll-content" style={this.props.tabScrollStyle}>
           {loading ?
             <View className="qz-lineup-content-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
             :

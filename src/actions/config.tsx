@@ -18,6 +18,7 @@ export const setVisit: any = createApiAction(config.VISIT, () => new Request().p
 export const setPayEnabled: any = createAction(config.CONFIG_PAY_ENABLED)
 export const setGiftEnabled: any = createAction(config.CONFIG_GIFT_ENABLED)
 export const getShareSentence: any = createApiAction(config.CONFIG_GET_SHARE_SENTENCE, () => new Request().get(api.API_GET_SHARE_SENTENCE, {}))
+export const getExpInfo: any = createApiAction(config.CONFIG_EXP, () => new Request().get(api.API_SYS_EXP, {}))
 
 export default bindActionCreators({
   getBannerConfig,
@@ -27,5 +28,6 @@ export default bindActionCreators({
   setVisit,
   setPayEnabled,
   setGiftEnabled,
-  getShareSentence
+  getShareSentence,
+  getExpInfo
 }, store.dispatch)
