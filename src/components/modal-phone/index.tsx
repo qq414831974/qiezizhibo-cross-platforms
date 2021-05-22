@@ -1,5 +1,5 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button} from '@tarojs/components'
 import Request from '../../utils/request'
@@ -32,7 +32,7 @@ interface ModalPhone {
   props: IProps;
 }
 
-class ModalPhone extends Component<PageOwnProps, PageState> {
+class ModalPhone extends Component<IProps, PageState> {
   static defaultProps = {
     handleClose: () => {
     },
@@ -43,6 +43,12 @@ class ModalPhone extends Component<PageOwnProps, PageState> {
     handleError: () => {
     },
   }
+  constructor(props) {
+    super(props)
+    this.state = {
+    }
+  }
+
   handleConfirm = async (value) => {
     Taro.showLoading({title: global.LOADING_TEXT})
     const {handleCancel, handleConfirm, handleError} = this.props;

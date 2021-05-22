@@ -1,6 +1,7 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro, {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Button, Image, Swiper, SwiperItem, Navigator, ScrollView} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import {AtNoticebar, AtIcon, AtCurtain, AtLoadMore} from 'taro-ui'
 import NavigationBar from './components/navigation-search-bar'
 import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
@@ -66,32 +67,18 @@ interface Home {
   props: IProps | any;
 }
 
-@withLogin("willMount")
+@withLogin("didMount")
 @withShare({})
-class Home extends Component<PageOwnProps, PageState> {
+class Home extends Component<IProps, PageState> {
   static defaultProps = {
     config: {},
     bannerConfig: [],
     wechatConfig: {},
     locationConfig: null,
   }
-  navRef = null;
+  navRef: any = null;
   bulletinIndex: number = 0;
   qqmapsdk: qqmapjs;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '茄子TV',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
-    disableScroll: true,
-  }
 
   constructor(props) {
     super(props)
@@ -120,16 +107,17 @@ class Home extends Component<PageOwnProps, PageState> {
     configAction.getShareSentence();
     configAction.getExpInfo();
     this.initBulletin();
-    if (this.$router.params.id && this.$router.params.page) {
-      let url = '/pages/' + this.$router.params.page + '/' + this.$router.params.page + '?id=' + this.$router.params.id;
+    const router = getCurrentInstance().router;
+    if (router && router.params && router.params.id && router.params.page) {
+      let url = '/pages/' + router.params.page + '/' + router.params.page + '?id=' + router.params.id;
       Taro.navigateTo({
         url: url,
         fail: () => {
           Taro.switchTab({url: url})
         }
       })
-    } else if (this.$router.params.page) {
-      let url = '/pages/' + this.$router.params.page + '/' + this.$router.params.page;
+    } else if (router && router.params && router.params.page) {
+      let url = '/pages/' + router.params.page + '/' + router.params.page;
       Taro.navigateTo({
         url: url,
         fail: () => {
@@ -295,7 +283,7 @@ class Home extends Component<PageOwnProps, PageState> {
   }
 
   // 小程序上拉加载
-  onReachBottom() {
+  onReachBottom = () => {
     this.nextPage();
   }
 
@@ -405,7 +393,7 @@ class Home extends Component<PageOwnProps, PageState> {
     if (this.state.bulletin && this.state.bulletin.content) {
       top = 84 + 30;
     }
-    if (this.navRef && this.navRef.state.configStyle.navHeight) {
+    if (this.navRef != null && this.navRef.state.configStyle.navHeight) {
       top = top + this.navRef.state.configStyle.navHeight;
     }
     return top;

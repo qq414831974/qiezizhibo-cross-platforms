@@ -1,7 +1,8 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtIcon, AtModal, AtModalContent, AtIndexes} from "taro-ui"
 import {View, Text} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './index.scss'
 import ModalLocation from "../../../../components/modal-location";
@@ -12,7 +13,6 @@ type PageStateProps = {
 }
 
 type PageDispatchProps = {
-  onCitySelect: (city, province?) => any;
   getLocation: (latitude, longitude, callbackFunc: any) => any;
   onClose: any;
   onCancel: any;
@@ -21,6 +21,7 @@ type PageDispatchProps = {
 type PageOwnProps = {
   location: { city: string, province: string },
   show: boolean;
+  onProvinceSelect: any;
 }
 
 type PageState = {
@@ -32,14 +33,23 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface LocationSelecter {
-  props: IProps | any;
+  props: IProps;
 }
 
-class LocationSelecter extends Component<PageOwnProps | PageStateProps, PageState> {
+class LocationSelecter extends Component<IProps, PageState> {
   static defaultProps = {
     location: {city: '福州市', province: "福建省"},
     areaList: [],
     show: false,
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      searchText: "",
+      locationShow: false,
+      locationLoading: false,
+    }
   }
 
   onProvinceSelect = (province) => {

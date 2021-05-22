@@ -1,7 +1,8 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtModal, AtModalContent, AtAvatar, AtDivider} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import { connect } from 'react-redux'
 
 import './index.scss'
 import {getYuan} from "../../utils/utils";
@@ -36,11 +37,11 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface ModalPay {
-  props: IProps | any;
+  props: IProps ;
 }
 
 
-class ModalPay extends Component<PageOwnProps | any, PageState> {
+class ModalPay extends Component<IProps , PageState> {
   static defaultProps = {}
 
   constructor(props) {

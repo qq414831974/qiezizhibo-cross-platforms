@@ -1,5 +1,5 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button} from '@tarojs/components'
 import Request from '../../utils/request'
@@ -34,7 +34,7 @@ interface ModalLogin {
   props: IProps;
 }
 
-class ModalLogin extends Component<PageOwnProps, PageState> {
+class ModalLogin extends Component<IProps, PageState> {
   static defaultProps = {
     handleClose: () => {
     },
@@ -44,6 +44,13 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
     },
     handleError: () => {
     },
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      canIUseGetUserProfile: false,
+    }
   }
 
   componentDidMount() {
@@ -56,7 +63,7 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
 
   handleGetUserInfoConfirm = (value) => {
     Taro.showLoading({title: global.LOADING_TEXT})
-    const {handleCancel, handleConfirm, handleError} = this.props;
+    const {handleCancel} = this.props;
     const userLogin = this.userLogin;
     if (value && value.detail && value.detail.errMsg === "getUserInfo:ok") {
       const userInfo = value.detail.userInfo;
@@ -69,7 +76,7 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
 
   handleConfirm = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
-    const {handleCancel, handleConfirm, handleError} = this.props;
+    const {handleCancel} = this.props;
     const userLogin = this.userLogin;
     console.log("getUserProfile")
     wx.getUserProfile({
@@ -86,7 +93,7 @@ class ModalLogin extends Component<PageOwnProps, PageState> {
     })
   }
   userLogin = (userInfo) => {
-    const {handleCancel, handleConfirm, handleError} = this.props;
+    const {handleConfirm, handleError} = this.props;
     let param: any = {};
     param.avatar = userInfo.avatarUrl;
     param.province = userInfo.province;

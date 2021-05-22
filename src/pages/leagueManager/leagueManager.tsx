@@ -1,7 +1,8 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro, {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Image, Text} from '@tarojs/components'
 import {AtActivityIndicator, AtTabs, AtTabsPane, AtMessage, AtFloatLayout, AtFab, AtToast} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import defaultLogo from '../../assets/default-logo.png'
 import cancel from '../../assets/cancel.png'
 
@@ -120,27 +121,13 @@ interface LeagueManager {
 }
 
 @withShare({})
-class LeagueManager extends Component<PageOwnProps, PageState> {
-  navRef = null;
+class LeagueManager extends Component<IProps, PageState> {
+  navRef: any = null;
   tabsY: number;
   socketTask: Taro.SocketTask | null
   timeout_gift: any = {};
   timeout_gift_show: any = {};
   giftRows: any = {left: [{}, {}, {}, {}, {}], right: [{}, {}, {}, {}, {}], unset: []};
-
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '茄子TV',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
-  }
 
   constructor(props) {
     super(props)
@@ -197,6 +184,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       leagueMemberOpen: false,
       userHaveLeagueMember: false,
       topSixHeats: null,
+      heatRankShow: false,
     }
   }
 
@@ -256,15 +244,15 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     if (this.props.userInfo && this.props.userInfo.userNo) {
       depositAction.getDeposit(this.props.userInfo.userNo);
     }
-    const query = Taro.createSelectorQuery();
-    query.select('.qz-league-manager-tabs').boundingClientRect(rect => {
-      this.tabsY = (rect as {
-        left: number
-        right: number
-        top: number
-        bottom: number
-      }).top;
-    }).exec();
+    // const query = Taro.createSelectorQuery();
+    // query.select('.qz-league-manager-tabs').boundingClientRect(rect => {
+    //   this.tabsY = (rect as {
+    //     left: number
+    //     right: number
+    //     top: number
+    //     bottom: number
+    //   }).top;
+    // }).exec();
   }
 
   componentWillUnmount() {
@@ -279,11 +267,12 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
 
   getParamId = () => {
     let id;
-    if (this.$router.params != null) {
-      if (this.$router.params.id == null && this.$router.params.scene != null) {
-        id = this.$router.params.scene
-      } else if (this.$router.params.id != null) {
-        id = this.$router.params.id
+    const router = getCurrentInstance().router;
+    if (router && router.params != null) {
+      if (router.params.id == null && router.params.scene != null) {
+        id = router.params.scene
+      } else if (router.params.id != null) {
+        id = router.params.id
       } else {
         return null
       }
@@ -898,7 +887,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
       tabs[global.LEAGUE_TABS_TYPE.leaguePlayer] = tabIndex;
       tabIndex = tabIndex + 1;
     }
-    return {tabList, tabs};
+    const tabKey = Object.keys(tabs).join(",");
+    return {tabList, tabs, tabKey};
   }
   showDownLoading = () => {
     this.setState({downLoading: true})
@@ -1025,7 +1015,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   render() {
     const {leaguePlayers, leagueTeams} = this.props
     const {league, leagueRankSetting} = this.state
-    let {tabList, tabs} = this.getTabsList();
+    let {tabList, tabs, tabKey} = this.getTabsList();
 
     if (this.state.loading) {
       return <View className="qz-league-manager-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
@@ -1046,7 +1036,8 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             <Image className="img img-round"
                    src={league.headImg ? league.headImg : defaultLogo}/>
             <View className='text'>{league.shortName ? league.shortName : league.name}</View>
-            {this.state.userHaveLeagueMember ? <Image className="img" src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/vip_card.png"/> : null}
+            {this.state.userHaveLeagueMember ? <Image className="img"
+                                                      src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/vip_card.png"/> : null}
           </View>
           }
         </View>
@@ -1058,6 +1049,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
             className='qz-league-manager__top-tabs__content qz-custom-tabs'
             current={this.state.currentTab}
             tabList={tabList}
+            key={tabKey}
             onClick={this.switchTab}>
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.leagueRule]}>
               <LeagueRegulations
@@ -1263,35 +1255,35 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
           onPayConfirm={this.onPayConfirm}
           onPayClose={this.onPayConfirmClose}
         />
-        {/*<RectFab*/}
-        {/*  className="qz-fab-rect-multi-line"*/}
-        {/*  onClick={this.handleHeatRankClick}*/}
-        {/*  background="#ECF5FD"*/}
-        {/*  top={`calc(${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px + 35px + 44px + 42px)`}*/}
-        {/*>*/}
-        {/*  <View className="qz-league-manager-heat">*/}
-        {/*    <View className="w-full center">*/}
-        {/*      <Image className="qz-league-manager-heat-title" src={hotIcon}/>*/}
-        {/*    </View>*/}
-        {/*    <View className="w-full center qz-league-manager-heat-items">*/}
-        {/*      {this.state.topSixHeats && this.state.topSixHeats.filter(record => record.number <= 3).map(data => {*/}
-        {/*        if (this.state.heatType && (this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT)) {*/}
-        {/*          return <Image key={data.id} className="qz-league-manager-heat-img-overlap"*/}
-        {/*                        src={data.player && data.player.headImg ? data.player.headImg : noperson}/>*/}
-        {/*        }*/}
-        {/*        return <Image key={data.id} className="qz-league-manager-heat-img-overlap"*/}
-        {/*                      src={data.team && data.team.headImg ? data.team.headImg : noperson}/>*/}
-        {/*      })}*/}
-        {/*    </View>*/}
-        {/*    <View className='at-icon at-icon-chevron-right qz-league-manager-heat-arrow'/>*/}
-        {/*  </View>*/}
-        {/*</RectFab>*/}
-        {/*<HeatRank*/}
-        {/*  heatRanks={this.state.topSixHeats}*/}
-        {/*  loading={this.state.teamHeatLoading || this.state.playerHeatLoading}*/}
-        {/*  isOpened={this.state.heatRankShow}*/}
-        {/*  handleCancel={this.handleHeatRankCancel}*/}
-        {/*  heatType={this.state.heatType}/>*/}
+        <RectFab
+          className="qz-fab-rect-multi-line"
+          onClick={this.handleHeatRankClick}
+          background="#ECF5FD"
+          top={`calc(${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px + 35px + 44px + 42px)`}
+        >
+          <View className="qz-league-manager-heat">
+            <View className="w-full center">
+              <Image className="qz-league-manager-heat-title" src={hotIcon}/>
+            </View>
+            <View className="w-full center qz-league-manager-heat-items">
+              {this.state.topSixHeats && this.state.topSixHeats.filter(record => record.number <= 3).map(data => {
+                if (this.state.heatType && (this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT)) {
+                  return <Image key={data.id} className="qz-league-manager-heat-img-overlap"
+                                src={data.player && data.player.headImg ? data.player.headImg : noperson}/>
+                }
+                return <Image key={data.id} className="qz-league-manager-heat-img-overlap"
+                              src={data.team && data.team.headImg ? data.team.headImg : noperson}/>
+              })}
+            </View>
+            <View className='at-icon at-icon-chevron-right qz-league-manager-heat-arrow'/>
+          </View>
+        </RectFab>
+        <HeatRank
+          heatRanks={this.state.topSixHeats}
+          loading={this.state.teamHeatLoading || this.state.playerHeatLoading}
+          isOpened={this.state.heatRankShow}
+          handleCancel={this.handleHeatRankCancel}
+          heatType={this.state.heatType}/>
       </View>
     )
   }

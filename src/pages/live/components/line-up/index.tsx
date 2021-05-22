@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, ScrollView, Text, Image} from '@tarojs/components'
 import {AtSegmentedControl, AtActivityIndicator} from 'taro-ui'
 import './index.scss'
@@ -30,7 +30,7 @@ interface LineUp {
   props: IProps;
 }
 
-class LineUp extends Component<PageOwnProps, PageState> {
+class LineUp extends Component<IProps, PageState> {
   static defaultProps = {}
 
   constructor(props) {

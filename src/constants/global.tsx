@@ -152,7 +152,7 @@ export class CacheManager {
   static instance: CacheManager;
   CACHE_ENABLED: boolean;
 
-  static getInstance() {
+  static getInstance = () => {
     if (!CacheManager.instance) {
       CacheManager.instance = new CacheManager();
     }

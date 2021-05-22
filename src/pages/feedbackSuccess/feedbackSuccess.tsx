@@ -1,6 +1,7 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro, {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import { connect } from 'react-redux'
 import {AtIcon, AtButton} from 'taro-ui'
 
 import './feedbackSuccess.scss'
@@ -25,20 +26,7 @@ interface FeedbackSuccess {
   props: IProps;
 }
 
-class FeedbackSuccess extends Component<PageOwnProps, PageState> {
-
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '',
-    navigationBarBackgroundColor: '#ffffff',
-    navigationBarTextStyle: 'black',
-  }
+class FeedbackSuccess extends Component<IProps, PageState> {
 
   constructor(props) {
     super(props)
@@ -55,8 +43,9 @@ class FeedbackSuccess extends Component<PageOwnProps, PageState> {
   }
 
   componentDidMount() {
-    if (this.$router.params && this.$router.params.type != null) {
-      const type = Number(this.$router.params.type);
+    const router = getCurrentInstance().router;
+    if (router && router.params && router.params.type != null) {
+      const type = Number(router.params.type);
       let title = "反馈已提交"
       let hint = "已将你的反馈内容提交给开发者"
       if (type == 4) {

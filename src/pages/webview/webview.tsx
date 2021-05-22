@@ -1,6 +1,7 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, WebView} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './webview.scss'
 
@@ -20,19 +21,14 @@ interface Webview {
   props: IProps;
 }
 
-class Webview extends Component<PageOwnProps, PageState> {
+class Webview extends Component<IProps, PageState> {
 
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '茄子TV',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+    }
   }
 
   componentWillMount() {
@@ -52,10 +48,12 @@ class Webview extends Component<PageOwnProps, PageState> {
   }
 
   render() {
+    const router = getCurrentInstance().router;
+
     return (
       <View className='qz-webview-container'>
-        {this.$router.params && this.$router.params.url ?
-          <WebView src={decodeURIComponent(this.$router.params.url)}/> : null}
+        {router && router.params && router.params.url ?
+          <WebView src={decodeURIComponent(router.params.url)}/> : null}
       </View>
     )
   }

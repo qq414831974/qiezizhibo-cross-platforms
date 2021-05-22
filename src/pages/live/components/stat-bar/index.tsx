@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text} from '@tarojs/components'
 import './index.scss'
 
@@ -25,9 +25,13 @@ interface StatBar {
   props: IProps;
 }
 
-class StatBar extends Component<PageOwnProps, PageState> {
+class StatBar extends Component<IProps, PageState> {
   static defaultProps = {}
-
+  constructor(props) {
+    super(props)
+    this.state = {
+    }
+  }
   render() {
     const {percent, leftColor = "#FF4949", rightColor = "#78A4F4", leftText = "", rightText = "", leftMoveClass = "", rightMoveClass = "", className = ""} = this.props
     let leftPercent = percent;

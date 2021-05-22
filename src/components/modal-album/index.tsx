@@ -1,9 +1,9 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button} from '@tarojs/components'
 import defaultLogo from '../../assets/default-logo.png'
 import './index.scss'
-import "taro-ui/dist/style/components/article.scss";
 import * as global from "../../constants/global";
 
 
@@ -28,7 +28,7 @@ interface ModalAlbum {
   props: IProps;
 }
 
-class ModalAlbum extends Component<PageOwnProps, PageState> {
+class ModalAlbum extends Component<IProps, PageState> {
   static defaultProps = {
     handleClose: () => {
     },
@@ -38,6 +38,11 @@ class ModalAlbum extends Component<PageOwnProps, PageState> {
     },
     handleError: () => {
     },
+  }
+  constructor(props) {
+    super(props)
+    this.state = {
+    }
   }
   handleConfirm = (value) => {
     Taro.showLoading({title: global.LOADING_TEXT})

@@ -1,7 +1,7 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtModal, AtModalHeader, AtModalContent, AtModalAction, AtInput} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import {View, Button} from '@tarojs/components'
 import {toLogin} from '../../../../utils/utils'
 import './index.scss'
@@ -37,10 +37,10 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface ModalDeposit {
-  props: IProps | any;
+  props: IProps;
 }
 
-class ModalDeposit extends Component<PageOwnProps | any, PageState> {
+class ModalDeposit extends Component<IProps, PageState> {
 
   constructor(props) {
     super(props)

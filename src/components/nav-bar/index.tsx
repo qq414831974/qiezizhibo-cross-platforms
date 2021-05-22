@@ -1,4 +1,5 @@
-import Taro, {Component} from '@tarojs/taro';
+import Taro from '@tarojs/taro';
+import {Component} from 'react'
 import {View} from '@tarojs/components';
 import {AtButton} from 'taro-ui'
 import {isFunction} from '../../utils/utils';
@@ -96,7 +97,24 @@ type PageStateProps = {}
 
 type PageDispatchProps = {}
 
-type PageOwnProps = {}
+type PageOwnProps = {
+  onSearch?: any;
+  onBack?: any;
+  onHome?: any;
+  delta?: any;
+  back?: any;
+  home?: any;
+  title?: any;
+  color?: any;
+  background?: any,
+  backgroundColorTop?: any,
+  searchBar?: any,
+  searchText?: any,
+  iconTheme?: any,
+  extClass?: any,
+  renderCenter?: any,
+  renderLeft?: any,
+}
 
 type PageState = {
   configStyle: any;
@@ -105,10 +123,10 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface NavBar {
-  props: IProps | any;
+  props: IProps;
 }
 
-class NavBar extends Component<PageOwnProps, PageState> {
+class NavBar extends Component<IProps, PageState> {
   constructor(props) {
     super(props);
     this.state = {

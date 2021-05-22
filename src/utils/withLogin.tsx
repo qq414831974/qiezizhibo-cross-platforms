@@ -30,7 +30,7 @@ const LIFE_CYCLE_MAP = ['willMount', 'didMount', 'didShow'];
   }
 }
  */
-function withLogin(lifecycle = 'willMount') {
+function withLogin(lifecycle = 'didMount') {
   // 异常规避提醒
   if (LIFE_CYCLE_MAP.indexOf(lifecycle) < 0) {
     console.warn(
@@ -99,21 +99,21 @@ function withLogin(lifecycle = 'willMount') {
       $_autoLogin = () => {
         // ...这里是登录逻辑
         // return true;
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve, __reject) => {
           Taro.showLoading({title: global.LOADING_TEXT})
           if (await hasLogin()) {
             const openid = await getStorage('wechatOpenid');
             userAction.getUserInfo({openId: openid}, {
               success: () => {
                 Taro.hideLoading()
-                resolve()
+                resolve(null)
               }, failed: () => {
                 Taro.hideLoading()
-                resolve();
+                resolve(null)
               }
             });
           } else {
-            resolve()
+            resolve(null)
             Taro.hideLoading()
           }
         })

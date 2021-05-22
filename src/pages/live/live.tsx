@@ -1,7 +1,8 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro, {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {Image, ScrollView, Text, Video, View} from '@tarojs/components'
 import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtMessage, AtTabs, AtTabsPane, AtToast} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import { connect } from 'react-redux'
 import MatchUp from './components/match-up'
 import NooiceBar from './components/nooice-bar'
 import GiftNotify from '../../components/gift-notify'
@@ -37,7 +38,7 @@ import {
   TABS_TYPE,
   SUBSCRIBE_TEMPLATES,
   PAY_TYPE,
-  CacheManager, default as global
+  CacheManager
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import star from '../../assets/live/star.png'
@@ -227,16 +228,8 @@ const eventType = {
 };
 
 @withShare({})
-class Live extends Component<PageOwnProps, PageState> {
-
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  navRef = null;
+class Live extends Component<IProps, PageState> {
+  navRef: any = null;
   socketTask: Taro.SocketTask | null
   videoContext: Taro.VideoContext | null
   animElemIds: any = {};
@@ -247,13 +240,6 @@ class Live extends Component<PageOwnProps, PageState> {
   giftRows: any = {left: [{}, {}, {}, {}, {}], right: [{}, {}, {}, {}, {}], unset: []};
   isupdating: boolean = false;
   enterTime: any;
-
-  config: Config = {
-    navigationBarTitleText: '茄子TV',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
-  }
 
   constructor(props) {
     super(props)
@@ -391,9 +377,6 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   componentWillMount() {
-    matchAction.getMatchInfo_clear()
-    matchAction.getMatchComment_clear()
-    liveAction.getLiveMediaList_clear()
   }
 
   componentDidMount() {
@@ -526,11 +509,12 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   getParamId = () => {
     let id;
-    if (this.$router.params != null) {
-      if (this.$router.params.id == null && this.$router.params.scene != null) {
-        id = this.$router.params.scene
-      } else if (this.$router.params.id != null) {
-        id = this.$router.params.id
+    const router = getCurrentInstance().router;
+    if (router && router.params != null) {
+      if (router.params.id == null && router.params.scene != null) {
+        id = router.params.scene
+      } else if (router.params.id != null) {
+        id = router.params.id
       } else {
         return null
       }
@@ -687,7 +671,7 @@ class Live extends Component<PageOwnProps, PageState> {
           this.socketTask && this.socketTask.send({
             data: JSON.stringify(params),
             success: () => {
-              resolve();
+              resolve(null);
             },
             fail: () => {
               reject();
@@ -1213,11 +1197,11 @@ class Live extends Component<PageOwnProps, PageState> {
     const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
     return new Promise((resolve, reject) => {
       if (commentList.length >= 10) {
-        resolve();
+        resolve(null);
         return;
       }
       if (this.props.commentList.current >= this.props.commentList.pages) {
-        resolve();
+        resolve(null);
         return;
       }
       this.setState({chatLoading: true})
@@ -1247,7 +1231,7 @@ class Live extends Component<PageOwnProps, PageState> {
             chatLoading: false,
           })
         }
-        resolve();
+        resolve(null);
       }, () => {
         reject();
       })
@@ -1904,7 +1888,8 @@ class Live extends Component<PageOwnProps, PageState> {
       tabs[TABS_TYPE.lineUp] = tabIndex;
       tabIndex = tabIndex + 1;
     }
-    return {tabList, tabs};
+    const tabKey = Object.keys(tabs).join(",");
+    return {tabList, tabs, tabKey};
   }
 
   showGiftPanel = async () => {
@@ -2222,7 +2207,7 @@ class Live extends Component<PageOwnProps, PageState> {
         diffTime: "00:00"
       }, liveStatus, leftNooice = 0, rightNooice = 0, teamHeats = null, playerHeats = null, topPlayerHeats = null
     } = this.state;
-    let {tabList, tabs} = this.getTabsList(match);
+    let {tabList, tabs, tabKey} = this.getTabsList(match);
 
     return (
       <View className='qz-live-content'>
@@ -2352,7 +2337,8 @@ class Live extends Component<PageOwnProps, PageState> {
             <AtTabs current={this.state.currentTab}
                     className="qz-live__top-tabs__content"
                     tabList={tabList}
-                    onClick={this.switchTab.bind(this)}>
+                    key={tabKey}
+                    onClick={this.switchTab}>
               {this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
                   <HeatPlayer
@@ -2553,9 +2539,7 @@ class Live extends Component<PageOwnProps, PageState> {
           handleToGiftSend={this.switchToGiftSend}
           payEnabled={payEnabled}
           onPayConfirm={this.onPayConfirm}
-          onPayClose={this.onPayConfirmClose}
-          leagueMemberRule={this.state.leagueMemberRule}
-          onLeagueMemberShow={this.onLeagueMemberShow}/>
+          onPayClose={this.onPayConfirmClose}/>
         <HeatReward
           heatRule={this.state.heatRule}
           loading={this.state.heatRule == null}

@@ -1,4 +1,5 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Image, ScrollView} from '@tarojs/components'
 import {AtSearchBar, AtDivider, AtButton, AtActivityIndicator, AtLoadMore} from 'taro-ui'
 import RoundButton from '../../components/round-button'
@@ -64,8 +65,22 @@ const STATUS = {
   finish: 2,
 }
 
-class HeatPlayer extends Component<PageOwnProps, PageState> {
+class HeatPlayer extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      timerID_CountDown: null,
+      startDiffDayTime: null,
+      endDiffDayTime: null,
+      searchText: "",
+      currentPlayerHeat: null,
+      loadingMore: false,
+      pulldownRefresh: false,
+      heatStatus: null,
+    }
+  }
 
   componentDidMount() {
     this.props.onPlayerHeatRefresh && this.props.onPlayerHeatRefresh(this.refresh);
@@ -79,11 +94,11 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
 
   refresh = (first?) => {
     this.props.onGetPlayerHeatInfo(1, 40, this.state.searchText).then((res) => {
-      if(first){
-      this.setState({currentPlayerHeat: res[0]},()=>{
-        this.refreshCurrentPlayer();
-      })
-      }else{
+      if (first) {
+        this.setState({currentPlayerHeat: res[0]}, () => {
+          this.refreshCurrentPlayer();
+        })
+      } else {
         this.refreshCurrentPlayer();
       }
     });
@@ -212,7 +227,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     this.nextPage();
   }
 
-  onPullDownRefresh() {
+  onPullDownRefresh = ()=> {
     this.setState({pulldownRefresh: true})
     Taro.showLoading({title: global.LOADING_TEXT})
     this.refresh();
@@ -276,6 +291,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
       url: "/pages/feedback/feedback",
     })
   }
+
   render() {
     const {startDiffDayTime, endDiffDayTime, currentPlayerHeat = null, pulldownRefresh = false} = this.state
     const {hidden = false, heatType} = this.props
@@ -290,7 +306,8 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     }
 
     return (
-      <View className={`${this.props.isLeauge ? "qz-heat-player-container-league" : "qz-heat-player-container"}`} style={this.props.tabContainerStyle}>
+      <View className={`${this.props.isLeauge ? "qz-heat-player-container-league" : "qz-heat-player-container"}`}
+            style={this.props.tabContainerStyle}>
         <View className="qz-heat-player-header">
           <View className="qz-heat-player-header__search">
             <AtSearchBar

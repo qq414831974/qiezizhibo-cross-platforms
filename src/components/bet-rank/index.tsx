@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Image, Button} from '@tarojs/components'
 import {AtModal, AtModalContent, AtModalAction} from "taro-ui"
 import './index.scss'
@@ -29,7 +29,7 @@ interface BetRank {
 }
 
 
-class BetRank extends Component<PageOwnProps, PageState> {
+class BetRank extends Component<IProps, PageState> {
   static defaultProps = {}
 
   constructor(props) {
@@ -71,7 +71,7 @@ class BetRank extends Component<PageOwnProps, PageState> {
                           </View>
                           <View className='qz-betrank-list__item-avatar'>
                             <Image mode='scaleToFill' src={item.user && item.user.avatar ? item.user.avatar : NoUser}/>
-                            {item.user.userExp?
+                            {item.user.userExp ?
                               <View className='qz-betrank-list__item-level'
                                     style={{backgroundColor: global.LEVEL_COLOR[Math.floor(getExpInfoByExpValue(this.props.expInfo, item.user.userExp.exp).level / 10)]}}>
                                 Lv.{getExpInfoByExpValue(this.props.expInfo, item.user.userExp.exp).level}

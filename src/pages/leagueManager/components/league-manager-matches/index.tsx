@@ -1,6 +1,6 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, ScrollView} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import {AtActivityIndicator, AtTabs, AtTabsPane} from 'taro-ui'
 import MatchList from '../match-list'
 
@@ -18,6 +18,8 @@ type PageOwnProps = {
   leagueMatch: any;
   loading: boolean;
   visible: boolean;
+  tabScrollStyle: any;
+  tabContainerStyle: any;
 }
 
 type PageState = {
@@ -29,26 +31,19 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface LeagueManagerMatches {
-  props: IProps | any;
+  props: IProps;
 }
 
-class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
+class LeagueManagerMatches extends Component<IProps, PageState> {
   static defaultProps = {}
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '茄子TV',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-  }
 
   constructor(props) {
     super(props)
+    this.state = {
+      currentTab: 0,
+      matchLoading: false,
+      matchLoadingMore: false,
+    }
   }
 
   componentWillMount() {
@@ -89,7 +84,7 @@ class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
   }
 
   // 小程序上拉加载
-  onReachBottom() {
+  onReachBottom = () => {
     this.nextPage(this.state.currentTab);
   }
 
@@ -122,7 +117,7 @@ class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
       pageSize: 5,
       sortOrder: orderby,
       leagueId: leagueMatch.id,
-      round: tabList[this.state.currentTab].title
+      round: tabList[tab].title
     }).then(() => {
       this.setState({matchLoadingMore: false})
     })

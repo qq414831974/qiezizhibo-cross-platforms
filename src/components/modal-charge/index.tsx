@@ -1,6 +1,6 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
-import {connect} from '@tarojs/redux'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
+import { connect } from 'react-redux'
 import {AtActionSheet, AtActionSheetItem, AtAvatar, AtDivider, AtModal, AtModalAction, AtModalContent} from "taro-ui"
 import {Button, Image, Text, View} from '@tarojs/components'
 import Request from '../../utils/request'
@@ -42,6 +42,7 @@ interface SignType {
 
 type PageStateProps = {
   isOpened: boolean,
+  deposit: any,
 }
 
 type PageDispatchProps = {
@@ -73,11 +74,21 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface ModalCharge {
-  props: IProps | any;
+  props: IProps ;
 }
 
-class ModalCharge extends Component<PageOwnProps | any, PageState> {
-
+class ModalCharge extends Component<IProps, PageState> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      isChargeOpen: false,
+      isMonopolyOpen: false,
+      isPaying: false,
+      isMonth: false,
+      isMonopoly: false,
+      anonymous: false,
+    }
+  }
   handleConfirm = ({isMonth, isMonopoly, anonymous}) => {
     const charge = this.props.charge;
     let price = 0;
@@ -267,9 +278,6 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
       return 10;
     }
     return Number((getJiao(giftDiscountPrice) / getJiao(charge.monthlyPrice)).toFixed(2)) * 10;
-  }
-  getOpenId = () => {
-    return this.props.user ? this.props.user.openId : null;
   }
 
   render() {

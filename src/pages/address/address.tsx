@@ -1,7 +1,8 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtButton, AtLoadMore, AtList, AtListItem} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './address.scss'
 import Request from "../../utils/request";
@@ -26,23 +27,19 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface Address {
-  props: IProps | any;
+  props: IProps;
 }
 
-class Address extends Component<PageOwnProps | any, PageState> {
-  navRef = null;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '我的地址',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
+class Address extends Component<IProps, PageState> {
+  navRef: any = null;
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+      updateLoading: false,
+      address: null,
+    }
   }
 
   componentWillMount() {

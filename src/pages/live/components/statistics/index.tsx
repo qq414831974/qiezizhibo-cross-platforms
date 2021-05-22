@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text} from '@tarojs/components'
 import './index.scss'
 import StatBar from '../stat-bar';
@@ -141,9 +141,13 @@ interface Statistics {
   props: IProps;
 }
 
-class Statistics extends Component<PageOwnProps, PageState> {
+class Statistics extends Component<IProps, PageState> {
   static defaultProps = {}
-
+  constructor(props) {
+    super(props)
+    this.state = {
+    }
+  }
   getStatisticsValue = (item, statistics, matchInfo): any => {
     const key = item.key;
     const require = item.require;

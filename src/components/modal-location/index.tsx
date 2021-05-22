@@ -1,5 +1,5 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button} from '@tarojs/components'
 import defaultLogo from '../../assets/default-logo.png'
@@ -28,7 +28,7 @@ interface ModalLocation {
   props: IProps;
 }
 
-class ModalLocation extends Component<PageOwnProps, PageState> {
+class ModalLocation extends Component<IProps, PageState> {
   static defaultProps = {
     handleClose: () => {
     },
@@ -38,6 +38,11 @@ class ModalLocation extends Component<PageOwnProps, PageState> {
     },
     handleError: () => {
     },
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {}
   }
   handleConfirm = (value) => {
     Taro.showLoading({title: global.LOADING_TEXT})

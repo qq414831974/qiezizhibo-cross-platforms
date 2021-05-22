@@ -1,4 +1,5 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Image, ScrollView} from '@tarojs/components'
 import {AtSearchBar, AtDivider, AtButton, AtActivityIndicator, AtLoadMore} from 'taro-ui'
 
@@ -63,8 +64,22 @@ const STATUS = {
   finish: 2,
 }
 
-class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
+class HeatLeagueTeam extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      timerID_CountDown: null,
+      startDiffDayTime: null,
+      endDiffDayTime: null,
+      searchText: "",
+      currentTeamHeat: null,
+      loadingMore: false,
+      pulldownRefresh: false,
+      heatStatus: null,
+    }
+  }
 
   componentDidMount() {
     this.props.onTeamHeatRefresh && this.props.onTeamHeatRefresh(this.refresh);
@@ -211,7 +226,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     this.nextPage();
   }
 
-  onPullDownRefresh() {
+  onPullDownRefresh=()=> {
     this.setState({pulldownRefresh: true})
     Taro.showLoading({title: global.LOADING_TEXT})
     this.refresh();
@@ -279,6 +294,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
       url: "/pages/feedback/feedback",
     })
   }
+
   render() {
     const {startDiffDayTime, endDiffDayTime, currentTeamHeat = null, pulldownRefresh = false} = this.state
     const {hidden = false} = this.props
@@ -293,7 +309,8 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     }
 
     return (
-      <View className={`${this.props.isLeague ? "qz-heat-team-container-league" : "qz-heat-team-container"}`} style={this.props.tabContainerStyle}>
+      <View className={`${this.props.isLeague ? "qz-heat-team-container-league" : "qz-heat-team-container"}`}
+            style={this.props.tabContainerStyle}>
         <View className="qz-heat-team-header">
           <View className="qz-heat-team-header__search">
             <AtSearchBar

@@ -1,7 +1,8 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtSearchBar, AtIcon, AtModal, AtModalContent, AtIndexes} from "taro-ui"
 import {View, Text} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './index.scss'
 import ModalLocation from "../../../../components/modal-location";
@@ -19,6 +20,7 @@ type PageDispatchProps = {
 
 type PageOwnProps = {
   location: { city: string, province: string },
+  onProvinceSelect: any,
 }
 
 type PageState = {
@@ -31,14 +33,25 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface NavigationBar {
-  props: IProps | any;
+  props: IProps;
 }
 
-class NavigationBar extends Component<PageOwnProps | PageStateProps, PageState> {
+class NavigationBar extends Component<IProps, PageState> {
   static defaultProps = {
     location: {city: '福州市', province: "福建省"},
     areaList: [],
   }
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      searchText: '',
+      cityModalOpen: false,
+      locationShow: false,
+      locationLoading: false,
+    }
+  }
+
   onSearchChange = (value) => {
     this.setState({
       searchText: value

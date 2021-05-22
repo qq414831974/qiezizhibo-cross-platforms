@@ -1,8 +1,9 @@
 import classNames from 'classnames'
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtIcon} from "taro-ui"
 import {View, Text, Image, Button} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import { connect } from 'react-redux'
 import './index.scss'
 import * as global from "../../constants/global";
 import {getStorage, getYuan, toLogin} from "../../utils/utils";
@@ -59,7 +60,7 @@ interface LeagueMember {
   props: IProps | any;
 }
 
-class LeagueMember extends Component<PageOwnProps | any, PageState> {
+class LeagueMember extends Component<IProps, PageState> {
 
   constructor(props) {
     super(props)

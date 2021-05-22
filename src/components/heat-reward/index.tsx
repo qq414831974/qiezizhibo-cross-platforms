@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Image, Button} from '@tarojs/components'
 import {AtActivityIndicator, AtModal, AtModalContent, AtModalAction} from "taro-ui"
 import './index.scss'
@@ -26,7 +26,7 @@ interface HeatReward {
   props: IProps;
 }
 
-class HeatReward extends Component<PageOwnProps, PageState> {
+class HeatReward extends Component<IProps, PageState> {
   static defaultProps = {}
 
   constructor(props) {

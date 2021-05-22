@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Image} from '@tarojs/components'
 import './index.scss'
 import NoUser from '../../assets/no-user.png'
@@ -32,7 +32,7 @@ const rowData = {
   4: "10%",
 }
 
-class GiftNotify extends Component<PageOwnProps, PageState> {
+class GiftNotify extends Component<IProps, PageState> {
   static defaultProps = {}
 
   constructor(props) {

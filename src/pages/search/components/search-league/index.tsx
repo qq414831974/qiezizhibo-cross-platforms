@@ -1,4 +1,5 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtLoadMore, AtActivityIndicator} from 'taro-ui'
 import LeagueItem from '../../../../components/league-item'
@@ -29,23 +30,12 @@ interface SearchLeague {
   props: IProps;
 }
 
-class SearchLeague extends Component<PageOwnProps, PageState> {
+class SearchLeague extends Component<IProps, PageState> {
   static defaultProps = {}
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '搜索',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-  }
 
   constructor(props) {
     super(props)
+    this.state = {}
   }
 
   componentWillMount() {

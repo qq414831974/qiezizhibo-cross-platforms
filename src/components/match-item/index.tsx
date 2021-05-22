@@ -1,7 +1,5 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
-import {AtAvatar} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {Component} from 'react'
+import {connect} from 'react-redux'
 import {View, Text, Image} from '@tarojs/components'
 import defaultLogo from '../../assets/default-logo.png'
 import './index.scss'
@@ -41,11 +39,16 @@ type PageState = {}
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface MatchItem {
-  props: IProps | any;
+  props: IProps;
 }
 
-class MatchItem extends Component<PageOwnProps | any, PageState> {
+class MatchItem extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
 
   onItemClick = () => {
     if (this.props.matchInfo.available || this.props.forceClick) {
@@ -67,7 +70,8 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
       <View className={`qz-match-item ${matchInfo.isBetEnable && showBet ? "qz-match-item-big" : ""} ${className}`}
             onClick={this.onItemClick}>
         {matchInfo.hostTeam != null && matchInfo.guestTeam != null ?
-          <View className={`qz-match-item-content ${matchInfo.isBetEnable && showBet? "qz-match-item-content-big" : ""}`}>
+          <View
+            className={`qz-match-item-content ${matchInfo.isBetEnable && showBet ? "qz-match-item-content-big" : ""}`}>
             {((matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
               <View className="qz-match-item__charge">
                 {matchInfo.isMonopoly ?
@@ -92,7 +96,8 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
               : null}
             <View className='qz-match-item__team'>
               <View className="qz-match-item__team-avatar">
-                <Image src={matchInfo.hostTeam && matchInfo.hostTeam.headImg ? matchInfo.hostTeam.headImg : defaultLogo}/>
+                <Image
+                  src={matchInfo.hostTeam && matchInfo.hostTeam.headImg ? matchInfo.hostTeam.headImg : defaultLogo}/>
               </View>
               <Text
                 className="qz-match-item__team-name">
@@ -140,7 +145,8 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
             </View>
             <View className='qz-match-item__team'>
               <View className="qz-match-item__team-avatar">
-                <Image src={matchInfo.guestTeam && matchInfo.guestTeam.headImg ? matchInfo.guestTeam.headImg : defaultLogo}/>
+                <Image
+                  src={matchInfo.guestTeam && matchInfo.guestTeam.headImg ? matchInfo.guestTeam.headImg : defaultLogo}/>
               </View>
               <Text
                 className="qz-match-item__team-name">

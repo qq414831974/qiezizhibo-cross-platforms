@@ -1,8 +1,8 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button, Input} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import Request from '../../utils/request'
 import {getStorage, toLogin} from '../../utils/utils'
@@ -75,10 +75,10 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface ModalGift {
-  props: IProps | any;
+  props: IProps;
 }
 
-class ModalGift extends Component<PageOwnProps | any, PageState> {
+class ModalGift extends Component<IProps, PageState> {
 
   constructor(props) {
     super(props)

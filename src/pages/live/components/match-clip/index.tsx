@@ -1,4 +1,5 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Image} from '@tarojs/components'
 import './index.scss'
 import defaultPoster from '../../../../assets/default-poster.jpg';
@@ -21,8 +22,13 @@ interface MatchClip {
   props: IProps;
 }
 
-class MatchClip extends Component<PageOwnProps, PageState> {
+class MatchClip extends Component<IProps, PageState> {
   static defaultProps = {}
+  constructor(props) {
+    super(props)
+    this.state = {
+    }
+  }
   onMediaClick = (mediaId) => {
     if(this.props.needPay){
       Taro.showToast({

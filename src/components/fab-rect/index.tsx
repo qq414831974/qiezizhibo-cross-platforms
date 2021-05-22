@@ -1,6 +1,5 @@
-import Taro, {Component} from '@tarojs/taro'
-import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
-import {View, Text, Button} from '@tarojs/components'
+import {Component} from 'react'
+import {View} from '@tarojs/components'
 import './index.scss'
 
 
@@ -26,10 +25,17 @@ interface RectFab {
   props: IProps;
 }
 
-class RectFab extends Component<PageOwnProps, PageState> {
+class RectFab extends Component<IProps, PageState> {
   static defaultProps = {
     onClick: () => {
     },
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      activeClass: null,
+    }
   }
 
   componentDidMount() {

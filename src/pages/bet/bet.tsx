@@ -1,7 +1,8 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro, {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Button, Picker} from '@tarojs/components'
 import {AtLoadMore, AtAvatar, AtIcon, AtButton, AtModal, AtModalContent, AtModalAction} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './bet.scss'
 import Request from "../../utils/request";
@@ -186,21 +187,35 @@ interface Bet {
   props: IProps;
 }
 
-class Bet extends Component<PageOwnProps, PageState> {
-  navRef = null;
+class Bet extends Component<IProps, PageState> {
+  navRef: any = null;
 
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '比分竞猜',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+      total: 0,
+      current: 0,
+      match: null,
+      betInfo: null,
+      startDiffDayTime: null,
+      endDiffDayTime: null,
+      timerID_CountDown: null,
+      betStatus: null,
+      rankShow: false,
+      ruleShow: false,
+      betShow: false,
+      currentBetScore: null,
+      currentBetScoreSelect: null,
+      betRanks: null,
+      betRanksLoading: null,
+      freeBetLoading: false,
+      freeBetTimes: 0,
+      betInputShow: false,
+      betInputHost: null,
+      betInputGuest: null,
+      costomType: null,
+    }
   }
 
   componentWillMount() {
@@ -270,12 +285,13 @@ class Bet extends Component<PageOwnProps, PageState> {
     });
   }
   getParamId = () => {
+    const router = getCurrentInstance().router;
     let id;
-    if (this.$router.params != null) {
-      if (this.$router.params.id == null && this.$router.params.scene != null) {
-        id = this.$router.params.scene
-      } else if (this.$router.params.id != null) {
-        id = this.$router.params.id
+    if (router != null && router.params != null) {
+      if (router.params.id == null && router.params.scene != null) {
+        id = router.params.scene
+      } else if (router.params.id != null) {
+        id = router.params.id
       } else {
         return null
       }

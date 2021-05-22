@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Image, Button} from '@tarojs/components'
 import {AtActivityIndicator, AtModal, AtModalContent, AtModalAction} from "taro-ui"
 import './index.scss'
@@ -26,7 +26,7 @@ interface BetRule {
   props: IProps;
 }
 
-class BetRule extends Component<PageOwnProps, PageState> {
+class BetRule extends Component<IProps, PageState> {
   static defaultProps = {}
 
   constructor(props) {

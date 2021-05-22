@@ -1,6 +1,6 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, ScrollView} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import {AtSearchBar, AtTabs, AtTabsPane} from 'taro-ui'
 
 import './search.scss'
@@ -38,44 +38,41 @@ type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 interface Search {
   props: IProps;
 }
+
 @withShare({})
-class Search extends Component<PageOwnProps, PageState> {
+class Search extends Component<IProps, PageState> {
   static defaultProps = {}
-  tabsY: number;
+  // tabsY: number;
   scrollTop: number;
-  navRef = null;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '茄子TV',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
-  }
+  navRef: any = null;
 
   constructor(props) {
     super(props)
+    this.state = {
+      searchText: "",
+      currentTab: 0,
+      isBeenSearch: false,
+      loading: false,
+      loadingmore: false,
+      tabsClass: "",
+    }
   }
+
   $setSharePath = () => `/pages/home/home?page=search`
 
   componentWillMount() {
   }
 
   componentDidMount() {
-    const query = Taro.createSelectorQuery();
-    query.select('.qz-search-tabs').boundingClientRect(rect => {
-      this.tabsY = (rect as {
-        left: number
-        right: number
-        top: number
-        bottom: number
-      }).top;
-    }).exec();
+    // const query = Taro.createSelectorQuery();
+    // query.select('.qz-search-tabs').boundingClientRect(rect => {
+    //   this.tabsY = (rect as {
+    //     left: number
+    //     right: number
+    //     top: number
+    //     bottom: number
+    //   }).top;
+    // }).exec();
     this.setState({currentTab: 0})
   }
 
@@ -158,7 +155,7 @@ class Search extends Component<PageOwnProps, PageState> {
   }
 
   // 小程序上拉加载
-  onReachBottom() {
+  onScrollToBottom = () => {
     this.nextPage(this.state.currentTab);
   }
 
@@ -183,7 +180,7 @@ class Search extends Component<PageOwnProps, PageState> {
     const timestamp = new Date().getTime();
 
     return (
-      <ScrollView scrollY onScrollToLower={this.onReachBottom}
+      <ScrollView scrollY onScrollToLower={this.onScrollToBottom}
                   className='qz-search-scroll-content'>
         <NavBar
           title='茄子TV'

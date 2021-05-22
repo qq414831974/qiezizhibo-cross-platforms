@@ -1,7 +1,7 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtLoadMore, AtTabs, AtTabsPane} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './betOrders.scss'
 import MatchList from "./components/match-list";
@@ -36,20 +36,21 @@ interface BetOrders {
   props: IProps;
 }
 
-class BetOrders extends Component<PageOwnProps, PageState> {
-  navRef = null;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '我的竞猜',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
+class BetOrders extends Component<IProps, PageState> {
+  navRef: any = null;
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+      total: 0,
+      current: 0,
+      orderList: [],
+      addressLoading: false,
+      address: null,
+      currentTab: null,
+      status: [],
+    }
   }
 
   componentWillMount() {
@@ -115,7 +116,7 @@ class BetOrders extends Component<PageOwnProps, PageState> {
   }
 
   // 小程序上拉加载
-  onReachBottom() {
+  onReachBottom = () => {
     this.nextPage();
   }
 

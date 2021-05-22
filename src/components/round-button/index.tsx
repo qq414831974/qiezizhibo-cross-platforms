@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Button, Text, Image} from '@tarojs/components'
 import './index.scss'
 
@@ -25,8 +25,13 @@ interface RoundButton {
   props: IProps;
 }
 
-class RoundButton extends Component<PageOwnProps, PageState> {
+class RoundButton extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
 
   render() {
     const {img = null, size, onClick, text = null, openType = null, margin = null, animation = false} = this.props
@@ -45,7 +50,9 @@ class RoundButton extends Component<PageOwnProps, PageState> {
     const textStyle = {
       width: size + 24 + "px",
     }
-    return <View style={viewStyle} className={`qz-round-button-content ${animation?"qz-round-button-content-animation":""}`} onClick={onClick}>
+    return <View style={viewStyle}
+                 className={`qz-round-button-content ${animation ? "qz-round-button-content-animation" : ""}`}
+                 onClick={onClick}>
       <Button style={style} className="qz-round-button" openType={openType}>
         {img ? <Image src={img}/> : null}
       </Button>

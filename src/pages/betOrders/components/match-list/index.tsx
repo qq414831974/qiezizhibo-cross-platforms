@@ -1,4 +1,5 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtActionSheet, AtActionSheetItem} from "taro-ui"
 import MatchItem from '../../../../components/match-item'
@@ -43,21 +44,8 @@ interface MatchList {
   props: IProps;
 }
 
-class MatchList extends Component<PageOwnProps, PageState> {
+class MatchList extends Component<IProps, PageState> {
   static defaultProps = {}
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-
-  config: Config = {
-    navigationBarTitleText: '比赛',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-  }
 
   constructor(props) {
     super(props)
@@ -145,6 +133,7 @@ class MatchList extends Component<PageOwnProps, PageState> {
         this.cashBet(this.props.address);
       }
     }).catch((error: any) => {
+      console.log(error)
       Taro.showToast({title: "未选择地址", icon: "none"});
     })
   }

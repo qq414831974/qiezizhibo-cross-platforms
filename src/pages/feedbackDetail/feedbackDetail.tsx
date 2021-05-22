@@ -1,6 +1,7 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro, {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Textarea, Input} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import { connect } from 'react-redux'
 import {AtImagePicker, AtButton, AtIcon} from 'taro-ui'
 
 import './feedbackdetail.scss'
@@ -30,20 +31,8 @@ interface FeedbackDetail {
   props: IProps;
 }
 
-class FeedbackDetail extends Component<PageOwnProps, PageState> {
+class FeedbackDetail extends Component<IProps, PageState> {
 
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '',
-    navigationBarBackgroundColor: '#ffffff',
-    navigationBarTextStyle: 'black',
-  }
 
   constructor(props) {
     super(props)
@@ -61,8 +50,9 @@ class FeedbackDetail extends Component<PageOwnProps, PageState> {
   }
 
   componentDidMount() {
-    if (this.$router.params && this.$router.params.type != null) {
-      const type = Number(this.$router.params.type);
+    const router = getCurrentInstance().router;
+    if (router && router.params && router.params.type != null) {
+      const type = Number(router.params.type);
       let title = ""
       let hint = "允许开发者在48小时内通过客服消息联系我"
       if (type == 1) {
@@ -109,7 +99,11 @@ class FeedbackDetail extends Component<PageOwnProps, PageState> {
     this.setState({check: !this.state.check})
   }
   onConfirm = () => {
-    const type = this.$router.params ? this.$router.params.type : null;
+    const router = getCurrentInstance().router;
+    if (router == null) {
+      return;
+    }
+    const type = router.params ? router.params.type : null;
     const value = this.state.value;
     const phone = this.state.phone;
     let userNo = null;

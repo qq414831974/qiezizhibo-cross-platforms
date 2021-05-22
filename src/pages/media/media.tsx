@@ -1,6 +1,7 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Video} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import {AtActivityIndicator} from 'taro-ui'
 
 import './media.scss'
@@ -27,20 +28,15 @@ interface Media {
   props: IProps;
 }
 
-class Media extends Component<PageOwnProps, PageState> {
-  navRef = null;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '茄子TV',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
+class Media extends Component<IProps, PageState> {
+  navRef: any = null;
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+      media: null,
+    }
   }
 
   componentWillMount() {
@@ -63,11 +59,12 @@ class Media extends Component<PageOwnProps, PageState> {
 
   getParamId = () => {
     let id;
-    if (this.$router.params != null) {
-      if (this.$router.params.id == null && this.$router.params.scene != null) {
-        id = this.$router.params.scene
-      } else if (this.$router.params.id != null) {
-        id = this.$router.params.id
+    const router = getCurrentInstance().router;
+    if (router && router.params != null) {
+      if (router.params.id == null && router.params.scene != null) {
+        id = router.params.scene
+      } else if (router.params.id != null) {
+        id = router.params.id
       } else {
         return null
       }

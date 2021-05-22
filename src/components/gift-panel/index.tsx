@@ -1,7 +1,8 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View, ScrollView, Text, Image, Picker, Button} from '@tarojs/components'
 import {AtActivityIndicator, AtButton, AtInputNumber} from 'taro-ui'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import './index.scss'
 import * as global from '../../constants/global';
 import * as api from '../../constants/api';
@@ -22,7 +23,7 @@ type PageDispatchProps = {
 }
 
 type PageOwnProps = {
-  gifts: [];
+  gifts: Array<any>;
   loading: boolean;
   heatType: number | null;
   matchInfo: any;
@@ -49,10 +50,10 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface GiftPanel {
-  props: IProps | any;
+  props: IProps;
 }
 
-class GiftPanel extends Component<PageOwnProps | any, PageState> {
+class GiftPanel extends Component<IProps, PageState> {
 
   numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100];
 
@@ -249,7 +250,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
 
   render() {
     const {loading = false, heatType = 0, hidden = false, giftWatchPrice = null, giftWatchEternalPrice = null, payEnabled, giftEnabled} = this.props
-    let {gifts = []}= this.props
+    let {gifts = []} = this.props
     const {currentGift = null, currentNum = 0} = this.state
     const discountPrice = this.getGiftDiscountPriceByNum(currentGift, currentNum);
     const realPrice = this.getGiftRealPriceByNum(currentGift, currentNum);
@@ -259,7 +260,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
     const onGiftClick = this.onGiftClick;
     const giftInfo = {price: discountPrice, realPrice: realPrice, heatValue: heat, expValue: exp, freeBetTime: freeBet}
     if (!giftEnabled) {
-      gifts = gifts.slice(0,1);
+      gifts = gifts.slice(0, 1);
     }
     return (
       <View className="qz-gifts">

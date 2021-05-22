@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Image} from '@tarojs/components'
 import './index.scss'
 import {
@@ -39,9 +39,13 @@ interface TimeLine {
   props: IProps;
 }
 
-class TimeLine extends Component<PageOwnProps, PageState> {
+class TimeLine extends Component<IProps, PageState> {
   static defaultProps = {}
-
+  constructor(props) {
+    super(props)
+    this.state = {
+    }
+  }
   render() {
     const {timeline = [], matchInfo = {}} = this.props
     return (

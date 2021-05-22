@@ -1,8 +1,8 @@
-// import {ComponentClass} from 'react'
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Image, Button} from '@tarojs/components'
 import {AtIcon} from 'taro-ui'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
 import configAction from "../../actions/config";
 
@@ -59,24 +59,10 @@ interface User {
   imageUrl: logo,
   path: 'pages/home/home'
 })
-class User extends Component<PageOwnProps, PageState> {
+class User extends Component<IProps, PageState> {
 
   qqmapsdk: qqmapjs;
-  navRef = null;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
-    enablePullDownRefresh: true
-  }
+  navRef: any = null;
 
   constructor(props) {
     super(props)
@@ -136,7 +122,7 @@ class User extends Component<PageOwnProps, PageState> {
   componentDidHide() {
   }
 
-  onPullDownRefresh() {
+  onPullDownRefresh = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getUserInfo()
     this.initLocation();

@@ -1,8 +1,9 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtList, AtListItem, AtLoadMore, AtButton} from "taro-ui"
 
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './deposit.scss'
 import inPic from "../../assets/in.png";
@@ -58,20 +59,21 @@ interface Deposit {
   props: IProps;
 }
 
-class Deposit extends Component<PageOwnProps, PageState> {
-  navRef = null;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '我的茄币',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
+class Deposit extends Component<IProps, PageState> {
+  navRef: any = null;
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+      listLoading: false,
+      total: 0,
+      current: 0,
+      deopsitLogs: [],
+      deposit: null,
+      isPayOpen: false,
+      isPaying: false,
+    }
   }
 
   componentWillMount() {
@@ -181,7 +183,7 @@ class Deposit extends Component<PageOwnProps, PageState> {
   }
 
   // 小程序上拉加载
-  onReachBottom() {
+  onReachBottom = () => {
     this.nextPage();
   }
 

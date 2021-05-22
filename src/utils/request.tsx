@@ -75,6 +75,7 @@ const refreshAuth = async (refreshToken) => {
       updateStorage(res);
       return res;
     }).catch(async (error) => {
+      console.log(error)
       await updateStorage({})
     });
 }
@@ -111,8 +112,8 @@ const request = async (options) => {
                   updateRefreshing(false);
                   delete options.autoLogin;
                   //重新请求
-                  request(options).then((res: any) => {
-                    resolve(res)
+                  request(options).then((reRequest: any) => {
+                    resolve(reRequest)
                   })
                 }).catch(async (error) => {
                   await updateStorage({})
@@ -126,8 +127,8 @@ const request = async (options) => {
                     clearInterval(refreshingInterval[refreshingIntervalKey])
                     delete options.autoLogin;
                     //重新请求
-                    request(options).then((res: any) => {
-                      resolve(res)
+                    request(options).then((reRequest: any) => {
+                      resolve(reRequest)
                     })
                   }
                 }, 100)

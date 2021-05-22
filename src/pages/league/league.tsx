@@ -1,7 +1,8 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtSearchBar, AtLoadMore} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './league.scss'
 import LeagueItem from "../../components/league-item";
@@ -33,22 +34,19 @@ interface League {
 }
 
 @withShare({})
-class League extends Component<PageOwnProps, PageState> {
-  navRef = null;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '茄子TV',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
-    navigationStyle: 'custom',
-    enablePullDownRefresh: true
+class League extends Component<IProps, PageState> {
+  navRef: any = null;
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      searchText: "",
+      loadingMore: false,
+      loading: false,
+      leagueList: null,
+    }
   }
+
   $setSharePath = () => `/pages/home/home?page=league`
 
   componentWillMount() {
@@ -135,11 +133,11 @@ class League extends Component<PageOwnProps, PageState> {
   }
 
   // 小程序上拉加载
-  onReachBottom() {
+  onReachBottom = () => {
     this.nextPage();
   }
 
-  onPullDownRefresh() {
+  onPullDownRefresh = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getLeagueList();
     Taro.stopPullDownRefresh();

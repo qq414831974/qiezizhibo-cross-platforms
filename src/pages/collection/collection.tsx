@@ -1,11 +1,12 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
-import {AtActivityIndicator} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {AtLoadMore} from "taro-ui"
+import {connect} from 'react-redux'
 
 import './collection.scss'
 import {getStorage} from "../../utils/utils";
 import MatchList from "./components/match-list";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {}
 
@@ -16,6 +17,7 @@ type PageOwnProps = {}
 type PageState = {
   loading: boolean;
   collectList: any;
+  total: number;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -24,19 +26,16 @@ interface Collection {
   props: IProps;
 }
 
-class Collection extends Component<PageOwnProps, PageState> {
+class Collection extends Component<IProps, PageState> {
+  navRef: any = null;
 
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '收藏',
-    navigationBarBackgroundColor: '#2d8cf0',
-    navigationBarTextStyle: 'white',
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+      collectList: null,
+      total: 0,
+    }
   }
 
   componentWillMount() {
@@ -73,25 +72,37 @@ class Collection extends Component<PageOwnProps, PageState> {
       }
       this.setState({
         collectList: list,
-        loading: false
+        loading: false,
+        total: list.length
       });
     }
   }
 
   render() {
-    const {collectList} = this.state
+    const {collectList, total, loading} = this.state
 
-    if (this.state.loading) {
-      return <View className="qz-collection-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
+    let loadingmoreStatus: any = "more";
+    if (loading) {
+      loadingmoreStatus = "loading";
+    } else if (collectList == null || collectList.length <= 0 || total <= collectList.length) {
+      loadingmoreStatus = "noMore"
     }
 
     return (
       <View className='qz-collection-content'>
+        <NavBar
+          title='我的收藏'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         {collectList && collectList.length > 0 ? (
           <MatchList
             matchList={collectList}
             loading={this.state.loading}/>
         ) : null}
+        <AtLoadMore status={loadingmoreStatus} loadingText="加载中..." noMoreText="没有更多了"/>
       </View>
     )
   }

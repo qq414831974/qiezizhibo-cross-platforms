@@ -1,7 +1,8 @@
 import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtModal, AtModalHeader, AtModalContent, AtModalAction, AtDivider} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import {View, Button} from '@tarojs/components'
 import Request from '../../../../utils/request'
 import PayModal from '../../../../components/modal-pay'
@@ -74,7 +75,7 @@ interface ModalBet {
   props: IProps | any;
 }
 
-class ModalBet extends Component<PageOwnProps | any, PageState> {
+class ModalBet extends Component<IProps, PageState> {
 
   constructor(props) {
     super(props)
@@ -91,11 +92,13 @@ class ModalBet extends Component<PageOwnProps | any, PageState> {
   componentDidMount() {
     this.refresh();
   }
-  componentWillUpdate(newProps){
-    if(this.props.isOpened == false && newProps.isOpened == true){
+
+  componentWillUpdate(newProps) {
+    if (this.props.isOpened == false && newProps.isOpened == true) {
       this.refresh();
     }
   }
+
   refresh = () => {
     const openId = this.props.userInfo ? this.props.userInfo.wechatOpenid : null
     const userNo = this.props.userInfo ? this.props.userInfo.userNo : null

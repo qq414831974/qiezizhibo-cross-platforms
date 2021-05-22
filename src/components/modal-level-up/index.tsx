@@ -1,5 +1,4 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button} from '@tarojs/components'
 import defaultLogo from '../../assets/default-logo.png'
@@ -26,7 +25,7 @@ interface ModalLevelUp {
   props: IProps;
 }
 
-class ModalLevelUp extends Component<PageOwnProps, PageState> {
+class ModalLevelUp extends Component<IProps, PageState> {
   static defaultProps = {
     handleClose: () => {
     },
@@ -36,6 +35,11 @@ class ModalLevelUp extends Component<PageOwnProps, PageState> {
     },
     handleError: () => {
     },
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {}
   }
 
   componentDidMount() {
