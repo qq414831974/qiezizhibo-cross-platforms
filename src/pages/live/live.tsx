@@ -1177,7 +1177,7 @@ class Live extends Component<IProps, PageState> {
       // this.setState({commentIntoView: `message-${this.props.commentList.list.length}`})
       // const commentList: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
       const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
-      // setTimeout(() => {
+      setTimeout(() => {
       if (commentList && commentList.length > 0) {
         this.setState({
           comments: commentList,
@@ -1190,7 +1190,7 @@ class Live extends Component<IProps, PageState> {
           chatLoading: false,
         })
       }
-      // }, 500)
+      }, 2000)
     })
   }
   getCommentList_next = () => {
@@ -2315,7 +2315,7 @@ class Live extends Component<IProps, PageState> {
                       </View>
                       {this.state.videoShowMore ?
                         <View className="qz-live-match__video-controllers__right-item-container">
-                          {this.props.mediaList.map((item, index) => (
+                          {this.props.mediaList && this.props.mediaList.map((item, index) => (
                             <View key={item.id}
                                   className={`qz-live-match__video-controllers__right-item ${this.state.currentMedia == index ? "qz-live-match__video-controllers__right-item-selected" : ""}`}
                                   onClick={this.handleMediaFragmentClick.bind(this, index)}>

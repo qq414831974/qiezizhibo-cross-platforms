@@ -48,7 +48,7 @@ class BetOrders extends Component<IProps, PageState> {
       orderList: [],
       addressLoading: false,
       address: null,
-      currentTab: null,
+      currentTab: 0,
       status: [],
     }
   }

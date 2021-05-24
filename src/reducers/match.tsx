@@ -61,7 +61,7 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
         matchList: action.payload
       }
     case MATCHES_CLEAR:
-      state.matchList = [];
+      state.matchList = {};
       return state;
     case MATCH_COMMENT:
       const commentList = action.payload.records.reverse()
@@ -71,7 +71,7 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
         comment: action.payload
       }
     case MATCH_COMMENT_CLEAR:
-      state.comment = [];
+      state.comment = {};
       return state;
     case MATCH_COMMENT_ADD:
       if (action.payload == null) {

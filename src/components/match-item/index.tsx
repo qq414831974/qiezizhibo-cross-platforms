@@ -25,7 +25,7 @@ type PageDispatchProps = {}
 type PageOwnProps = {
   matchInfo: any;
   onClick: any | null;
-  onBetClick: any | null;
+  onBetClick?: any | null;
   className?: string | null;
   onlytime?: boolean | null;
   showRound?: boolean;

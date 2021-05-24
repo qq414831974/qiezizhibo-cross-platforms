@@ -7,7 +7,7 @@ type PropsType = {
   ping: any;
 }
 const INITIAL_STATE = {
-  mediaList: {},
+  mediaList: [],
   ping: {},
 }
 
@@ -19,7 +19,7 @@ export default function live(state: PropsType = INITIAL_STATE, action) {
         mediaList: action.payload
       }
     case ACTIVITY_MEDIA_LIST_CLEAR:
-      state.mediaList = {};
+      state.mediaList = [];
       return state;
     case ACTIVITY_PING:
       return {
