@@ -100,7 +100,6 @@ class ModalLogin extends Component<IProps, PageState> {
     param.city = userInfo.city;
     param.country = userInfo.country;
     param.name = userInfo.nickName;
-    param.wechatType = 1;
     Taro.login().then(loginValue => {
       if (loginValue && loginValue.errMsg === "login:ok") {
         new Request().post(`${api.API_LOGIN}?code=${loginValue.code}&wechatType=0`, param).then(async (res: any) => {

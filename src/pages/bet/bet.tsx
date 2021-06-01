@@ -196,7 +196,7 @@ class Bet extends Component<IProps, PageState> {
       loading: false,
       total: 0,
       current: 0,
-      match: null,
+      match: {},
       betInfo: null,
       startDiffDayTime: null,
       endDiffDayTime: null,

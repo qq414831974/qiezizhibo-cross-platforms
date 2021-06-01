@@ -10,6 +10,7 @@ import {getStorage, getYuan, toLogin} from "../../utils/utils";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import * as error from "../../constants/error";
+import {crown} from "../../utils/assets";
 
 type UnifiedJSAPIOrderResult = {
   appId: string,
@@ -242,14 +243,14 @@ class LeagueMember extends Component<IProps, PageState> {
           <View className='layout-header'>
             <View className='layout-header__btn-close' onClick={this.close}/>
             <View className="layout-header__title">
-              <Image src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/crown.png"/>
+              <Image src={crown}/>
               <Text>联赛会员</Text>
             </View>
           </View>
           <View className='layout-body'>
             <View className="qz-league-member__league">
               <Image
-                src={this.props.league && this.props.league.headImg ? this.props.league.headImg : "https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/crown.png"}/>
+                src={this.props.league && this.props.league.headImg ? this.props.league.headImg : {crown}}/>
               <Text>{this.getLeagueName(this.props.league)}</Text>
             </View>
             <View className="qz-league-member__card">

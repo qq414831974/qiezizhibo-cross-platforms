@@ -14,7 +14,6 @@ type PageStateProps = {
 }
 
 type PageDispatchProps = {
-  onCitySelect: (city, province?) => any;
   getLocation: (latitude, longitude, callbackFunc: any) => any;
 }
 

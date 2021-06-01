@@ -1,3 +1,4 @@
+import Taro from '@tarojs/taro'
 import {Component} from 'react'
 import {View, Image, Button} from '@tarojs/components'
 import {AtModal, AtModalContent, AtModalAction} from "taro-ui"
@@ -17,6 +18,7 @@ type PageOwnProps = {
   heatRanks: any,
   loading: any,
   isOpened: boolean,
+  leagueId: any,
 }
 
 type PageState = {}
@@ -86,8 +88,35 @@ class HeatRank extends Component<IProps, PageState> {
     }
     return heat;
   }
-  handleJump = () => {
-
+  onRedirect = () => {
+    if (this.props.leagueId == null) {
+      Taro.showToast({title: "跳转失败", icon: "none"});
+      return;
+    }
+    Taro.navigateToMiniProgram({
+      appId: global.TOUPIAO_APPID,
+      path: `/pages/leagueManager/leagueManager?id=${this.props.leagueId}&disableBack=true`,
+      extraData: {},
+      envVersion: 'release',
+      success: (_res) => {
+        // 打开成功
+      }
+    })
+  }
+  onHeatClickRedirect = (targetId) => {
+    if (this.props.leagueId == null) {
+      Taro.showToast({title: "跳转失败", icon: "none"});
+      return;
+    }
+    Taro.navigateToMiniProgram({
+      appId: global.TOUPIAO_APPID,
+      path: `/pages/leagueManager/leagueManager?id=${this.props.leagueId}&disableBack=true&targetId=${targetId}`,
+      extraData: {},
+      envVersion: 'release',
+      success: (_res) => {
+        // 打开成功
+      }
+    })
   }
 
   render() {
@@ -95,7 +124,9 @@ class HeatRank extends Component<IProps, PageState> {
 
     return (
       <View>
-        <AtModal className="at-modal-big" isOpened={isOpened} onClose={handleCancel}>
+        <AtModal className="at-modal-big at-modal-bottom-nopadding" isOpened={isOpened} onClose={handleCancel}>
+          <View className="qz-heatrank-bottom-shadow">
+          </View>
           {isOpened ? <AtModalContent>
             <View className="qz-heatrank">
               <View className="qz-heatrank-scroll-content">
@@ -103,7 +134,8 @@ class HeatRank extends Component<IProps, PageState> {
                   <View className="qz-heatrank-content-nomore">暂无</View>
                   : null}
                 {heatRanks && heatRanks.map((item: any) => (
-                  <View key={item.id} className='qz-heatrank-content'>
+                  <View key={item.id} className='qz-heatrank-content'
+                        onClick={this.onHeatClickRedirect.bind(this, item.id)}>
                     <View className='qz-heatrank-list'>
                       <View className='qz-heatrank-list__item'>
                         <View className='qz-heatrank-list__item-container'>
@@ -139,7 +171,7 @@ class HeatRank extends Component<IProps, PageState> {
             </View>
           </AtModalContent> : null}
           <AtModalAction>
-            <Button className="qz-heatrank-button" onClick={this.handleJump}>更多球员</Button>
+            <Button className="qz-heatrank-button" onClick={this.onRedirect}>更多球员</Button>
           </AtModalAction>
         </AtModal>
       </View>

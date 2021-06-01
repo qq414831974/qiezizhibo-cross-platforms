@@ -1,8 +1,8 @@
 import Taro, {getCurrentInstance} from '@tarojs/taro'
 import {Component} from 'react'
 import {Image, ScrollView, Text, Video, View} from '@tarojs/components'
-import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtMessage, AtTabs, AtTabsPane, AtToast} from "taro-ui"
-import { connect } from 'react-redux'
+import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtTabs, AtTabsPane, AtToast} from "taro-ui"
+import {connect} from 'react-redux'
 import MatchUp from './components/match-up'
 import NooiceBar from './components/nooice-bar'
 import GiftNotify from '../../components/gift-notify'
@@ -74,7 +74,10 @@ import {
   owngoal,
   shoot,
   substitutionLeft,
-  substitutionRight
+  substitutionRight,
+  heat_reward,
+  gift_rank,
+  crown
 } from '../../utils/assets';
 import MatchClip from "./components/match-clip";
 import configAction from "../../actions/config";
@@ -82,6 +85,9 @@ import LevelUpModal from "../../components/modal-level-up";
 import NavBar from "../../components/nav-bar";
 import LeagueMember from "../../components/league-member";
 import RectFab from "../../components/fab-rect";
+import heatRankIcon from "../../assets/heat_rank.png";
+import noperson from "../../assets/no-person.png";
+import HeatRank from "../../components/heat-rank";
 
 type Bulletin = {
   id: number,
@@ -201,6 +207,8 @@ type PageState = {
   currentLevel: number;
   leagueMemberRule: any;
   leagueMemberOpen: boolean;
+  topSixHeats: any,
+  heatRankShow: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -327,6 +335,8 @@ class Live extends Component<IProps, PageState> {
       currentLevel: 0,
       leagueMemberRule: null,
       leagueMemberOpen: false,
+      topSixHeats: null,
+      heatRankShow: false,
     }
   }
 
@@ -491,6 +501,11 @@ class Live extends Component<IProps, PageState> {
           heatStartTime: heatStartTime,
           heatEndTime: heatEndTime
         }, () => {
+          if (data.type == HEAT_TYPE.LEAGUE_PLAYER_HEAT && !this.props.giftEnabled) {
+            this.getPlayerHeatInfo(1, 40, null);
+          } else if (data.type == HEAT_TYPE.LEAGUE_TEAM_HEAT && !this.props.giftEnabled) {
+            this.getLeagueTeamHeatInfo(1, 40, null);
+          }
           this.getTeamHeatInfo(id, data.type);
           this.getGiftRanks(id);
         })
@@ -920,7 +935,7 @@ class Live extends Component<IProps, PageState> {
         param.matchId = this.getParamId();
         this.setState({playerHeatLoading: true})
         new Request().get(api.API_MATCH_PLAYER_HEAT, param).then((data: any) => {
-          this.setState({playerHeatLoading: false})
+          this.setState({playerHeatLoading: false, topSixHeats: this.getTopSixHeat(data.records)})
           if (name) {
             this.setState({playerHeats: data}, () => {
               resolve(data.records);
@@ -938,7 +953,7 @@ class Live extends Component<IProps, PageState> {
         param.leagueId = this.state.leagueId;
         this.setState({playerHeatLoading: true})
         new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
-          this.setState({playerHeatLoading: false})
+          this.setState({playerHeatLoading: false, topSixHeats: this.getTopSixHeat(data.records)})
           if (name) {
             this.setState({playerHeats: data}, () => {
               resolve(data.records);
@@ -1009,7 +1024,7 @@ class Live extends Component<IProps, PageState> {
         param.leagueId = this.state.leagueId;
         this.setState({leagueTeamHeatLoading: true})
         new Request().get(api.API_LEAGUE_TEAM_HEAT, param).then((data: any) => {
-          this.setState({leagueTeamHeatLoading: false})
+          this.setState({leagueTeamHeatLoading: false, topSixHeats: this.getTopSixHeat(data.records)})
           if (name) {
             this.setState({leagueTeamHeats: data}, () => {
               resolve(data.records);
@@ -1072,6 +1087,38 @@ class Live extends Component<IProps, PageState> {
         } else {
           index = index + 1;
           if (index <= 3) {
+            heatObjects[i].index = index;
+            sorted.push(heatObjects[i]);
+          }
+        }
+      }
+    }
+    return sorted;
+  }
+  getTopSixHeat = (heatObjects) => {
+    let sorted: any = [];
+    let index = 1;
+    for (let i = 0; i < heatObjects.length; i++) {
+      let heat = this.getHeat(heatObjects[i]);
+      if (i < 7) {
+        if (heat == 0) {
+          heatObjects[i].number = 10;
+        } else {
+          heatObjects[i].number = i + 1;
+        }
+        if (i == 0) {
+          index = 1;
+          heatObjects[i].index = index;
+          sorted.push(heatObjects[i]);
+          continue;
+        }
+        let heatPre = this.getHeat(heatObjects[i - 1]);
+        if (heat == heatPre) {
+          heatObjects[i].index = index;
+          sorted.push(heatObjects[i]);
+        } else {
+          index = index + 1;
+          if (index <= 7) {
             heatObjects[i].index = index;
             sorted.push(heatObjects[i]);
           }
@@ -1178,18 +1225,18 @@ class Live extends Component<IProps, PageState> {
       // const commentList: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
       const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
       setTimeout(() => {
-      if (commentList && commentList.length > 0) {
-        this.setState({
-          comments: commentList,
-          chatLoading: false,
-          commentIntoView: `message-${commentList[commentList.length - 1].id}`
-        })
-      } else {
-        this.setState({
-          comments: commentList,
-          chatLoading: false,
-        })
-      }
+        if (commentList && commentList.length > 0) {
+          this.setState({
+            comments: commentList,
+            chatLoading: false,
+            commentIntoView: `message-${commentList[commentList.length - 1].id}`
+          })
+        } else {
+          this.setState({
+            comments: commentList,
+            chatLoading: false,
+          })
+        }
       }, 2000)
     })
   }
@@ -1805,7 +1852,7 @@ class Live extends Component<IProps, PageState> {
           if (res.statusCode === 200) {
             Taro.saveImageToPhotosAlbum({filePath: res.tempFilePath}).then(saveres => {
               console.log(saveres)
-              this.showMessage("图片保存到相册成功，快去发朋友圈吧", "success")
+              this.showMessage("图片保存到相册成功，快去发朋友圈吧", "none")
               this.setState({downLoading: false})
             }, () => {
               this.showMessage("图片保存到相册失败", "error")
@@ -1825,9 +1872,9 @@ class Live extends Component<IProps, PageState> {
     })
   }
   showMessage = (title, type) => {
-    Taro.atMessage({
-      'message': title,
-      'type': type,
+    Taro.showToast({
+      'title': title,
+      'icon': type,
     })
   }
   onPayClick = () => {
@@ -1845,12 +1892,16 @@ class Live extends Component<IProps, PageState> {
     const tabs: any = {};
     let tabIndex = 0;
     //球员热度比拼
-    if (this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+    if (this.state.heatType == HEAT_TYPE.PLAYER_HEAT) {
+      tabList.push({title: '人气榜'})
+      tabs[TABS_TYPE.heatPlayer] = tabIndex;
+      tabIndex = tabIndex + 1;
+    } else if (this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT && this.props.giftEnabled) {
       tabList.push({title: '人气榜'})
       tabs[TABS_TYPE.heatPlayer] = tabIndex;
       tabIndex = tabIndex + 1;
     }
-    if (this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+    if (this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT && this.props.giftEnabled) {
       tabList.push({title: '人气榜'})
       tabs[TABS_TYPE.heatLeagueTeam] = tabIndex;
       tabIndex = tabIndex + 1;
@@ -2091,7 +2142,7 @@ class Live extends Component<IProps, PageState> {
         if (res.statusCode === 200) {
           Taro.saveImageToPhotosAlbum({filePath: res.tempFilePath}).then(saveres => {
             console.log(saveres)
-            this.showMessage("图片保存到相册成功，快去发朋友圈吧", "success")
+            this.showMessage("图片保存到相册成功，快去发朋友圈吧", "none")
             this.setState({shareMomentLoading: false})
           }, () => {
             this.showMessage("图片保存到相册失败", "error")
@@ -2128,6 +2179,10 @@ class Live extends Component<IProps, PageState> {
     })
   }
   switchToGiftSend = () => {
+    if (!this.props.giftEnabled) {
+      this.handleHeatRankClick();
+      return;
+    }
     let {tabs} = this.getTabsList(this.props.match);
     if (this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT || this.state.heatType == HEAT_TYPE.PLAYER_HEAT) {
       this.switchTab(tabs[TABS_TYPE.heatPlayer]);
@@ -2198,6 +2253,12 @@ class Live extends Component<IProps, PageState> {
       }
     }
   }
+  handleHeatRankClick = () => {
+    this.setState({heatRankShow: true});
+  }
+  handleHeatRankCancel = () => {
+    this.setState({heatRankShow: false});
+  }
 
   render() {
     const {match = null, matchStatus = null, payEnabled} = this.props;
@@ -2245,6 +2306,7 @@ class Live extends Component<IProps, PageState> {
                 onError={this.bindPlayError}
                 show-casting-button
                 autoplay
+                direction={90}
                 // enableDanmu
                 // danmuList={danmuList}
                 onTimeUpdate={this.handleVideoTime}
@@ -2339,7 +2401,7 @@ class Live extends Component<IProps, PageState> {
                     tabList={tabList}
                     key={tabKey}
                     onClick={this.switchTab}>
-              {this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
+              {this.state.heatType == HEAT_TYPE.PLAYER_HEAT || (this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT && this.props.giftEnabled) ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
                   <HeatPlayer
                     tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
@@ -2362,7 +2424,7 @@ class Live extends Component<IProps, PageState> {
                   />
                 </AtTabsPane>
                 : null}
-              {this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT ?
+              {this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT && this.props.giftEnabled ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatLeagueTeam]}>
                   <HeatLeagueTeam
                     tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
@@ -2562,7 +2624,6 @@ class Live extends Component<IProps, PageState> {
           />
         </AtCurtain>
         <AtToast isOpened={this.state.downLoading} text="生成中..." status="loading"/>
-        <AtMessage/>
         <ModalAlbum
           isOpened={this.state.permissionShow}
           handleConfirm={this.onPremissionSuccess}
@@ -2632,26 +2693,26 @@ class Live extends Component<IProps, PageState> {
             <View className="qz-live-fab qz-live-fab-square qz-live-fab-giftrank">
               <AtFab onClick={this.onGiftRankClick}>
                 <Image className="qz-live-fab-image"
-                       src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/gift_rank.png"/>
+                       src={gift_rank}/>
               </AtFab>
             </View>
             <View className="qz-live-fab qz-live-fab-square qz-live-fab-heatreward">
               <AtFab onClick={this.onHeatRewardClick}>
                 <Image className="qz-live-fab-image"
-                       src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/heat_reward.png"/>
+                       src={heat_reward}/>
               </AtFab>
             </View>
           </View>
           : null
         }
-        {this.state.payOpen && this.state.leagueMemberRule && this.state.leagueMemberRule.available ?
+        {this.state.payOpen && this.props.giftEnabled && this.state.leagueMemberRule && this.state.leagueMemberRule.available ?
           <RectFab
             className="qz-fab-rect-single-line"
             onClick={this.onLeagueMemberShow}
             background="linear-gradient(90deg,#f8e2c4,#f3bb6c);"
             top="30%"
           >
-            <Image src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/crown.png"/>
+            <Image src={crown}/>
             <Text style={{color: "#754e19"}}>联赛会员，比赛随心看</Text>
           </RectFab>
           : null}
@@ -2666,6 +2727,42 @@ class Live extends Component<IProps, PageState> {
             onPayConfirm={this.onPayConfirm}
             onPayClose={this.onPayConfirmClose}
           /> : null}
+        {!this.props.giftEnabled && this.state.heatType != null ?
+          <RectFab
+            className="qz-fab-rect-multi-line"
+            onClick={this.handleHeatRankClick}
+            background="#ECF5FD"
+            top={`calc(9 / 16 * 100vw + ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px)`}
+          >
+            <View className="qz-live-heat">
+              <View className="w-full center">
+                <Image className="qz-live-heat-title" src={heatRankIcon}/>
+              </View>
+              <View className="w-full center qz-live-heat-items">
+                {this.state.topSixHeats && this.state.topSixHeats.filter(record => record.number <= 3).map(data => {
+                  if (this.state.heatType && (this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT)) {
+                    return <Image key={data.id} className="qz-live-heat-img-overlap"
+                                  src={data.player && data.player.headImg ? data.player.headImg : noperson}/>
+                  }
+                  return <Image key={data.id} className="qz-live-heat-img-overlap"
+                                src={data.team && data.team.headImg ? data.team.headImg : noperson}/>
+                })}
+              </View>
+              <View className='at-icon at-icon-chevron-right qz-live-heat-arrow'/>
+            </View>
+          </RectFab>
+          : null
+        }
+        {!this.props.giftEnabled ?
+          <HeatRank
+            leagueId={this.state.leagueId}
+            heatRanks={this.state.topSixHeats}
+            loading={this.state.leagueTeamHeatLoading || this.state.playerHeatLoading}
+            isOpened={this.state.heatRankShow}
+            handleCancel={this.handleHeatRankCancel}
+            heatType={this.state.heatType}/>
+          : null
+        }
       </View>
     )
   }

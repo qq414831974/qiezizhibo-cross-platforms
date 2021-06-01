@@ -641,7 +641,11 @@ $at-timeline-line-color: $color-border-lighter !default;
     padding: 0;
   }
 }
-
+.at-modal-bottom-nopadding{
+  .at-modal__content {
+    padding-bottom: 0 !important;
+  }
+}
 .white {
   background: $color-bg;
   box-shadow: none;
@@ -664,3 +668,4 @@ $at-timeline-line-color: $color-border-lighter !default;
   border-radius: 46px !important;
   height: 60px !important;
 }
+

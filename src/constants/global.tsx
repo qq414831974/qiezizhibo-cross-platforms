@@ -167,3 +167,5 @@ export const LEVEL_COLOR = {
   3: "#ff4136",
   4: "#B10DC9",
 }
+
+export const TOUPIAO_APPID = "wxbabc811f507ba6aa";

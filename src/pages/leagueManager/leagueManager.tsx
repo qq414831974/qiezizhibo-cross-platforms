@@ -1,7 +1,7 @@
 import Taro, {getCurrentInstance} from '@tarojs/taro'
 import {Component} from 'react'
 import {View, Image, Text} from '@tarojs/components'
-import {AtActivityIndicator, AtTabs, AtTabsPane, AtMessage, AtFloatLayout, AtFab, AtToast} from "taro-ui"
+import {AtActivityIndicator, AtTabs, AtTabsPane, AtFloatLayout, AtFab, AtToast} from "taro-ui"
 import {connect} from 'react-redux'
 import defaultLogo from '../../assets/default-logo.png'
 import cancel from '../../assets/cancel.png'
@@ -38,8 +38,9 @@ import NavBar from "../../components/nav-bar";
 import RectFab from "../../components/fab-rect";
 import LeagueMember from "../../components/league-member";
 import noperson from "../../assets/no-person.png";
-import hotIcon from "../../assets/home/hot-icon.png";
+import heatRankIcon from "../../assets/heat_rank.png";
 import HeatRank from "../../components/heat-rank";
+import {bet_rank, crown, gift_rank, heat_reward, vip_card} from "../../utils/assets";
 
 type PageStateProps = {
   leagueTeams: any;
@@ -328,13 +329,20 @@ class LeagueManager extends Component<IProps, PageState> {
           heatStartTime: heatStartTime,
           heatEndTime: heatEndTime
         }, () => {
+          if (data.type == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT && !this.props.giftEnabled) {
+            this.getPlayerHeatInfo(1, 40, null);
+          } else if (data.type == global.HEAT_TYPE.LEAGUE_TEAM_HEAT && !this.props.giftEnabled) {
+            this.getTeamHeatInfo(1, 40, null);
+          }
           this.getGiftRanks(id);
-          if (data.type == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
-            let {tabs} = this.getTabsList();
-            this.switchTab(tabs[global.LEAGUE_TABS_TYPE.heatPlayer]);
-          } else if (data.type == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) {
-            let {tabs} = this.getTabsList();
-            this.switchTab(tabs[global.LEAGUE_TABS_TYPE.heatTeam]);
+          if (this.props.giftEnabled) {
+            if (data.type == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+              let {tabs} = this.getTabsList();
+              this.switchTab(tabs[global.LEAGUE_TABS_TYPE.heatPlayer]);
+            } else if (data.type == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+              let {tabs} = this.getTabsList();
+              this.switchTab(tabs[global.LEAGUE_TABS_TYPE.heatTeam]);
+            }
           }
         })
         // this.initSocket(id);
@@ -555,11 +563,12 @@ class LeagueManager extends Component<IProps, PageState> {
     let index = 1;
     for (let i = 0; i < heatObjects.length; i++) {
       let heat = this.getHeat(heatObjects[i]);
-      if (heat == 0) {
-        continue;
-      }
-      if (i < 6) {
-        heatObjects[i].number = i + 1;
+      if (i < 7) {
+        if (heat == 0) {
+          heatObjects[i].number = 10;
+        } else {
+          heatObjects[i].number = i + 1;
+        }
         if (i == 0) {
           index = 1;
           heatObjects[i].index = index;
@@ -572,7 +581,7 @@ class LeagueManager extends Component<IProps, PageState> {
           sorted.push(heatObjects[i]);
         } else {
           index = index + 1;
-          if (index <= 6) {
+          if (index <= 7) {
             heatObjects[i].index = index;
             sorted.push(heatObjects[i]);
           }
@@ -864,13 +873,13 @@ class LeagueManager extends Component<IProps, PageState> {
     tabs[global.LEAGUE_TABS_TYPE.leagueMatch] = tabIndex;
     tabIndex = tabIndex + 1;
     //人气PK
-    if (this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
+    if (this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT && this.props.giftEnabled) {
       tabList.push({title: '人气PK'})
       tabs[global.LEAGUE_TABS_TYPE.heatPlayer] = tabIndex;
       tabIndex = tabIndex + 1;
     }
     //球队PK
-    if (this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) {
+    if (this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT && this.props.giftEnabled) {
       tabList.push({title: '人气PK'})
       tabs[global.LEAGUE_TABS_TYPE.heatTeam] = tabIndex;
       tabIndex = tabIndex + 1;
@@ -1037,7 +1046,7 @@ class LeagueManager extends Component<IProps, PageState> {
                    src={league.headImg ? league.headImg : defaultLogo}/>
             <View className='text'>{league.shortName ? league.shortName : league.name}</View>
             {this.state.userHaveLeagueMember ? <Image className="img"
-                                                      src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/vip_card.png"/> : null}
+                                                      src={vip_card}/> : null}
           </View>
           }
         </View>
@@ -1066,7 +1075,7 @@ class LeagueManager extends Component<IProps, PageState> {
                 loading={this.state.tabloading}
                 visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueMatch]}/>
             </AtTabsPane>
-            {this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT &&
+            {this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT && this.props.giftEnabled &&
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.heatPlayer]}>
               <HeatPlayer
                 isLeauge
@@ -1088,7 +1097,7 @@ class LeagueManager extends Component<IProps, PageState> {
                 onPictureDownLoaded={this.showShareMoment}
               />
             </AtTabsPane>}
-            {this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT &&
+            {this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT && this.props.giftEnabled &&
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.heatTeam]}>
               <HeatLeagueTeam
                 isLeague
@@ -1142,7 +1151,6 @@ class LeagueManager extends Component<IProps, PageState> {
           handleCancel={this.onPhoneCancel}
           handleClose={this.onPhoneClose}
           handleError={this.onPhoneError}/>
-        <AtMessage/>
         <AtFloatLayout
           className="qz-gift-float"
           title={`礼物送给${(this.state.heatType == global.HEAT_TYPE.TEAM_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
@@ -1212,13 +1220,13 @@ class LeagueManager extends Component<IProps, PageState> {
             <View className="qz-league-manager-fab qz-league-manager-fab-square qz-league-manager-fab-giftrank">
               <AtFab onClick={this.onGiftRankClick}>
                 <Image className="qz-league-manager-fab-image"
-                       src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/gift_rank.png"/>
+                       src={gift_rank}/>
               </AtFab>
             </View>
             <View className="qz-league-manager-fab qz-league-manager-fab-square qz-league-manager-fab-heatreward">
               <AtFab onClick={this.onHeatRewardClick}>
                 <Image className="qz-league-manager-fab-image"
-                       src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/heat_reward.png"/>
+                       src={heat_reward}/>
               </AtFab>
             </View>
           </View>
@@ -1229,19 +1237,19 @@ class LeagueManager extends Component<IProps, PageState> {
             <Image onClick={this.hideBetRank} className="qz-league-manager-fab-close" src={cancel}/>
             <AtFab onClick={this.handleBetRankClick}>
               <Image className="qz-league-manager-fab-image"
-                     src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/bet_rank.png"/>
+                     src={bet_rank}/>
             </AtFab>
           </View>
           : null
         }
-        {!this.state.userHaveLeagueMember && this.state.leagueMemberRule && this.state.leagueMemberRule.available && this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueMatch] ?
+        {this.props.giftEnabled && !this.state.userHaveLeagueMember && this.state.leagueMemberRule && this.state.leagueMemberRule.available && this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueMatch] ?
           <RectFab
             className="qz-fab-rect-single-line"
             onClick={this.onLeagueMemberShow}
             background="linear-gradient(90deg,#f8e2c4,#f3bb6c);"
             top={`calc(${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px + 35px + 44px)`}
           >
-            <Image src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/crown.png"/>
+            <Image src={crown}/>
             <Text style={{color: "#754e19"}}>开通联赛会员</Text>
           </RectFab>
           : null}
@@ -1255,35 +1263,42 @@ class LeagueManager extends Component<IProps, PageState> {
           onPayConfirm={this.onPayConfirm}
           onPayClose={this.onPayConfirmClose}
         />
-        <RectFab
-          className="qz-fab-rect-multi-line"
-          onClick={this.handleHeatRankClick}
-          background="#ECF5FD"
-          top={`calc(${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px + 35px + 44px + 42px)`}
-        >
-          <View className="qz-league-manager-heat">
-            <View className="w-full center">
-              <Image className="qz-league-manager-heat-title" src={hotIcon}/>
-            </View>
-            <View className="w-full center qz-league-manager-heat-items">
-              {this.state.topSixHeats && this.state.topSixHeats.filter(record => record.number <= 3).map(data => {
-                if (this.state.heatType && (this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT)) {
+        {!this.props.giftEnabled && this.state.heatType != null ?
+          <RectFab
+            className="qz-fab-rect-multi-line"
+            onClick={this.handleHeatRankClick}
+            background="#ECF5FD"
+            top={`calc(${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px + 35px + 44px + 42px)`}
+          >
+            <View className="qz-league-manager-heat">
+              <View className="w-full center">
+                <Image className="qz-league-manager-heat-title" src={heatRankIcon}/>
+              </View>
+              <View className="w-full center qz-league-manager-heat-items">
+                {this.state.topSixHeats && this.state.topSixHeats.filter(record => record.number <= 3).map(data => {
+                  if (this.state.heatType && (this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT)) {
+                    return <Image key={data.id} className="qz-league-manager-heat-img-overlap"
+                                  src={data.player && data.player.headImg ? data.player.headImg : noperson}/>
+                  }
                   return <Image key={data.id} className="qz-league-manager-heat-img-overlap"
-                                src={data.player && data.player.headImg ? data.player.headImg : noperson}/>
-                }
-                return <Image key={data.id} className="qz-league-manager-heat-img-overlap"
-                              src={data.team && data.team.headImg ? data.team.headImg : noperson}/>
-              })}
+                                src={data.team && data.team.headImg ? data.team.headImg : noperson}/>
+                })}
+              </View>
+              <View className='at-icon at-icon-chevron-right qz-league-manager-heat-arrow'/>
             </View>
-            <View className='at-icon at-icon-chevron-right qz-league-manager-heat-arrow'/>
-          </View>
-        </RectFab>
-        <HeatRank
-          heatRanks={this.state.topSixHeats}
-          loading={this.state.teamHeatLoading || this.state.playerHeatLoading}
-          isOpened={this.state.heatRankShow}
-          handleCancel={this.handleHeatRankCancel}
-          heatType={this.state.heatType}/>
+          </RectFab>
+          : null
+        }
+        {!this.props.giftEnabled ?
+          <HeatRank
+            leagueId={this.getParamId()}
+            heatRanks={this.state.topSixHeats}
+            loading={this.state.teamHeatLoading || this.state.playerHeatLoading}
+            isOpened={this.state.heatRankShow}
+            handleCancel={this.handleHeatRankCancel}
+            heatType={this.state.heatType}/>
+          : null
+        }
       </View>
     )
   }

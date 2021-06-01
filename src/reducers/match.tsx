@@ -43,8 +43,10 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
         match: action.payload
       }
     case MATCH_CLEAR:
-      state.match = {};
-      return state;
+      return {
+        ...state,
+        match: {}
+      }
     case MATCHES:
       return {
         ...state,
@@ -61,8 +63,10 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
         matchList: action.payload
       }
     case MATCHES_CLEAR:
-      state.matchList = {};
-      return state;
+      return {
+        ...state,
+        matchList: {}
+      }
     case MATCH_COMMENT:
       const commentList = action.payload.records.reverse()
       action.payload.records = commentList;
@@ -71,8 +75,10 @@ export default function match(state: PropsType = INITIAL_STATE, action) {
         comment: action.payload
       }
     case MATCH_COMMENT_CLEAR:
-      state.comment = {};
-      return state;
+      return {
+        ...state,
+        comment: {}
+      }
     case MATCH_COMMENT_ADD:
       if (action.payload == null) {
         return state;

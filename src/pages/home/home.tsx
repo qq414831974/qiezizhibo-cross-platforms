@@ -132,9 +132,9 @@ class Home extends Component<IProps, PageState> {
   }
 
   componentDidShow() {
-    // const getLocation = this.getLocation;
+    const getLocation = this.getLocation;
+    const refresh = this.refresh;
     const initLocation = this.initLocation;
-    // const refresh = this.refresh;
     new Request().get(api.API_CACHED_CONTROLLER, null).then((data: any) => {
       if (data.available) {
         global.CacheManager.getInstance().CACHE_ENABLED = true;
@@ -145,8 +145,25 @@ class Home extends Component<IProps, PageState> {
         if (this.props.locationConfig && this.props.locationConfig.province) {
           initLocation();
         } else {
-          configAction.setLocationConfig({city: null, province: '全国'}).then(() => {
-            initLocation();
+          // configAction.setLocationConfig({city: null, province: '全国'}).then(() => {
+          //   initLocation();
+          // })
+          Taro.getSetting({
+            success(res) {
+              const userLocation = res && res.authSetting ? res.authSetting["scope.userLocation"] : null;
+              if (userLocation == null || (userLocation == true)) {
+                Taro.getLocation({
+                  success: (location) => {
+                    getLocation(location.latitude, location.longitude);
+                  }, fail: () => {
+                    Taro.showToast({title: "获取位置信息失败", icon: "none"});
+                    refresh();
+                  }
+                })
+              } else {
+                initLocation();
+              }
+            }
           })
         }
       })

@@ -19,8 +19,10 @@ export default function live(state: PropsType = INITIAL_STATE, action) {
         mediaList: action.payload
       }
     case ACTIVITY_MEDIA_LIST_CLEAR:
-      state.mediaList = [];
-      return state;
+      return {
+        ...state,
+        mediaList: []
+      }
     case ACTIVITY_PING:
       return {
         ...state,

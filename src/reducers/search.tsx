@@ -52,10 +52,12 @@ export default function search(state: PropsType = INITIAL_STATE, action) {
         player: action.payload.player
       }
     case SEARCH_CLEAR_ALL:
-      state.player = {};
-      state.match = {};
-      state.league = {};
-      return state
+      return {
+        ...state,
+        league: {},
+        match: {},
+        player: {}
+      }
     default:
       return state
   }

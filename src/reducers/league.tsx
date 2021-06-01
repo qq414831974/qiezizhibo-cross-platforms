@@ -43,8 +43,10 @@ export default function league(state: PropsType = INITIAL_STATE, action) {
         leagueList: action.payload
       }
     case LEAGUES_CLEAR:
-      state.leagueList = {};
-      return state;
+      return {
+        ...state,
+        leagueList: {}
+      }
     case LEAGUES_ADD:
       if (action.payload == null) {
         return state;

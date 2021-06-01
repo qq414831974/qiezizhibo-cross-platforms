@@ -14,8 +14,10 @@ export default function user(state = INITIAL_STATE, action) {
         userInfo: action.payload
       }
     case USERINFO_REMOVE:
-      state.userInfo = {};
-      return state;
+      return {
+        ...state,
+        userInfo: {}
+      }
     default:
       return state
   }
