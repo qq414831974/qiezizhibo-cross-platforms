@@ -377,13 +377,19 @@ class Live extends Component<IProps, PageState> {
               times: 1,
             }).then((result) => {
               if (result) {
-                payAction.getGiftList({matchId: this.getParamId()});
+                payAction.getGiftList();
               }
             })
           }
         });
       }
     }
+  }
+
+  onShareAppMessage() {
+  }
+
+  onShareTimeline() {
   }
 
   componentWillMount() {
@@ -431,7 +437,7 @@ class Live extends Component<IProps, PageState> {
         this.getSharePicture(data);
         this.enterTime = formatTimeSecond(new Date());
 
-        if (data.type.includes(MATCH_TYPE.chattingRoom)) {
+        if (data.type && data.type.includes(MATCH_TYPE.chattingRoom)) {
           this.getCommentList(data.id);
         }
         this.initHeatCompetition(data);
@@ -494,7 +500,7 @@ class Live extends Component<IProps, PageState> {
           heatStartTime = this.getMatchHeatStartTime(data, match);
           heatEndTime = this.getMatchHeatEndTime(data, match);
         }
-        payAction.getGiftList({matchId: id});
+        payAction.getGiftList();
         this.setState({
           heatRule: data,
           heatType: data.type,
@@ -1582,7 +1588,7 @@ class Live extends Component<IProps, PageState> {
     this.setState({giftOpen: false})
     if (orderId == GIFT_TYPE.FREE) {
       this.getParamId() && this.getTeamHeatInfo(this.getParamId(), null);
-      this.getParamId() && payAction.getGiftList({matchId: this.getParamId()});
+      this.getParamId() && payAction.getGiftList();
       this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
       this.state.leagueTeamHeatRefreshFunc && this.state.leagueTeamHeatRefreshFunc();
       this.getUserChargeInfo(this.props.match, false);
@@ -2617,11 +2623,11 @@ class Live extends Component<IProps, PageState> {
           isOpened={this.state.curtainShow}
           onClose={this.onCurtainClose}
         >
-          <Image
+          {this.state.curtainShow ? <Image
             mode="widthFix"
             src={this.state.curtain ? this.state.curtain.content : ""}
             onClick={this.handleCurtainClick}
-          />
+          /> : null}
         </AtCurtain>
         <AtToast isOpened={this.state.downLoading} text="生成中..." status="loading"/>
         <ModalAlbum

@@ -1,3 +1,4 @@
+import Taro from '@tarojs/taro'
 import {Component} from 'react'
 import {View} from '@tarojs/components'
 import MatchItem from '../../../../components/match-item'

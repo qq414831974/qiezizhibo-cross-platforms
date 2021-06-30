@@ -94,7 +94,14 @@ class Home extends Component<IProps, PageState> {
   }
 
   $loginCallback = () => {
+    this.redirectPage();
     this.initPayConfig();
+  }
+
+  onShareAppMessage() {
+  }
+
+  onShareTimeline() {
   }
 
   componentWillMount() {
@@ -107,17 +114,40 @@ class Home extends Component<IProps, PageState> {
     configAction.getShareSentence();
     configAction.getExpInfo();
     this.initBulletin();
+  }
+
+  redirectPage = () => {
     const router = getCurrentInstance().router;
-    if (router && router.params && router.params.id && router.params.page) {
-      let url = '/pages/' + router.params.page + '/' + router.params.page + '?id=' + router.params.id;
+    if (router && router.params && router.params.page) {
+      let url = '/pages/' + router.params.page + '/' + router.params.page;
+      let count = 0;
+      for (let key in router.params) {
+        if (key != "page") {
+          if (count == 0) {
+            url = url + "?";
+          } else {
+            url = url + "&";
+          }
+          url = url + key + "=" + router.params[key];
+          count = count + 1;
+        }
+      }
       Taro.navigateTo({
         url: url,
         fail: () => {
           Taro.switchTab({url: url})
         }
       })
-    } else if (router && router.params && router.params.page) {
-      let url = '/pages/' + router.params.page + '/' + router.params.page;
+    } else if (router && router.params && router.params.scene) {
+      const scene = decodeURIComponent(router.params.scene);
+      const paramPage = this.getQueryVariable(scene, "page");
+      const paramId = this.getQueryVariable(scene, "id");
+      let url = '/pages/' + paramPage + '/' + paramPage + '?id=' + paramId;
+      if (paramPage == "reg") {
+        const l = this.getQueryVariable(scene, "l");
+        const t = this.getQueryVariable(scene, "t");
+        url = `/pages/registration/registration?leagueId=${l}&regTeamId=${t}&editable=true&isShare=true`;
+      }
       Taro.navigateTo({
         url: url,
         fail: () => {
@@ -125,6 +155,16 @@ class Home extends Component<IProps, PageState> {
         }
       })
     }
+  }
+  getQueryVariable = (query, name) => {
+    var vars = query.split("&");
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split("=");
+      if (pair[0] == name) {
+        return pair[1];
+      }
+    }
+    return (false);
   }
 
   componentWillUnmount() {

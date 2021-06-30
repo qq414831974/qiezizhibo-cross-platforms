@@ -44,7 +44,7 @@
     "regenerator-runtime": "0.13.7",
 		"taro-ui": "^3.0.0-alpha.10",
 		"classnames": "^2.3.1"
-	},
+  },
 	"devDependencies": {
     "@types/webpack-env": "^1.16.0",
     "@types/react": "^17.0.6",

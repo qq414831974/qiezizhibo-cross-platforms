@@ -20,6 +20,11 @@ export default {
     'pages/feedbackDetail/feedbackDetail',
     'pages/feedbackSuccess/feedbackSuccess',
     'pages/memberOrder/memberOrder',
+    'pages/registration/registration',
+    'pages/registrationTeam/registrationTeam',
+    'pages/registrationPlayer/registrationPlayer',
+    'pages/registrationList/registrationList',
+    'pages/myRegistration/myRegistration',
   ],
   window: {
     backgroundTextStyle: 'light',

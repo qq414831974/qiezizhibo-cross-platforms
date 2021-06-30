@@ -1,0 +1,618 @@
+@import '../../app.scss';
+
+.qz-registration {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  position: relative;
+  background-color: $color-bg-grey-dark;
+
+  &-header {
+    //width: 100%;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 30px 0 30px;
+  }
+
+  &-league {
+    width: 100%;
+    position: relative;
+    height: 260px;
+    border-radius: 15px 15px 0 0;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+
+    &__name {
+      position: absolute;
+      left: 30px;
+      top: 30px;
+      display: flex;
+      align-items: center;
+      clear: both;
+      overflow: hidden;
+
+      image {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        min-height: 50px;
+        border-radius: 50%;
+      }
+
+      text {
+        font-size: $font-size-lg;
+        color: $color-text-base-inverse;
+        max-height: 88px;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+        word-break: break-all;
+        white-space: normal !important;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        margin-left: 10px;
+        text-shadow: #333 1px 1px 1px;
+        font-weight: 800;
+      }
+    }
+
+    &__info {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+
+      .city {
+        position: absolute;
+        right: $spacing-h-sm;
+        bottom: $spacing-h-sm * $line-height-en;
+        font-size: $font-size-sm;
+        padding: $spacing-v-xs $spacing-v-sm;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: $spacing-v-sm/2;
+        color: $color-text-base-inverse;
+      }
+
+      .time {
+        position: absolute;
+        left: $spacing-h-sm;
+        bottom: $spacing-h-sm * $line-height-en;
+        font-size: $font-size-sm;
+        padding: $spacing-v-xs $spacing-v-sm;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: $spacing-v-sm/2;
+        color: $color-text-base-inverse;
+      }
+    }
+
+    &__button {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+
+      button {
+        font-size: $font-size-sm !important;
+        color: $color-text-base-inverse !important;
+        background-color: $color-bg-blue-main;
+      }
+    }
+
+    &__poster {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 260px;
+      border-radius: 10px 10px 0 0;
+      overflow: hidden;
+      padding: 20px 30px;
+
+      image {
+        width: 100%;
+        height: 260px;
+      }
+    }
+  }
+
+  &-countdown {
+    position: relative;
+    overflow: hidden;
+    padding: 0 30px 20px 30px;
+
+    &__info {
+      background: $color-white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    &__title {
+      width: 100%;
+      font-size: $font-size-sm;
+      color: $color-grey-2;
+      text-align: center;
+    }
+
+    &__time {
+      width: 100%;
+      font-size: $font-size-sm;
+      color: $color-text-base;
+      text-align: center;
+    }
+  }
+
+  &-team {
+    position: relative;
+    overflow: hidden;
+    padding: 0 30px 20px 30px;
+
+    &__info {
+      background: $color-white;
+      border-radius: 0 0 15px 15px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.15);
+
+      .headImg {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+      }
+
+      .teamName {
+        font-size: $font-size-base;
+        padding: $spacing-v-xs $spacing-v-sm;
+        color: $color-text-base;
+      }
+
+      .hint {
+        margin-top: 10px;
+        padding: $spacing-v-xs $spacing-v-sm;
+
+        text {
+          font-size: $font-size-sm;
+          padding: $spacing-v-xs $spacing-v-sm;
+          background-color: rgba(0, 0, 0, 0.5);
+          border-radius: $spacing-v-sm/2;
+          color: $color-text-base-inverse;
+        }
+      }
+
+      .edit {
+        height: 64px;
+        width: 64px;
+        position: absolute;
+        top: 50%;
+        right: 60px;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $color-bg-grey-dark;
+        border-radius: 15px;
+
+        image {
+          height: 32px;
+          width: 32px;
+        }
+      }
+
+      &-right {
+        margin-left: 20px;
+      }
+    }
+  }
+
+  &-verify {
+    color: $color-error;
+    font-size: $font-size-base;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  &-player {
+    padding: 20px 30px;
+
+    &__title {
+      color: $color-grey-1;
+      font-size: $font-size-base;
+      padding: 10px 0;
+
+      .left {
+        color: $color-grey-1;
+        font-size: $font-size-base;
+      }
+
+      .right {
+        color: $color-link;
+        font-size: $font-size-base;
+        float: right;
+        margin-right: 10px;
+      }
+
+      .right:hover {
+        color: $color-link-active;
+      }
+    }
+
+    &__buttons {
+      display: flex;
+      margin-top: 20px;
+
+      .button {
+        margin: 0 2%;
+        flex: 1 1;
+      }
+    }
+
+    &__transparent {
+      button {
+        background-color: $color-text-base-inverse !important;
+        border: none;
+        padding: 10px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        image {
+          height: 60px;
+          width: 60px;
+        }
+      }
+
+      button:after {
+        display: none;
+      }
+    }
+
+    &__add {
+      margin-top: 20px;
+
+      button {
+        font-size: $font-size-base !important;
+        color: $color-text-base-inverse !important;
+        background-color: $color-bg-blue-main !important;
+        text:last-child{
+          margin-left: 10px;
+        }
+      }
+
+      button:active {
+        transform: scale(1.01);
+        background-color: tint($color-bg-blue-main, 10%) !important;
+      }
+    }
+
+    &__confirm {
+      margin-top: 20px;
+
+      button {
+        font-size: $font-size-base !important;
+        color: $color-text-base-inverse !important;
+        background-color: #ff9900 !important;
+      }
+
+      button:active {
+        transform: scale(1.01);
+        background-color: tint(#ff9900, 10%) !important;
+      }
+    }
+
+    &__delete {
+      margin-top: 20px;
+
+      button {
+        font-size: $font-size-base !important;
+        color: $color-text-base-inverse !important;
+        background-color: $color-error !important;
+      }
+
+      button:active {
+        transform: scale(1.01);
+        background-color: tint($color-error, 10%) !important;
+      }
+    }
+  }
+
+  &-player-list {
+    background-color: $color-white;
+    border-radius: 15px;
+    padding: 0 20px;
+
+    &__item {
+      padding: $spacing-v-sm $spacing-h-sm;
+      position: relative;
+      box-sizing: border-box;
+      color: $at-list-text-color;
+      font-size: $font-size-lg;
+      line-height: $line-height-zh;
+      @include active;
+      @include hairline-bottom-relative($left: $spacing-h-sm);
+
+      &-inner {
+        position: relative;
+        display: flex;
+        align-items: center;
+        -webkit-box-align: center;
+      }
+
+      &-avatar {
+        width: 70px;
+        height: 70px;
+        margin-right: $spacing-v-xl;
+
+        image {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+        }
+      }
+    }
+
+    .item-content {
+      &__info {
+        &-title {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: inherit;
+          font-size: $font-size-base;
+          line-height: $line-height-zh;
+        }
+
+        &-note {
+          color: $color-error;
+          font-size: $font-size-sm;
+          line-height: $line-height-zh;
+        }
+      }
+    }
+
+    &__item-content {
+      flex: 1;
+      -webkit-box-flex: 1;
+      overflow: hidden;
+      margin-right: 40px;
+    }
+
+    .item-extra {
+      position: relative;
+
+      &__text {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: $spacing-v-md;
+        width: 120px;
+        height: 60px;
+
+        text {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 120px;
+          height: 60px;
+          line-height: 60px;
+          text-align: right;
+          font-size: $font-size-base;
+          color: $color-grey-2;
+        }
+      }
+
+      &__phone {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: $spacing-v-md;
+        width: 180px;
+        height: 60px;
+
+        text {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 180px;
+          height: 60px;
+          line-height: 60px;
+          text-align: right;
+          font-size: $font-size-base;
+          color: $color-grey-2;
+        }
+      }
+    }
+
+    &__item-extra {
+      flex: 0 0 $at-list-extra-width;
+      -webkit-box-flex: $at-list-extra-width;
+      width: $at-list-extra-width;
+      text-align: right;
+    }
+  }
+
+  &-contract {
+    background-color: $color-white;
+    border-radius: 15px;
+    padding: 10px;
+    margin-top: 20px;
+
+
+    &__inner {
+      transform: scale(0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    checkbox {
+      font-size: $font-size-xl;
+    }
+
+    .contract {
+      font-size: $font-size-xl;
+      color: $color-bg-blue-main;
+    }
+
+    .contract-agreement {
+      font-size: $font-size-xl;
+      margin-left: 20px;
+    }
+
+    &__hint {
+      background: $color-white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $color-grey-1;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+.qz-registration__content {
+  width: 100%;
+  height: 100vh;
+  background-color: $color-bg-grey;
+  padding: 150px 0;
+  overflow: hidden;
+}
+
+.qz-registration__form {
+  position: relative;
+  background-color: $color-white;
+  padding: 110px $spacing-h-xl 80px $spacing-h-xl;
+  border-radius: 10px;
+}
+
+.qz-registration__input {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ebebeb;
+  text-align: center;
+
+  .title {
+    color: $color-black-2;
+    font-size: $font-size-base;
+  }
+
+  .divider {
+    width: 2px;
+    height: 44px;
+    margin: 0 24px;
+    background: #ebebeb;
+  }
+
+  .input-wrapper {
+    height: 96px;
+    width: 100%;
+    text-align: left;
+
+    input {
+      height: 96px;
+      width: 100%;
+      color: $color-black-1;
+      font-size: $font-size-base;
+      border: none;
+      text-align: start;
+      flex: 1 1;
+      display: inline-block;
+    }
+  }
+
+  .input-placeholder {
+    color: $color-black-3;
+    font-size: $font-size-base;
+  }
+}
+
+.qz-registration__img-title {
+  color: $color-black-1;
+  font-size: $font-size-lg;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.qz-registration__img-container {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  background: $color-white;
+  border-radius: 50%;
+  height: 200px;
+  width: 200px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .upload {
+    height: 180px;
+    width: 180px;
+    background-color: $color-bg-grey;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+
+    .icon {
+      width: 60px;
+      height: 60px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+}
+
+.qz-registration__button {
+  width: 100%;
+  text-align: center;
+  margin-top: 50px;
+
+  button {
+    width: 80%;
+    font-size: $font-size-base !important;
+    color: $color-text-base-inverse !important;
+    background-color: $color-bg-blue-main !important;
+  }
+
+  button:active {
+    transform: scale(1.01);
+    background-color: tint($color-bg-blue-main, 10%) !important;
+  }
+}
+
+.qz-registration-loading {
+  width: 100vw;
+  height: 10vw;
+  position: relative;
+  margin-top: $spacing-v-md;
+}
+
+.qz-registration__delete-confirm__button {
+  color: $color-error !important;
+}
+
+.qz-registration__delete-confirm__image {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  image {
+    width: 120px;
+    height: 120px;
+  }
+}

@@ -13,3 +13,7 @@ export const ERROR_PAY_CANCEL = 'error_pay_cancel';
 export const ERROR_PAY_ERROR = 'error_pay';
 
 export const ERROR_SEND_GIFT_ERROR = 'error_gift';
+
+export const ERROR_PLAYER_ID_NUMBER_DUPLICATE = 'playerIDNumberDuplicate';
+export const ERROR_PLAYER_SHIRT_NUMBER_DUPLICATE = 'playerShirtNumberDuplicate';
+export const ERROR_PLAYER_USER_NOT_VALID = 'playerUserNoNotValid';

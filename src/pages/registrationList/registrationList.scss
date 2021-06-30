@@ -1,0 +1,142 @@
+@import '../../app.scss';
+
+.qz-registration-list-content {
+  width: 100%;
+  height: 100%;
+}
+
+.qz-registration-list-loading {
+  width: 100vw;
+  height: 10vw;
+  position: relative;
+  margin-top: $spacing-v-md;
+}
+.qz-registration-list__registration {
+  margin-top: 30px;
+
+  button {
+    width: 90%;
+    font-size: $font-size-base !important;
+    color: $color-text-base-inverse !important;
+    background-color: $color-bg-blue-main !important;
+    margin-top: $spacing-v-lg;
+  }
+
+  button:active {
+    transform: scale(1.01);
+    background-color: tint($color-bg-blue-main, 10%) !important;
+  }
+
+  &-title {
+    color: $color-text-title;
+    font-weight: 800;
+    font-size: $font-size-base;
+    padding: 10px 30px;
+  }
+
+  &-team {
+    background-color: $color-white;
+    border-radius: 15px;
+    padding: 0 20px;
+
+    &__item {
+      padding: $spacing-v-sm $spacing-h-sm;
+      position: relative;
+      box-sizing: border-box;
+      color: $at-list-text-color;
+      font-size: $font-size-lg;
+      line-height: $line-height-zh;
+      @include active;
+      @include hairline-bottom-relative($left: $spacing-h-sm);
+
+      &-inner {
+        position: relative;
+        display: flex;
+        align-items: center;
+        -webkit-box-align: center;
+      }
+
+      &-avatar {
+        width: 70px;
+        height: 70px;
+        margin-right: $spacing-v-xl;
+
+        image {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+        }
+      }
+    }
+
+    .item-content {
+      &__info {
+        &-title {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: inherit;
+          font-size: $font-size-base;
+          line-height: $line-height-zh;
+        }
+
+        &-note {
+          color: $at-list-content-color;
+          font-size: $font-size-sm;
+          line-height: $line-height-zh;
+        }
+      }
+    }
+
+    &__item-content {
+      flex: 1;
+      -webkit-box-flex: 1;
+      overflow: hidden;
+      margin-right: 40px;
+    }
+
+    .item-extra {
+      position: relative;
+
+      &__text {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: $spacing-v-md;
+        width: 160px;
+        height: 60px;
+
+        text {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 160px;
+          height: 60px;
+          line-height: 60px;
+          text-align: right;
+          font-size: $font-size-base;
+          color: $color-grey-2;
+        }
+      }
+
+      .pass {
+        text {
+          color: $color-text-secondary !important;
+        }
+      }
+
+      .not-pass {
+        text {
+          color: $color-error !important;
+        }
+      }
+    }
+
+    &__item-extra {
+      flex: 0 0 $at-list-extra-width;
+      -webkit-box-flex: $at-list-extra-width;
+      width: $at-list-extra-width;
+      text-align: right;
+    }
+  }
+}

@@ -32,7 +32,7 @@
     display: flex;
     justify-content: center;
     margin-top: $spacing-v-md;
-    padding-top: 100px;
+    //padding-top: 100px;
 
     &__inner {
       display: flex;
@@ -52,4 +52,23 @@
   height: 10vw;
   position: relative;
   margin-top: $spacing-v-md;
+}
+
+.qz-league-tabs {
+  width: 100%;
+  padding-top: 85px
+}
+.qz-league__top-tabs__content {
+  width: 100%;
+}
+
+.qz-league__top-tabs__content--fixed {
+  .at-tabs__header {
+    position: fixed;
+    //top: 85px;
+    z-index: $zindex-drawer;
+  }
+  .at-tabs__body{
+    padding-top: 85px;
+  }
 }

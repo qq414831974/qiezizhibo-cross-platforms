@@ -75,6 +75,10 @@ class Match extends Component<IProps, PageState> {
   componentDidHide() {
   }
 
+  onShareAppMessage() {}
+
+  onShareTimeline() {}
+
   onPullDownRefresh = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getMatchList();

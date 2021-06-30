@@ -1,0 +1,64 @@
+@import '../../../../app.scss';
+
+.qz-verify-modal {
+  &-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-sm;
+    color: $color-text-title;
+  }
+
+  &-choice-selected{
+    background-color: $color-bg-grey-dark;
+  }
+
+  &-choice-container {
+    //margin: $spacing-v-sm 0;
+    //background-color: $color-bg;
+  }
+
+  &-choice {
+    &-img {
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      //border-radius: 15px;
+      //box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    &-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: $font-size-sm;
+      margin-top: $spacing-v-sm;
+      color: $color-text-base;
+    }
+
+    &-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: $font-size-xs;
+      color: $color-error;
+    }
+  }
+  &-input {
+    input {
+      height: 96px;
+      width: 100%;
+      color: $color-black-1;
+      font-size: $font-size-base;
+      border: none;
+      text-align: center;
+      flex: 1 1;
+      display: inline-block;
+    }
+  }
+  .input-placeholder {
+    color: $color-black-3;
+    font-size: $font-size-base;
+  }
+}

@@ -65,6 +65,10 @@ class Series extends Component<IProps, PageState> {
   componentDidHide() {
   }
 
+  onShareAppMessage() {}
+
+  onShareTimeline() {}
+
   getParamId = () => {
     let id;
     const router = getCurrentInstance().router;

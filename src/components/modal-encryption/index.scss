@@ -1,0 +1,17 @@
+@import '../../app.scss';
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qz-encryption-modal-content_text {
+  font-size: $font-size-base;
+  margin: $spacing-v-sm 0;
+}
+
+.qz-encryption-modal-content_input {
+  margin-top: 40px;
+  text-align: center;
+}

@@ -19,6 +19,7 @@ import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import payAction from "../../actions/pay";
 import userAction from "../../actions/user";
+import registrationAction from "../../actions/registration";
 import * as error from "../../constants/error";
 import LoginModal from "../../components/modal-login";
 import PhoneModal from "../../components/modal-phone";
@@ -113,6 +114,8 @@ type PageState = {
   userHaveLeagueMember: any;
   topSixHeats: any,
   heatRankShow: boolean;
+  leagueRegistration: any,
+  userLeagueRegistration: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -129,6 +132,7 @@ class LeagueManager extends Component<IProps, PageState> {
   timeout_gift: any = {};
   timeout_gift_show: any = {};
   giftRows: any = {left: [{}, {}, {}, {}, {}], right: [{}, {}, {}, {}, {}], unset: []};
+  leagueId: any = null;
 
   constructor(props) {
     super(props)
@@ -186,10 +190,12 @@ class LeagueManager extends Component<IProps, PageState> {
       userHaveLeagueMember: false,
       topSixHeats: null,
       heatRankShow: false,
+      leagueRegistration: null,
+      userLeagueRegistration: null,
     }
   }
 
-  $setSharePath = () => `/pages/home/home?id=${this.getParamId()}&page=leagueManager`
+  $setSharePath = () => `/pages/home/home?id=${this.leagueId}&page=leagueManager`
 
   $setShareTitle = () => {
     const shareSentence = random_weight(this.props.shareSentence.filter(value => value.type == global.SHARE_SENTENCE_TYPE.league).map(value => {
@@ -223,13 +229,19 @@ class LeagueManager extends Component<IProps, PageState> {
               times: 1,
             }).then((result) => {
               if (result) {
-                payAction.getGiftList({matchId: this.getParamId()});
+                payAction.getGiftList();
               }
             })
           }
         });
       }
     }
+  }
+
+  onShareAppMessage() {
+  }
+
+  onShareTimeline() {
   }
 
   componentWillMount() {
@@ -240,8 +252,9 @@ class LeagueManager extends Component<IProps, PageState> {
     if (!payEnabled) {
       this.initPayConfig();
     }
-    this.getParamId() && this.getLeagueInfo(this.getParamId());
-    this.getParamId() && this.getBetRanks(this.getParamId());
+    this.leagueId = this.getParamId();
+    this.leagueId && this.getLeagueInfo(this.leagueId);
+    this.leagueId && this.getBetRanks(this.leagueId);
     if (this.props.userInfo && this.props.userInfo.userNo) {
       depositAction.getDeposit(this.props.userInfo.userNo);
     }
@@ -260,7 +273,8 @@ class LeagueManager extends Component<IProps, PageState> {
   }
 
   componentDidShow() {
-    this.initLeagueMember(this.getParamId())
+    this.leagueId = this.getParamId();
+    this.initLeagueMember(this.leagueId)
   }
 
   componentDidHide() {
@@ -426,7 +440,7 @@ class LeagueManager extends Component<IProps, PageState> {
         param.name = name;
       }
       if (heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
-        param.leagueId = this.getParamId();
+        param.leagueId = this.leagueId;
         this.setState({playerHeatLoading: true})
         new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
           this.setState({playerHeatLoading: false, topSixHeats: this.getTopSixHeat(data.records)})
@@ -440,7 +454,7 @@ class LeagueManager extends Component<IProps, PageState> {
             })
           }
         })
-        // new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.getParamId()}).then((data: any) => {
+        // new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.leagueId}).then((data: any) => {
         //   this.setState({playerHeatTotal: data})
         // })
       }
@@ -456,7 +470,7 @@ class LeagueManager extends Component<IProps, PageState> {
       param.name = name;
     }
     if (heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
-      param.leagueId = this.getParamId();
+      param.leagueId = this.leagueId;
       this.setState({playerHeatLoading: true})
       new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
         this.setState({playerHeatLoading: false})
@@ -484,7 +498,7 @@ class LeagueManager extends Component<IProps, PageState> {
         param.name = name;
       }
       if (heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) {
-        param.leagueId = this.getParamId();
+        param.leagueId = this.leagueId;
         this.setState({teamHeatLoading: true})
         new Request().get(api.API_LEAGUE_TEAM_HEAT, param).then((data: any) => {
           this.setState({teamHeatLoading: false, topSixHeats: this.getTopSixHeat(data.records)})
@@ -498,7 +512,7 @@ class LeagueManager extends Component<IProps, PageState> {
             })
           }
         })
-        // new Request().get(api.API_LEAGUE_TEAM_HEAT_TOTAL, {leagueId: this.getParamId()}).then((data: any) => {
+        // new Request().get(api.API_LEAGUE_TEAM_HEAT_TOTAL, {leagueId: this.leagueId}).then((data: any) => {
         //   this.setState({teamHeatTotal: data})
         // })
       }
@@ -514,7 +528,7 @@ class LeagueManager extends Component<IProps, PageState> {
       param.name = name;
     }
     if (heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) {
-      param.leagueId = this.getParamId();
+      param.leagueId = this.leagueId;
       this.setState({teamHeatLoading: true})
       new Request().get(api.API_LEAGUE_TEAM_HEAT, param).then((data: any) => {
         this.setState({teamHeatLoading: false})
@@ -647,7 +661,8 @@ class LeagueManager extends Component<IProps, PageState> {
         this.setState({phoneOpen: true})
       }
       this.initPayConfig(res.userNo);
-      this.initLeagueMember(this.getParamId());
+      this.initLeagueMember(this.leagueId);
+      this.getLeagueRegistration(this.leagueId);
     })
   }
 
@@ -719,7 +734,7 @@ class LeagueManager extends Component<IProps, PageState> {
   onGiftPaySuccess = (orderId: any) => {
     this.setState({giftOpen: false})
     if (orderId == global.GIFT_TYPE.FREE) {
-      this.getParamId() && payAction.getGiftList({matchId: this.getParamId()});
+      this.leagueId && payAction.getGiftList();
       this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
       this.state.teamHeatRefreshFunc && this.state.teamHeatRefreshFunc();
     } else {
@@ -818,11 +833,23 @@ class LeagueManager extends Component<IProps, PageState> {
       url = api.API_CACHED_LEAGUE(id);
     }
     new Request().get(url, null).then((data: any) => {
-      this.setState({league: data}, () => {
+      this.setState({league: data}, async () => {
         this.getLeagueList(id);
         this.getLeagueRankSetting(id);
+        this.getLeagueRegistration(id);
         let {tabs} = this.getTabsList();
-        this.switchTab(tabs[global.LEAGUE_TABS_TYPE.leagueMatch]);
+        let startTime = new Date(data.dateBegin).getTime()
+        const nowDate = new Date().getTime();
+        const startTime_diff = startTime - nowDate;
+        if (startTime_diff > 0) {
+          this.switchTab(tabs[global.LEAGUE_TABS_TYPE.leagueRule]);
+          if (!await this.isUserLogin()) {
+            this.showAuth();
+            return;
+          }
+        } else {
+          this.switchTab(tabs[global.LEAGUE_TABS_TYPE.leagueMatch]);
+        }
         this.initHeatCompetition(id);
       })
     })
@@ -830,6 +857,27 @@ class LeagueManager extends Component<IProps, PageState> {
   getLeagueRankSetting = (id) => {
     new Request().get(api.API_LEAGUE_RANK_SETTING, {leagueId: id}).then((data: any) => {
       this.setState({leagueRankSetting: data})
+    })
+  }
+  getLeagueRegistration = (id) => {
+    registrationAction.setRegistrationCompleteFunc(this.getUserLeagueRegistration.bind(this, id))
+    new Request().get(api.API_LEAGUE_REGISTRATION, {leagueId: id}).then((data: any) => {
+      if (data) {
+        if (data.available) {
+          this.setState({leagueRegistration: data})
+        }
+        if (this.props.userInfo && this.props.userInfo.userNo) {
+          this.getUserLeagueRegistration(id);
+        }
+      }
+    })
+  }
+  getUserLeagueRegistration = (id) => {
+    new Request().get(api.API_LEAGUE_REGISTRATION_USER, {
+      leagueId: id,
+      userNo: this.props.userInfo.userNo
+    }).then((res: any) => {
+      this.setState({userLeagueRegistration: res})
     })
   }
   getLeagueList = (id) => {
@@ -1064,6 +1112,8 @@ class LeagueManager extends Component<IProps, PageState> {
               <LeagueRegulations
                 tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
                 leagueMatch={league}
+                leagueRegistration={this.state.leagueRegistration}
+                userLeagueRegistration={this.state.userLeagueRegistration}
                 loading={this.state.tabloading}
                 visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueRule]}/>
             </AtTabsPane>
@@ -1081,7 +1131,7 @@ class LeagueManager extends Component<IProps, PageState> {
                 isLeauge
                 tabContainerStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
                 tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px - 85px - 42px)`}}
-                leagueId={this.getParamId()}
+                leagueId={this.leagueId}
                 heatType={this.state.heatType}
                 onPlayerHeatRefresh={this.onPlayerHeatRefresh}
                 // totalHeat={this.state.playerHeatTotal}
@@ -1103,7 +1153,7 @@ class LeagueManager extends Component<IProps, PageState> {
                 isLeague
                 tabContainerStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
                 tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px - 85px - 42px)`}}
-                leagueId={this.getParamId()}
+                leagueId={this.leagueId}
                 heatType={this.state.heatType}
                 onTeamHeatRefresh={this.onTeamHeatRefresh}
                 // totalHeat={this.state.teamHeatTotal}
@@ -1157,7 +1207,7 @@ class LeagueManager extends Component<IProps, PageState> {
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}>
           <GiftPanel
-            leagueId={this.getParamId()}
+            leagueId={this.leagueId}
             matchInfo={null}
             supportTeam={this.state.currentSupportTeam}
             supportPlayer={this.state.currentSupportPlayer}
@@ -1291,7 +1341,7 @@ class LeagueManager extends Component<IProps, PageState> {
         }
         {!this.props.giftEnabled ?
           <HeatRank
-            leagueId={this.getParamId()}
+            leagueId={this.leagueId}
             heatRanks={this.state.topSixHeats}
             loading={this.state.teamHeatLoading || this.state.playerHeatLoading}
             isOpened={this.state.heatRankShow}

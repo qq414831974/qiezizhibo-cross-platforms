@@ -56,7 +56,7 @@ class ShareMoment extends Component<IProps, PageState> {
           <AtModalAction>
             <Button className="mini-gray" onClick={handleCancel}>关闭</Button>
             <Button className="qz-sharemoment-download" loading={loading} disabled={loading}
-                    onClick={handleConfirm}><View className='at-icon at-icon-download'/>下载海报</Button>
+                    onClick={handleConfirm}><View className='at-icon at-icon-download'/>下载图片</Button>
           </AtModalAction>
         </AtModal>
       </View>

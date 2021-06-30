@@ -3,7 +3,7 @@ import Taro from '@tarojs/taro'
 import {Component} from 'react'
 import {AtIcon} from "taro-ui"
 import {View, Text, Image, Button} from '@tarojs/components'
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 import './index.scss'
 import * as global from "../../constants/global";
 import {getStorage, getYuan, toLogin} from "../../utils/utils";
@@ -239,40 +239,42 @@ class LeagueMember extends Component<IProps, PageState> {
     return (
       <View className={rootClass} onTouchMove={this.handleTouchMove}>
         <View onClick={this.close} className='qz-league-member__overlay'/>
-        <View className='qz-league-member__container layout'>
-          <View className='layout-header'>
-            <View className='layout-header__btn-close' onClick={this.close}/>
-            <View className="layout-header__title">
-              <Image src={crown}/>
-              <Text>联赛会员</Text>
-            </View>
-          </View>
-          <View className='layout-body'>
-            <View className="qz-league-member__league">
-              <Image
-                src={this.props.league && this.props.league.headImg ? this.props.league.headImg : {crown}}/>
-              <Text>{this.getLeagueName(this.props.league)}</Text>
-            </View>
-            <View className="qz-league-member__card">
-              <View className="qz-league-member__card-item qz-league-member__card-item-hover">
-                <View>
-                  <Text className="qz-league-member__card-item-price">
-                    ¥{this.props.leagueMemberRule && this.props.leagueMemberRule.price ? getYuan(this.props.leagueMemberRule.price) : 999}
-                  </Text>
-                </View>
-                <View><Text className="qz-league-member__card-item-time">永久</Text></View>
+        {_isOpened ?
+          <View className='qz-league-member__container layout'>
+            <View className='layout-header'>
+              <View className='layout-header__btn-close' onClick={this.close}/>
+              <View className="layout-header__title">
+                <Image src={crown}/>
+                <Text>联赛会员</Text>
               </View>
             </View>
-            <View className="qz-league-member__title">
-              联赛会员特权
+            <View className='layout-body'>
+              <View className="qz-league-member__league">
+                <Image
+                  src={this.props.league && this.props.league.headImg ? this.props.league.headImg : {crown}}/>
+                <Text>{this.getLeagueName(this.props.league)}</Text>
+              </View>
+              <View className="qz-league-member__card">
+                <View className="qz-league-member__card-item qz-league-member__card-item-hover">
+                  <View>
+                    <Text className="qz-league-member__card-item-price">
+                      ¥{this.props.leagueMemberRule && this.props.leagueMemberRule.price ? getYuan(this.props.leagueMemberRule.price) : 999}
+                    </Text>
+                  </View>
+                  <View><Text className="qz-league-member__card-item-time">永久</Text></View>
+                </View>
+              </View>
+              <View className="qz-league-member__title">
+                联赛会员特权
+              </View>
+              <View className="qz-league-member__desc">
+                <AtIcon value='play' size='12' color='#7F7F7F'/>
+                可永久免费观看此联赛的所有比赛录像
+              </View>
+              <Button className="qz-league-member__button" onClick={this.onMemberSignUp}>开通</Button>
             </View>
-            <View className="qz-league-member__desc">
-              <AtIcon value='play' size='12' color='#7F7F7F'/>
-              可永久免费观看此联赛的所有比赛录像
-            </View>
-            <Button className="qz-league-member__button" onClick={this.onMemberSignUp}>开通</Button>
           </View>
-        </View>
+          : null}
       </View>
     )
   }

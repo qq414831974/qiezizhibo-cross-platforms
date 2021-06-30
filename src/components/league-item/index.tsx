@@ -65,7 +65,7 @@ class LeagueItem extends Component<IProps, PageState> {
         {!withoutName && !pictureOnly && <View className='qz-league-item__title qz-league-item__title-bottom-gradient'>
           <Image className="img"
                  src={leagueInfo.headImg ? leagueInfo.headImg : defaultLogo}/>
-          <Text className="name">{leagueInfo.name}</Text>
+          <Text className="name">{leagueInfo.shortName ? leagueInfo.shortName : leagueInfo.name}</Text>
         </View>}
         {!pictureOnly && <View className="qz-league-item__info">
           {leagueInfo.city ? <View className="city">{leagueInfo.city}</View> : null}
@@ -78,7 +78,13 @@ class LeagueItem extends Component<IProps, PageState> {
               {leagueInfo.isParent ? "系列赛" : null}
             </Text>
           }
+          {leagueInfo.isParent ? <Text className="series">
+            系列赛
+          </Text> : null}
         </View>}
+        {leagueInfo.registration &&  leagueInfo.registration.available ? <Text className="registration">
+          球队报名
+        </Text> : null}
       </View>
       <Image src={leagueInfo.poster ? leagueInfo.poster : defaultPoster} className="qz-league-item__poster"/>
     </View>

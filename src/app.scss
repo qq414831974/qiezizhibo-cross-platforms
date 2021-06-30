@@ -469,6 +469,42 @@ $at-timeline-dot-color: $color-bg !default;
 $at-timeline-dot-border-color: $color-brand-light !default;
 $at-timeline-line-color: $color-border-lighter !default;
 
+@mixin active {
+  transition: background-color 0.3s;
+
+  &:active {
+    background-color: $color-grey-5;
+  }
+}
+
+@mixin hairline-common() {
+  content: '';
+  position: absolute;
+  transform-origin: center;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+@mixin hairline-bottom-relative(
+  $color: $color-border-grey-light,
+  $style: solid,
+  $width: 1px,
+  $left: 0
+) {
+  position: relative;
+
+  &::after {
+    @include hairline-common();
+
+    top: auto;
+    left: $left;
+    right: 0;
+    bottom: 0;
+    transform: scaleY(0.5);
+    border-bottom: $width $style $color;
+  }
+}
+
 .at-search-bar::after {
   border: none;
 }
@@ -641,11 +677,13 @@ $at-timeline-line-color: $color-border-lighter !default;
     padding: 0;
   }
 }
-.at-modal-bottom-nopadding{
+
+.at-modal-bottom-nopadding {
   .at-modal__content {
     padding-bottom: 0 !important;
   }
 }
+
 .white {
   background: $color-bg;
   box-shadow: none;
@@ -669,3 +707,57 @@ $at-timeline-line-color: $color-border-lighter !default;
   height: 60px !important;
 }
 
+.at-modal {
+  transition-duration: 100ms;
+}
+
+.at-float-layout-large {
+  .layout {
+    max-height: 1050px;
+  }
+
+  .layout-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .layout-header__title {
+    padding-right: 0;
+  }
+
+  .layout-body {
+    max-height: 928px;
+  }
+
+  .layout-body__content {
+    max-height: 898px;
+  }
+}
+
+.modal-overlay-blur {
+  .at-modal__overlay {
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(30px);
+  }
+}
+
+.at-input-top-border:before {
+  content: "";
+  position: absolute;
+  -webkit-transform-origin: center;
+  -ms-transform-origin: center;
+  transform-origin: center;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  pointer-events: none;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  border: 0 solid #d6e4ef;
+  -webkit-transform: scale(0.5);
+  -ms-transform: scale(0.5);
+  transform: scale(0.5);
+  border-top-width: 1PX;
+}

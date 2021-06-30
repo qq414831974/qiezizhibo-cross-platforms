@@ -1,0 +1,376 @@
+@import '../../app.scss';
+
+.qz-registration-player__scroll {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.qz-registration-player__no-scroll {
+  overflow: hidden;
+}
+
+.qz-registration-player {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+
+  &-header {
+    width: 100%;
+    background-color: $color-bg-blue-main;
+    z-index: 800;
+
+    &-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 70px;
+
+      .img {
+        height: 50px;
+        width: 50px;
+        min-height: 50px;
+        min-width: 50px;
+        border-radius: 50%;
+      }
+
+      .text {
+        font-size: $font-size-lg;
+        color: $color-text-base-inverse;
+        text-align: center;
+        margin-left: $spacing-h-md;
+      }
+    }
+  }
+
+  &__title {
+    color: $color-text-title;
+    font-weight: 800;
+    font-size: $font-size-base;
+    padding: 10px 0;
+  }
+
+  &__hint {
+    color: $color-black-3;
+    font-size: $font-size-sm;
+    margin-top: 30px;
+  }
+}
+
+.qz-registration-player__content {
+  width: 100%;
+  background-color: $color-bg-grey-dark;
+  padding: 30px 0;
+  overflow: hidden;
+}
+
+.qz-registration-player__form {
+  position: relative;
+  background-color: $color-white;
+  padding: $spacing-h-xl $spacing-h-xl;
+  border-radius: 10px;
+  margin-top: 30px;
+}
+
+.qz-registration-player__form:first-of-type {
+  margin-top: 0;
+}
+
+.qz-registration-player__input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ebebeb;
+  text-align: center;
+
+  .title {
+    min-width: 140px;
+    text-align: left;
+    color: $color-black-2;
+    font-size: $font-size-base;
+  }
+
+  .divider {
+    width: 2px;
+    height: 44px;
+    margin: 0 24px;
+    background: #ebebeb;
+  }
+
+  .input-wrapper {
+    height: 96px;
+    width: 100%;
+    text-align: left;
+
+    .input-left {
+      width: calc(100% - 160px);
+    }
+
+    input {
+      height: 96px;
+      width: 100%;
+      color: $color-black-1;
+      font-size: $font-size-base;
+      border: none;
+      text-align: start;
+      flex: 1 1;
+      display: inline-block;
+    }
+  }
+
+  .icon-wrapper {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
+
+  .radio-wrapper {
+    height: 96px;
+    align-items: center;
+
+    .radio-item {
+      height: 56px;
+      color: $color-bg-blue-main;
+      font-size: $font-size-base;
+      border: 4px solid $color-bg-blue-main;
+      border-left: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .radio-item:first-of-type {
+      border: 4px solid $color-bg-blue-main;
+    }
+
+    .radio-item__active {
+      background: $color-bg-blue-main;
+      color: $color-white;
+    }
+  }
+
+  .upload-wrapper {
+    height: 192px;
+    display: flex;
+    align-items: center;
+
+    .img-container {
+      background: $color-bg-grey-dark;
+      border-radius: 50%;
+      height: 160px;
+      width: 160px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .upload {
+        height: 140px;
+        width: 140px;
+        background-color: $color-bg-grey;
+        border-radius: 50%;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .icon {
+          width: 40px;
+          height: 40px;
+        }
+
+        .text {
+          color: $color-grey-1;
+          font-size: $font-size-sm;
+        }
+
+        .headImg {
+          width: 140px;
+          height: 140px;
+        }
+      }
+    }
+  }
+
+  .button-wrapper {
+    button {
+      font-size: $font-size-sm !important;
+      color: $color-text-base !important;
+      border: 1px solid $color-grey-1;
+    }
+  }
+
+  .button-wrapper-ct {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    z-index: 10;
+  }
+
+  .button-wrapper-tr {
+    position: absolute;
+    right: 0;
+    top: 20px;
+    z-index: 10;
+  }
+
+  .input-placeholder {
+    color: $color-black-3;
+    font-size: $font-size-base;
+  }
+}
+
+.qz-registration-player__img-title {
+  color: $color-black-1;
+  font-size: $font-size-lg;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.qz-registration-player__img-container {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  background: $color-white;
+  border-radius: 50%;
+  height: 200px;
+  width: 200px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .upload {
+    height: 180px;
+    width: 180px;
+    background-color: $color-bg-grey;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+
+    .icon {
+      width: 60px;
+      height: 60px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .headImg {
+      width: 180px;
+      height: 180px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+}
+
+.qz-registration-player__button {
+  width: 100%;
+  text-align: center;
+  margin-top: 50px;
+
+  button {
+    width: 80%;
+    font-size: $font-size-base !important;
+    color: $color-text-base-inverse !important;
+    background-color: $color-bg-blue-main !important;
+  }
+
+  button:active {
+    transform: scale(1.01);
+    background-color: tint($color-bg-blue-main, 10%) !important;
+  }
+}
+
+.qz-registration-player__button-delete {
+  width: 100%;
+  text-align: center;
+  margin-top: 30px;
+
+  button {
+    width: 80%;
+    font-size: $font-size-base !important;
+    color: $color-text-base-inverse !important;
+    background-color: $color-error !important;
+  }
+
+  button:active {
+    transform: scale(1.01);
+    background-color: tint($color-error, 10%) !important;
+  }
+}
+
+.qz-registration-player__sample {
+  padding: 30px;
+
+  &-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    image {
+      height: 500px;
+      width: 400px;
+    }
+  }
+
+  &-hint {
+    text-align: left;
+    color: $color-grey-1;
+    font-size: $font-size-base;
+  }
+
+  &-hint-paragraph {
+    margin: 30px 0;
+  }
+}
+
+.qz-registration-player__cropper {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  pointer-events: auto;
+
+  .button-wrapper {
+    position: fixed;
+    bottom: 44px;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    z-index: 2;
+
+    button {
+      width: 50%;
+      font-size: 28px;
+    }
+
+    button:last-child {
+      color: $color-white;
+      background-color: $color-text-secondary;
+    }
+  }
+}
+
+.qz-registration-player__cropper-background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1999;
+  pointer-events: auto;
+}

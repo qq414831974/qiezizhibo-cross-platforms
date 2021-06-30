@@ -45,6 +45,16 @@
       border-radius: $spacing-v-sm/2;
       color: $color-text-base-inverse;
     }
+    .series {
+      position: absolute;
+      right: $spacing-h-sm;
+      bottom: $spacing-h-sm * $line-height-en;
+      font-size: $font-size-sm;
+      padding: $spacing-v-xs $spacing-v-sm;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: $spacing-v-sm/2;
+      color: $color-text-base-inverse;
+    }
     .live:before {
       content: "";
       display: inline-block;
@@ -55,6 +65,16 @@
       background-color: $color-text-secondary;
       box-shadow: inset 2px 2px 4px rgba(0,0,0,0.4);
     }
+  }
+  .registration {
+    position: absolute;
+    right: $spacing-h-sm;
+    bottom: $spacing-h-sm * $line-height-en;
+    font-size: $font-size-sm;
+    padding: $spacing-v-xs $spacing-v-sm;
+    background-color: $color-text-secondary;
+    border-radius: $spacing-v-sm/2;
+    color: $color-text-base-inverse;
   }
   &__title {
     position: absolute;
@@ -78,7 +98,7 @@
     }
     .name {
       position: absolute;
-      left: $spacing-h-sm + 50px;
+      left: $spacing-h-sm + 50px + 10px;
       bottom: $spacing-h-md;
       font-size: $font-size-base;
       color: $color-text-base-inverse;

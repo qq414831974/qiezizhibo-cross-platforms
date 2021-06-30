@@ -86,6 +86,10 @@ class Search extends Component<IProps, PageState> {
   componentDidHide() {
   }
 
+  onShareAppMessage() {}
+
+  onShareTimeline() {}
+
   onSearchChange = (value) => {
     this.setState({
       searchText: value,

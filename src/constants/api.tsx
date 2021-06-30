@@ -27,9 +27,12 @@ export const API_GET_SHARE_MOMENT_PICTURE = `${system_service}/wx/ma/picture/mom
 export const API_GET_SHARE_SENTENCE = `${system_service}/sys/share/sentence`;
 export const API_GET_SHARE_PICTURE = `${system_service}/wx/ma/picture/share`;
 export const API_GET_HEAT_COMPETITION_SHARE = `${system_service}/wx/ma/picture/heat`;
+export const API_GET_REGISTRATION_LEAGUE_SHARE = `${system_service}/wx/ma/picture/registration/league`;
+export const API_GET_REGISTRATION_TEAM_SHARE = `${system_service}/wx/ma/picture/registration/team`;
 export const API_SYS_PAYMENT_CONFIG = `${system_service}/sys/config/payment`;
 export const API_SYS_FEEDBACK = `${system_service}/sys/feedback`;
 export const API_SYS_EXP = `${system_service}/sys/exp`;
+export const API_SYS_UPLOAD_AVATAR = `${system_service}/sys/upload/avatar`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth`;
@@ -51,6 +54,15 @@ export const API_LEAGUE_SERIES_LEAGUE = `${football_service}/league`;
 export const API_LEAGUE_REPORT = `${football_service}/league/report`;
 export const API_LEAGUE_RANK_SETTING = `${football_service}/league/rank/setting`;
 export const API_LEAGUE_AD = `${football_service}/ad/league`;
+export const API_LEAGUE_REGISTRATION = `${football_service}/registration/league`;
+export const API_LEAGUE_REGISTRATION_TEAM = `${football_service}/registration/team`;
+export const API_LEAGUE_REGISTRATION_TEAM_BY_ID = (id) => `${football_service}/registration/team/${id}`;
+export const API_LEAGUE_REGISTRATION_PLAYER = `${football_service}/registration/player`;
+export const API_LEAGUE_REGISTRATION_USER = `${football_service}/registration/user`;
+export const API_LEAGUE_REGISTRATION_TEAM_ALL = `${football_service}/registration/team/all`;
+export const API_LEAGUE_REGISTRATION_TEAM_VERIFY = `${football_service}/registration/team/verify`;
+export const API_LEAGUE_REGISTRATION_TEAM_LAST_CHANCE = `${football_service}/registration/team/lastChance`;
+export const API_LEAGUE_REGISTRATION_TEAM_PRE = `${football_service}/registration/team/pre`;
 
 //match
 export const API_MATCH = (id) => `${football_service}/match/${id}`;
@@ -130,6 +142,8 @@ export const API_USER_LEAGUE_MEMBER = `${football_service}/charge/member/user`;
 
 //subscribe
 export const API_SUBSCRIBE = `${system_service}/subscribe`;
+export const API_SUBSCRIBE_REGISTRATION = `${system_service}/subscribe/registration`;
+export const API_SUBSCRIBE_REGISTRATION_VERIFY = `${system_service}/subscribe/registration/verify`;
 
 //cached
 export const cached_service = `${protocol_http}qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/cached/football`;

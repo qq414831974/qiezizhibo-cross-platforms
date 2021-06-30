@@ -27,7 +27,8 @@ class Index extends Component {
 type optsType = {
   title?: string,
   imageUrl?: any,
-  path?: any
+  path?: any,
+  menus?: Array<string>
 }
 
 function withShare(opts: optsType) {
@@ -37,7 +38,7 @@ function withShare(opts: optsType) {
     class WithShare extends Component {
       componentWillMount() {
         Taro.showShareMenu({
-          menus: ['shareAppMessage', 'shareTimeline'],
+          menus: opts.menus == null ? ['shareAppMessage', 'shareTimeline'] : opts.menus,
           withShareTicket: true
         });
 

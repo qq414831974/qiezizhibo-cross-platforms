@@ -1,0 +1,226 @@
+@import '../../app.scss';
+
+.qz-registration-team__scroll {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+.qz-registration-team__no-scroll {
+  overflow: hidden;
+}
+.qz-registration-team {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background-color: $color-bg-grey-dark;
+
+  &-header {
+    width: 100%;
+    background-color: $color-bg-blue-main;
+    z-index: 800;
+
+    &-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 70px;
+
+      .img {
+        height: 50px;
+        width: 50px;
+        min-height: 50px;
+        min-width: 50px;
+        border-radius: 50%;
+      }
+
+      .text {
+        font-size: $font-size-lg;
+        color: $color-text-base-inverse;
+        text-align: center;
+        margin-left: $spacing-h-md;
+      }
+    }
+  }
+}
+
+.qz-registration-team__content {
+  width: 100%;
+  background-color: $color-bg-grey-dark;
+  padding-top: 150px;
+  overflow: hidden;
+}
+
+.qz-registration-team__form {
+  position: relative;
+  background-color: $color-white;
+  padding: 110px $spacing-h-xl 80px $spacing-h-xl;
+  border-radius: 10px;
+}
+
+.qz-registration-team__input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ebebeb;
+  text-align: center;
+
+  .title {
+    min-width: 140px;
+    color: $color-black-2;
+    font-size: $font-size-base;
+  }
+
+  .divider {
+    width: 2px;
+    height: 44px;
+    margin: 0 24px;
+    background: #ebebeb;
+  }
+
+  .input-wrapper {
+    height: 96px;
+    width: 100%;
+    text-align: left;
+    .input-left {
+      width: calc(100% - 160px);
+    }
+    input {
+      height: 96px;
+      width: 100%;
+      color: $color-black-1;
+      font-size: $font-size-base;
+      border: none;
+      text-align: start;
+      flex: 1 1;
+      display: inline-block;
+    }
+  }
+
+  .button-wrapper {
+    button {
+      font-size: $font-size-sm !important;
+      color: $color-text-base !important;
+      border: 1px solid $color-grey-1;
+    }
+  }
+
+  .button-wrapper-ct {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    z-index: 10;
+  }
+
+  .input-placeholder {
+    color: $color-black-3;
+    font-size: $font-size-base;
+  }
+}
+
+.qz-registration-team__img-title {
+  color: $color-black-1;
+  font-size: $font-size-lg;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.qz-registration-team__img-container {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  background: $color-white;
+  border-radius: 50%;
+  height: 200px;
+  width: 200px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .upload {
+    height: 180px;
+    width: 180px;
+    background-color: $color-bg-grey;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+
+    .icon {
+      width: 60px;
+      height: 60px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .headImg {
+      width: 180px;
+      height: 180px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+}
+
+.qz-registration-team__button {
+  width: 100%;
+  text-align: center;
+  margin-top: 50px;
+
+  button {
+    width: 80%;
+    font-size: $font-size-base !important;
+    color: $color-text-base-inverse !important;
+    background-color: $color-bg-blue-main !important;
+  }
+
+  button:active {
+    transform: scale(1.01);
+    background-color: tint($color-bg-blue-main, 10%) !important;
+  }
+}
+
+.qz-registration-team__cropper {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+
+  .button-wrapper {
+    position: fixed;
+    bottom: 44px;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    z-index: 2;
+
+    button {
+      width: 50%;
+      font-size: 28px;
+    }
+
+    button:last-child {
+      color: $color-white;
+      background-color: $color-text-secondary;
+    }
+  }
+}
+.qz-registration-team__cropper-background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1999;
+  pointer-events: auto;
+}

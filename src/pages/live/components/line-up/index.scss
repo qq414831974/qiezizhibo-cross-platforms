@@ -1,41 +1,5 @@
 @import '../../../../app';
 
-@mixin active {
-  transition: background-color 0.3s;
-
-  &:active {
-    background-color: $color-grey-5;
-  }
-}
-
-@mixin hairline-common() {
-  content: '';
-  position: absolute;
-  transform-origin: center;
-  box-sizing: border-box;
-  pointer-events: none;
-}
-
-@mixin hairline-bottom-relative(
-  $color: $color-border-grey-light,
-  $style: solid,
-  $width: 1px,
-  $left: 0
-) {
-  position: relative;
-
-  &::after {
-    @include hairline-common();
-
-    top: auto;
-    left: $left;
-    right: 0;
-    bottom: 0;
-    transform: scaleY(0.5);
-    border-bottom: $width $style $color;
-  }
-}
-
 .qz-lineup {
   width: 90vw;
   margin: 0 5vw;
