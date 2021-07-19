@@ -1,0 +1,12 @@
+/**
+ * 设置placeholder 颜色
+ */
+@mixin placeholder($color: #CCC) {
+  @at-root .placeholder {
+    color: $color;
+  }
+
+  &::placeholder {
+    color: $color;
+  }
+}

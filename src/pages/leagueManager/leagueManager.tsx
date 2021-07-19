@@ -1,7 +1,7 @@
 import Taro, {getCurrentInstance} from '@tarojs/taro'
 import {Component} from 'react'
 import {View, Image, Text} from '@tarojs/components'
-import {AtActivityIndicator, AtTabs, AtTabsPane, AtFloatLayout, AtFab, AtToast} from "taro-ui"
+import {AtActivityIndicator, AtTabs, AtTabsPane, AtFab, AtToast} from "taro-ui"
 import {connect} from 'react-redux'
 import defaultLogo from '../../assets/default-logo.png'
 import cancel from '../../assets/cancel.png'
@@ -42,6 +42,7 @@ import noperson from "../../assets/no-person.png";
 import heatRankIcon from "../../assets/heat_rank.png";
 import HeatRank from "../../components/heat-rank";
 import {bet_rank, crown, gift_rank, heat_reward, vip_card} from "../../utils/assets";
+// import withOfficalAccount from "../../utils/withOfficialAccount";
 
 type PageStateProps = {
   leagueTeams: any;
@@ -116,6 +117,7 @@ type PageState = {
   heatRankShow: boolean;
   leagueRegistration: any,
   userLeagueRegistration: any,
+  heatRewardScrollBottom: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -124,6 +126,7 @@ interface LeagueManager {
   props: IProps;
 }
 
+// @withOfficalAccount()
 @withShare({})
 class LeagueManager extends Component<IProps, PageState> {
   navRef: any = null;
@@ -192,6 +195,7 @@ class LeagueManager extends Component<IProps, PageState> {
       heatRankShow: false,
       leagueRegistration: null,
       userLeagueRegistration: null,
+      heatRewardScrollBottom: false,
     }
   }
 
@@ -898,14 +902,14 @@ class LeagueManager extends Component<IProps, PageState> {
   onGiftRankClick = () => {
     this.setState({giftRanksOpen: true});
   }
-  onHeatRewardClick = () => {
-    this.setState({heatRewardOpen: true});
+  onHeatRewardClick = (bottom) => {
+    this.setState({heatRewardOpen: true, heatRewardScrollBottom: bottom != null ? bottom : false});
   }
   hideGfitRank = () => {
     this.setState({giftRanksOpen: false});
   }
   hideReward = () => {
-    this.setState({heatRewardOpen: false});
+    this.setState({heatRewardOpen: false, heatRewardScrollBottom: false});
   }
   getTabsList = () => {
     const {leagueRankSetting} = this.state
@@ -1201,27 +1205,24 @@ class LeagueManager extends Component<IProps, PageState> {
           handleCancel={this.onPhoneCancel}
           handleClose={this.onPhoneClose}
           handleError={this.onPhoneError}/>
-        <AtFloatLayout
-          className="qz-gift-float"
-          title={`礼物送给${(this.state.heatType == global.HEAT_TYPE.TEAM_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
+        <GiftPanel
+          onHeatRewardRuleClick={this.onHeatRewardClick}
+          title={`送给${(this.state.heatType == global.HEAT_TYPE.TEAM_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
           onClose={this.hideGiftPanel}
-          isOpened={this.state.giftOpen}>
-          <GiftPanel
-            leagueId={this.leagueId}
-            matchInfo={null}
-            supportTeam={this.state.currentSupportTeam}
-            supportPlayer={this.state.currentSupportPlayer}
-            heatType={this.state.heatType}
-            gifts={this.props.giftList}
-            loading={this.props.giftList == null || this.props.giftList.length == 0}
-            onHandlePaySuccess={this.onGiftPaySuccess}
-            onHandlePayError={this.onGiftPayError}
-            onHandleShareSuccess={this.onHandleShareSuccess}
-            hidden={!this.state.giftOpen}
-            onPayConfirm={this.onPayConfirm}
-            onPayClose={this.onPayConfirmClose}
-          />
-        </AtFloatLayout>
+          isOpened={this.state.giftOpen}
+          leagueId={this.leagueId}
+          matchInfo={null}
+          supportTeam={this.state.currentSupportTeam}
+          supportPlayer={this.state.currentSupportPlayer}
+          heatType={this.state.heatType}
+          gifts={this.props.giftList}
+          loading={this.props.giftList == null || this.props.giftList.length == 0}
+          onHandlePaySuccess={this.onGiftPaySuccess}
+          onHandlePayError={this.onGiftPayError}
+          onHandleShareSuccess={this.onHandleShareSuccess}
+          hidden={!this.state.giftOpen}
+          onPayConfirm={this.onPayConfirm}
+          onPayClose={this.onPayConfirmClose}/>
         <GiftRank
           giftRanks={this.state.giftRanks}
           loading={this.state.giftRanksLoading}
@@ -1232,7 +1233,8 @@ class LeagueManager extends Component<IProps, PageState> {
           heatRule={this.state.heatRule}
           loading={this.state.heatRule == null}
           isOpened={this.state.heatRewardOpen}
-          handleCancel={this.hideReward}
+          scrollBottom={this.state.heatRewardScrollBottom}
+          onClose={this.hideReward}
         />
         <ShareMoment
           isOpened={this.state.shareMomentOpen}
@@ -1274,7 +1276,7 @@ class LeagueManager extends Component<IProps, PageState> {
               </AtFab>
             </View>
             <View className="qz-league-manager-fab qz-league-manager-fab-square qz-league-manager-fab-heatreward">
-              <AtFab onClick={this.onHeatRewardClick}>
+              <AtFab onClick={this.onHeatRewardClick.bind(this, false)}>
                 <Image className="qz-league-manager-fab-image"
                        src={heat_reward}/>
               </AtFab>

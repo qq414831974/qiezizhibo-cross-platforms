@@ -11,6 +11,7 @@ import withShare from "../../utils/withShare";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import NavBar from "../../components/nav-bar";
+// import withOfficalAccount from "../../utils/withOfficialAccount";
 
 type PageStateProps = {
   locationConfig: { city: string, province: string }
@@ -33,7 +34,7 @@ type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 interface League {
   props: IProps;
 }
-
+// @withOfficalAccount()
 @withShare({})
 class League extends Component<IProps, PageState> {
   navRef: any = null;

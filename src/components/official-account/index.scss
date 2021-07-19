@@ -1,0 +1,108 @@
+@mixin overlay {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-color: rgba($color: #000, $alpha: 0.3);
+}
+
+@mixin absolute-bottom($pos: absolute) {
+  position: $pos;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -100%);
+}
+
+.official-account {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  transition: visibility 100ms ease-in;
+  z-index: 1000;
+
+  &__overlay,
+  &__container {
+    opacity: 0;
+    transition: opacity 100ms ease-in;
+  }
+
+  &__overlay {
+    @include overlay;
+  }
+
+  &__container {
+    @include absolute-bottom();
+
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  &__content {
+    padding: 32px 24px;
+    min-height: 180px;
+    max-height: 840px;
+    color: #333;
+    font-size: 28px;
+    box-sizing: content-box;
+    width: auto;
+    max-width: 100vw;
+
+    .content {
+      border-radius: 15px;
+      background-color: #FFFFFF;
+      padding-top: 20px;
+      text-align: center;
+      overflow: hidden;
+
+      &-title {
+        margin-bottom: 20px;
+        position: relative;
+      }
+
+      &__btn-close {
+        position: absolute;
+        padding: 10px;
+        top: 50%;
+        right: 18px;
+        width: 40px;
+        height: 100%;
+        line-height: 1;
+        transform: translate(0, -50%);
+
+        &::before,
+        &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          display: inline-block;
+          width: 36px;
+          height: 2PX;
+          border-radius: 1PX;
+          background: #CCC;
+        }
+
+        &::before {
+          transform: translate3d(-50%, -50%, 0) rotate(45deg);
+        }
+
+        &::after {
+          transform: translate3d(-50%, -50%, 0) rotate(-45deg);
+        }
+      }
+    }
+  }
+
+  &--active {
+    visibility: visible;
+
+    .official-account__overlay,
+    .official-account__container {
+      opacity: 1;
+    }
+  }
+}

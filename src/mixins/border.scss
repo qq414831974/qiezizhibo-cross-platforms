@@ -1,0 +1,47 @@
+/**
+ * 默认主题下 $color-border-light
+ */
+@import './tint.scss';
+
+@mixin border-thin(
+  $color: tint(#C5D9E8, 30%),
+  $style: solid,
+  $directions: top bottom right left,
+  $width: 1px
+) {
+  @each $value in $directions {
+    border-#{$value}: $width $color $style;
+  }
+}
+
+@mixin border-thin-top(
+  $color: tint(#C5D9E8, 30%),
+  $style: solid,
+  $width: 1px
+) {
+  @include border-thin($color, $style, top, $width);
+}
+
+@mixin border-thin-left(
+  $color: tint(#C5D9E8, 30%),
+  $style: solid,
+  $width: 1px
+) {
+  @include border-thin($color, $style, left, $width);
+}
+
+@mixin border-thin-right(
+  $color: tint(#C5D9E8, 30%),
+  $style: solid,
+  $width: 1px
+) {
+  @include border-thin($color, $style, right, $width);
+}
+
+@mixin border-thin-bottom(
+  $color: tint(#C5D9E8, 30%),
+  $style: solid,
+  $width: 1px
+) {
+  @include border-thin($color, $style, bottom, $width);
+}

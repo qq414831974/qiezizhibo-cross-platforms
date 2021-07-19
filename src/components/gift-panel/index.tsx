@@ -1,7 +1,7 @@
 import Taro from '@tarojs/taro'
 import {Component} from 'react'
 import {View, ScrollView, Text, Image, Picker, Button} from '@tarojs/components'
-import {AtActivityIndicator, AtButton, AtInputNumber} from 'taro-ui'
+import {AtActivityIndicator, AtButton, AtInputNumber, AtIcon} from 'taro-ui'
 import {connect} from 'react-redux'
 import './index.scss'
 import * as global from '../../constants/global';
@@ -10,6 +10,7 @@ import {getYuan, isInteger} from '../../utils/utils';
 import GiftModal from '../../components/modal-gift';
 import flame from '../../assets/live/left-support.png';
 import Request from "../../utils/request";
+import FloatLayout from "../../components/float-layout"
 
 type PageStateProps = {
   userInfo: any;
@@ -36,6 +37,10 @@ type PageOwnProps = {
   leagueId: any;
   giftWatchPrice?: any;
   giftWatchEternalPrice?: any;
+  onClose: any;
+  isOpened: boolean;
+  title: any;
+  onHeatRewardRuleClick: any;
 }
 
 type PageState = {
@@ -45,6 +50,7 @@ type PageState = {
   numSelectorValue: Array<any>;
   numSelector: Array<any>;
   giftConfirmOpen: boolean;
+  heatRuleChecked: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -66,6 +72,7 @@ class GiftPanel extends Component<IProps, PageState> {
       numSelectorValue: [],
       numSelector: [],
       giftConfirmOpen: false,
+      heatRuleChecked: true,
     }
   }
 
@@ -73,6 +80,17 @@ class GiftPanel extends Component<IProps, PageState> {
     this.props.onHandleShareSuccess && this.props.onHandleShareSuccess(this.clearCurrentGift);
     this.setState({numSelectorValue: this.numbers, numSelector: this.numbers});
   }
+
+  // UNSAFE_componentWillReceiveProps(nextProps) {
+  //   const {leagueId} = nextProps;
+  //   if (leagueId !== this.props.leagueId) {
+  //     Taro.getStorage({key: `agreement-${leagueId}`}).then(res => {
+  //       if (res && res.data != null) {
+  //         this.setState({heatRuleChecked: res.data})
+  //       }
+  //     })
+  //   }
+  // }
 
   getGiftGrowthByType = (gift: any, type, num) => {
     if (gift == null || gift.growth == null) {
@@ -157,6 +175,15 @@ class GiftPanel extends Component<IProps, PageState> {
     return value;
   }
   onGiftSendClick = () => {
+    if (!this.state.heatRuleChecked) {
+      Taro.showToast({
+        'title': "请先阅读并同意活动规则",
+        'icon': 'none',
+      })
+      return;
+    }
+    // Taro.setStorage({key: `agreement-${this.props.leagueId}`, data: this.state.heatRuleChecked});
+
     if (this.props.payEnabled != true) {
       Taro.showToast({
         'title': "由于相关规范，iOS功能暂不可用",
@@ -247,6 +274,14 @@ class GiftPanel extends Component<IProps, PageState> {
   clearCurrentGift = () => {
     this.setState({currentGift: null, currentNum: 0});
   }
+  onHeatRuleCheckBoxClick = () => {
+    this.setState({heatRuleChecked: !this.state.heatRuleChecked})
+  }
+  onHeatRewardRuleClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    this.props.onHeatRewardRuleClick && this.props.onHeatRewardRuleClick(true);
+  }
 
   render() {
     const {loading = false, heatType = 0, hidden = false, giftWatchPrice = null, giftWatchEternalPrice = null, payEnabled, giftEnabled} = this.props
@@ -263,121 +298,138 @@ class GiftPanel extends Component<IProps, PageState> {
       gifts = gifts.slice(0, 1);
     }
     return (
-      <View className="qz-gifts">
-        {loading || hidden ?
-          <View className="qz-lineup-content-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
-          :
-          <View>
-            {payEnabled ?
-              <ScrollView scrollY className="qz-gifts__content">
-                <View className="qz-gifts__grid">
-                  {gifts.map((data: any) => (
-                      <View key={data.id}
-                            className={`qz-gifts__grid-item ${currentGift && currentGift.id == data.id ? "qz-gifts__grid-item-active" : ""}`}
-                            onClick={onGiftClick.bind(this, data)}>
-                        <View className="qz-gifts__grid-item-img-container">
-                          <Image src={data.pic}/>
-                        </View>
-                        <View className="qz-gifts__grid-item-name">
-                          <Text>{data.name}</Text>
-                        </View>
-                        {data.type == global.GIFT_TYPE.CHARGE ? <View className="qz-gifts__grid-item-price">
-                            <View>{getYuan(data.price)}茄币</View>
-                          </View> :
-                          <View className="qz-gifts__grid-item-price">
-                            <Text>{data.limitRemain > 0 ? `免费(余${data.limitRemain})` : "分享群得茄子"}</Text>
-                          </View>}
-                        <View className="qz-gifts__grid-item-price">
-                          <Image className="qz-gifts__grid-item-price__image" src={flame}/>
-                          <Text>+{this.getGiftGrowthByType(data, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, 1)}</Text>
-                        </View>
-                        {(giftWatchPrice != null || giftWatchEternalPrice != null) && data.price != null && data.price >= giftWatchPrice ?
-                          <View className="qz-gifts__grid-item-freewatch">
-                            送本场录像
+      <FloatLayout
+        title={<View className="qz-gifts__title">
+          <View className="qz-gifts__title-text">{this.props.title}</View>
+          {heat ?
+            <View className="qz-gifts__title-heat"><Image src={flame}/><Text>+{heat}</Text></View> : null}
+          {discountPrice ?
+            <View
+              className="qz-gifts__title-price">花费茄币：{currentGift.type == global.GIFT_TYPE.CHARGE ? discountPrice : "免费"}</View>
+            : null}
+          {realPrice ?
+            <View className="qz-gifts__title-discount">(原价{realPrice})</View>
+            : null}
+          {/*{exp ?*/}
+          {/*  <View className="qz-gifts__title-exp">+{exp}经验</View> : null}*/}
+        </View>}
+        isOpened={this.props.isOpened}
+        onClose={this.props.onClose}>
+        <View className="qz-gifts">
+          {loading || hidden ?
+            <View className="qz-gifts__content-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
+            :
+            <View>
+              {payEnabled ?
+                <ScrollView scrollY className="qz-gifts__content">
+                  <View className="qz-gifts__grid">
+                    {gifts.map((data: any) => (
+                        <View key={data.id}
+                              className={`qz-gifts__grid-item ${currentGift && currentGift.id == data.id ? "qz-gifts__grid-item-active" : ""}`}
+                              onClick={onGiftClick.bind(this, data)}>
+                          <View className="qz-gifts__grid-item-img-container">
+                            <Image src={data.pic}/>
                           </View>
-                          : null}
-                      </View>
-                    )
-                  )}
-                </View>
-              </ScrollView>
-              : <View className="qz-gifts__content y-center">
-                <View className="text-center w-full">
-                  由于相关规范，iOS功能暂不可用
-                </View>
-                <Button className="black" openType="contact">联系客服</Button>
-              </View>}
-            <View className="qz-gifts__bottom-container">
-              <View className="qz-gifts__bottom at-row">
-                <View className="at-col at-col-7">
-                  <View className="qz-gifts__bottom-left">
-                    {discountPrice ?
-                      <View
-                        className="qz-gifts__bottom-price">茄币：{currentGift.type == global.GIFT_TYPE.CHARGE ? discountPrice : "免费"}</View>
-                      : null}
-                    {realPrice ?
-                      <View className="qz-gifts__bottom-discount">(原价{realPrice})</View>
-                      : null}
-                    {heat ?
-                      <View className="qz-gifts__bottom-heat"><Image src={flame}/><Text>+{heat}</Text></View> : null}
-                    {/*{exp ?*/}
-                    {/*  <View className="qz-gifts__bottom-exp">+{exp}经验</View> : null}*/}
+                          <View className="qz-gifts__grid-item-name">
+                            <Text>{data.name}</Text>
+                          </View>
+                          {data.type == global.GIFT_TYPE.CHARGE ? <View className="qz-gifts__grid-item-price">
+                              <View>{getYuan(data.price)}茄币</View>
+                            </View> :
+                            <View className="qz-gifts__grid-item-price">
+                              <Text>{data.limitRemain > 0 ? `免费(余${data.limitRemain})` : "分享群得茄子"}</Text>
+                            </View>}
+                          <View className="qz-gifts__grid-item-price">
+                            <Image className="qz-gifts__grid-item-price__image" src={flame}/>
+                            <Text>+{this.getGiftGrowthByType(data, (heatType == global.HEAT_TYPE.TEAM_HEAT || heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) ? global.GROWTH_TYPE.TEAM_HEAT : global.GROWTH_TYPE.PLAYER_HEAT, 1)}</Text>
+                          </View>
+                          {(giftWatchPrice != null || giftWatchEternalPrice != null) && data.price != null && data.price >= giftWatchPrice ?
+                            <View className="qz-gifts__grid-item-freewatch">
+                              送本场录像
+                            </View>
+                            : null}
+                        </View>
+                      )
+                    )}
                   </View>
-                </View>
-                <View className="at-col at-col-5">
-                  <View className="at-row">
-                    <View className="at-col at-col-6 qz-gifts__bottom-num-container">
-                      <View className="qz-gifts__bottom-num">
-                        <AtInputNumber
-                          className="at-number-input-without-button"
-                          type="number"
-                          value={this.state.currentNum}
-                          onChange={this.onNumInputChange}/>
+                </ScrollView>
+                : <View className="qz-gifts__content y-center">
+                  <View className="text-center w-full">
+                    由于相关规范，iOS功能暂不可用
+                  </View>
+                  <Button className="black" openType="contact">联系客服</Button>
+                </View>}
+              <View className="qz-gifts__bottom-container">
+                <View className="qz-gifts__bottom at-row">
+                  <View className="at-col at-col-7">
+                    <View className="qz-gifts__bottom-left" onClick={this.onHeatRuleCheckBoxClick}>
+                      <View className='qz-gifts-checkbox-container'>
+                        <View
+                          className={`${this.state.heatRuleChecked ? "qz-gifts-checkbox" : "qz-gifts-checkbox-disabled"}`}>
+                          {this.state.heatRuleChecked ? <AtIcon value='check' size='10' color='#ffffff'/> : null}
+                        </View>
+                        <View className='qz-gifts-checkbox-text'>
+                          <Text onClick={this.onHeatRuleCheckBoxClick}>我已阅读并同意</Text>
+                          <Text onClick={this.onHeatRewardRuleClick}>《活动规则》</Text>
+                        </View>
                       </View>
-                      <Picker
-                        className="h-full center"
-                        mode='selector'
-                        range={this.state.numSelectorValue}
-                        onChange={this.onNumPickerChange}
-                        value={this.state.selectorValue}>
-                        <View className="at-icon at-icon-chevron-down qz-gifts__bottom-arrow"/>
-                      </Picker>
                     </View>
-                    <View className="at-col at-col-6 qz-gifts__bottom-button">
-                      <AtButton
-                        className="vertical-middle half-circle-button"
-                        size="small"
-                        type="primary"
-                        full
-                        circle
-                        onClick={this.onGiftSendClick}>
-                        发送
-                      </AtButton>
+                  </View>
+                  <View className="at-col at-col-5">
+                    <View className="at-row">
+                      <View className="at-col at-col-6 qz-gifts__bottom-num-container">
+                        <View className="qz-gifts__bottom-num">
+                          <AtInputNumber
+                            className="at-number-input-without-button"
+                            type="number"
+                            value={this.state.currentNum}
+                            onChange={this.onNumInputChange}/>
+                        </View>
+                        <Picker
+                          className="h-full center"
+                          mode='selector'
+                          range={this.state.numSelectorValue}
+                          onChange={this.onNumPickerChange}
+                          value={this.state.selectorValue}>
+                          <View className="at-icon at-icon-chevron-down qz-gifts__bottom-arrow"/>
+                        </Picker>
+                      </View>
+                      <View className="at-col at-col-6 qz-gifts__bottom-button">
+                        <AtButton
+                          className="vertical-middle half-circle-button"
+                          size="small"
+                          type="primary"
+                          full
+                          circle
+                          onClick={this.onGiftSendClick}>
+                          发送
+                        </AtButton>
+                      </View>
                     </View>
                   </View>
                 </View>
               </View>
+              <GiftModal
+                giftWatchPrice={giftWatchPrice}
+                giftWatchEternalPrice={giftWatchEternalPrice}
+                isOpened={this.state.giftConfirmOpen}
+                gift={this.state.currentGift}
+                num={this.state.currentNum}
+                matchId={this.props.matchInfo ? this.props.matchInfo.id : null}
+                leagueId={this.props.leagueId ? this.props.leagueId : null}
+                externalId={this.getTargetId()}
+                giftInfo={giftInfo}
+                heatType={this.props.heatType}
+                handleCancel={this.onGiftConfrimCancel}
+                handleConfirm={this.onGiftConfrim}
+                handleError={this.props.onHandlePayError}
+                onPayConfirm={this.props.onPayConfirm}
+                onPayClose={this.props.onPayClose}
+              />
             </View>
-            <GiftModal
-              giftWatchPrice={giftWatchPrice}
-              giftWatchEternalPrice={giftWatchEternalPrice}
-              isOpened={this.state.giftConfirmOpen}
-              gift={this.state.currentGift}
-              num={this.state.currentNum}
-              matchId={this.props.matchInfo ? this.props.matchInfo.id : null}
-              leagueId={this.props.leagueId ? this.props.leagueId : null}
-              externalId={this.getTargetId()}
-              giftInfo={giftInfo}
-              heatType={this.props.heatType}
-              handleCancel={this.onGiftConfrimCancel}
-              handleConfirm={this.onGiftConfrim}
-              handleError={this.props.onHandlePayError}
-              onPayConfirm={this.props.onPayConfirm}
-              onPayClose={this.props.onPayClose}
-            />
-          </View>
-        }
-      </View>
+          }
+        </View>
+      </FloatLayout>
     )
   }
 }

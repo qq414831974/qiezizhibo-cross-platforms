@@ -1,10 +1,18 @@
 @import '../../app';
+
 .qz-gifts {
   overflow: hidden;
 
   &__content {
     height: 416px;
     width: 100%;
+  }
+
+  &__content-loading {
+    width: 100vw;
+    height: 10vw;
+    position: relative;
+    margin-top: $spacing-v-md;
   }
 
   &__bottom-container {
@@ -15,29 +23,29 @@
     box-shadow: 4px 0 4px 0 rgba(0, 0, 0, 0.3);
   }
 
-  &__bottom {
-    align-self: center;
+  &__title {
+    padding: 0 $spacing-v-lg;
+    display: flex;
+    align-items: center;
+    height: 100%;
 
-    &-left {
-      padding: 0 $spacing-v-lg;
-      display: flex;
-      align-items: center;
-      height: 100%;
+    &-text {
     }
 
     &-price {
       font-size: $font-size-sm;
       font-weight: 800;
       color: $color-text-title;
+      margin-left: $spacing-v-sm;
     }
 
     &-heat {
       font-size: $font-size-xs;
       font-weight: 800;
-      color: $color-text-disabled;
-      margin-left: $spacing-v-sm;
+      color: $color-text-title;
       display: flex;
       align-items: center;
+      margin-left: $spacing-v-sm;
 
       image {
         width: $font-size-xs;
@@ -52,7 +60,7 @@
     &-exp {
       font-size: $font-size-xs;
       font-weight: 800;
-      color: $color-text-disabled;
+      color: $color-grey-2;
       margin-left: $spacing-v-sm;
     }
 
@@ -60,7 +68,7 @@
       position: relative;
       font-size: $font-size-xs;
       font-weight: 800;
-      color: $color-text-disabled;
+      color: $color-grey-2;
       margin-left: $spacing-v-sm;
     }
 
@@ -75,6 +83,17 @@
     //  right: $font-size-base/2;
     //  top: -$font-size-base/5;
     //}
+  }
+
+  &__bottom {
+    align-self: center;
+
+    &-left {
+      padding: 0 $spacing-v-lg;
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
 
     &-num-container {
       width: 47.5%;
@@ -171,5 +190,54 @@
         height: 100px;
       }
     }
+  }
+
+  &-checkbox-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  &-checkbox {
+    background: $color-bg-blue-main;
+    border: 1px solid $color-bg-blue-main;
+    box-sizing: content-box;
+    border-radius: 50%;
+    width: 33px;
+    height: 33px;
+    min-width: 33px;
+    min-height: 33px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    text {
+      //transform: translateY(-20%);
+    }
+
+    &-text {
+      font-size: 26px;
+      color: $color-black-2;
+      margin-left: 10px;
+
+      text:last-child {
+        text-decoration: $color-link;
+        color: $color-link;
+      }
+    }
+  }
+
+  &-checkbox-disabled {
+    background: #ffffff;
+    border: 1px solid $color-border-grey;
+    box-sizing: content-box;
+    border-radius: 50%;
+    width: 33px;
+    height: 33px;
+    min-width: 33px;
+    min-height: 33px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }

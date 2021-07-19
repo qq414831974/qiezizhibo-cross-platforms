@@ -11,6 +11,7 @@ import * as global from "../../constants/global";
 import * as api from "../../constants/api";
 import Request from '../../utils/request'
 import NavBar from "../../components/nav-bar";
+// import withOfficalAccount from "../../utils/withOfficialAccount";
 
 type PageStateProps = {
   locationConfig: { city: string, province: string }
@@ -31,6 +32,7 @@ type PageState = {
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
+// @withOfficalAccount()
 @withShare({})
 class Match extends Component<IProps, PageState> {
 

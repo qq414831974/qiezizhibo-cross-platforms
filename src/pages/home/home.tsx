@@ -22,6 +22,7 @@ import Request from '../../utils/request'
 import * as api from "../../constants/api";
 import {getStorage} from "../../utils/utils";
 import NavBar from "../../components/nav-bar";
+// import withOfficalAccount from "../../utils/withOfficialAccount";
 
 // import {getStorage, hasLogin} from "../../utils/utils";
 
@@ -67,6 +68,7 @@ interface Home {
   props: IProps | any;
 }
 
+// @withOfficalAccount()
 @withLogin("didMount")
 @withShare({})
 class Home extends Component<IProps, PageState> {
@@ -164,7 +166,7 @@ class Home extends Component<IProps, PageState> {
         return pair[1];
       }
     }
-    return (false);
+    return false;
   }
 
   componentWillUnmount() {

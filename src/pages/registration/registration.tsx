@@ -38,6 +38,7 @@ import * as global from "../../constants/global";
 import withShare from "../../utils/withShare";
 import ShareMoment from "../../components/share-moment";
 import ModalAlbum from "../../components/modal-album";
+// import withOfficalAccount from "../../utils/withOfficialAccount";
 
 type PageStateProps = {
   userInfo: any;
@@ -92,6 +93,7 @@ const STATUS = {
   finish: 2,
 }
 
+// @withOfficalAccount()
 @withShare({menus: ['shareAppMessage']})
 class Registration extends Component<IProps, PageState> {
   navRef: any = null;

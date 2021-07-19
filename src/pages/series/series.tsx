@@ -10,6 +10,7 @@ import LeagueItem from "../../components/league-item";
 import leagueAction from "../../actions/league";
 import withShare from "../../utils/withShare";
 import NavBar from "../../components/nav-bar";
+// import withOfficalAccount from "../../utils/withOfficialAccount";
 
 type PageStateProps = {
   leagueList: any;
@@ -32,7 +33,7 @@ type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 interface Series {
   props: IProps;
 }
-
+// @withOfficalAccount()
 @withShare({})
 class Series extends Component<IProps, PageState> {
   navRef: any = null;

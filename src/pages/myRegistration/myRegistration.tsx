@@ -1,4 +1,4 @@
-import Taro, {getCurrentInstance} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
 import {Component} from 'react'
 import {View, Image, Text} from '@tarojs/components'
 import {AtActivityIndicator} from "taro-ui"
@@ -9,7 +9,6 @@ import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import NavBar from "../../components/nav-bar";
 import logo from "../../assets/default-logo.png";
-import registrationAction from "../../actions/registration";
 
 type PageStateProps = {
   userInfo: any;

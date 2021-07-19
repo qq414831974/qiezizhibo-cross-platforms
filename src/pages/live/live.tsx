@@ -1,7 +1,7 @@
 import Taro, {getCurrentInstance} from '@tarojs/taro'
 import {Component} from 'react'
 import {Image, ScrollView, Text, Video, View} from '@tarojs/components'
-import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtTabs, AtTabsPane, AtToast} from "taro-ui"
+import {AtButton, AtCurtain, AtFab, AtIcon, AtTabs, AtTabsPane, AtToast} from "taro-ui"
 import {connect} from 'react-redux'
 import MatchUp from './components/match-up'
 import NooiceBar from './components/nooice-bar'
@@ -88,6 +88,7 @@ import RectFab from "../../components/fab-rect";
 import heatRankIcon from "../../assets/heat_rank.png";
 import noperson from "../../assets/no-person.png";
 import HeatRank from "../../components/heat-rank";
+// import withOfficalAccount from "../../utils/withOfficialAccount";
 
 type Bulletin = {
   id: number,
@@ -209,6 +210,7 @@ type PageState = {
   leagueMemberOpen: boolean;
   topSixHeats: any,
   heatRankShow: boolean;
+  heatRewardScrollBottom: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -235,6 +237,7 @@ const eventType = {
   22: {text: "乌龙球", icon: owngoal},
 };
 
+// @withOfficalAccount()
 @withShare({})
 class Live extends Component<IProps, PageState> {
   navRef: any = null;
@@ -337,6 +340,7 @@ class Live extends Component<IProps, PageState> {
       leagueMemberOpen: false,
       topSixHeats: null,
       heatRankShow: false,
+      heatRewardScrollBottom: false,
     }
   }
 
@@ -2122,14 +2126,14 @@ class Live extends Component<IProps, PageState> {
   onGiftRankClick = () => {
     this.setState({giftRanksOpen: true});
   }
-  onHeatRewardClick = () => {
-    this.setState({heatRewardOpen: true});
+  onHeatRewardClick = (bottom) => {
+    this.setState({heatRewardOpen: true, heatRewardScrollBottom: bottom != null ? bottom : false});
   }
   hideGfitRank = () => {
     this.setState({giftRanksOpen: false});
   }
   hideReward = () => {
-    this.setState({heatRewardOpen: false});
+    this.setState({heatRewardOpen: false, heatRewardScrollBottom: false});
   }
   showDownLoading = () => {
     this.setState({downLoading: true})
@@ -2612,7 +2616,8 @@ class Live extends Component<IProps, PageState> {
           heatRule={this.state.heatRule}
           loading={this.state.heatRule == null}
           isOpened={this.state.heatRewardOpen}
-          handleCancel={this.hideReward}/>
+          scrollBottom={this.state.heatRewardScrollBottom}
+          onClose={this.hideReward}/>
         <GiftRank
           giftRanks={this.state.giftRanks}
           loading={this.state.giftRanksLoading}
@@ -2635,29 +2640,27 @@ class Live extends Component<IProps, PageState> {
           handleConfirm={this.onPremissionSuccess}
           handleCancel={this.onPremissionCancel}
           handleClose={this.onPremissionClose}/>
-        <AtFloatLayout
-          className="qz-gift-float"
-          title={`礼物送给${(this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
+        <GiftPanel
+          onHeatRewardRuleClick={this.onHeatRewardClick}
+          title={`送给${(this.state.heatType == HEAT_TYPE.TEAM_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
           onClose={this.hideGiftPanel}
-          isOpened={this.state.giftOpen}>
-          <GiftPanel
-            giftWatchPrice={match && match.giftWatchRecordEnable && match.giftWatchRecordEternalPrice ? match.giftWatchRecordEternalPrice : null}
-            giftWatchEternalPrice={match && match.giftWatchRecordEnable && match.giftWatchRecordEternalPrice ? match.giftWatchRecordEternalPrice : null}
-            leagueId={this.state.leagueId}
-            matchInfo={match}
-            supportTeam={this.state.currentSupportTeam}
-            supportPlayer={this.state.currentSupportPlayer}
-            heatType={this.state.heatType}
-            gifts={this.props.giftList}
-            loading={this.props.giftList == null || this.props.giftList.length == 0}
-            onHandlePaySuccess={this.onGiftPaySuccess}
-            onHandlePayError={this.onGiftPayError}
-            onHandleShareSuccess={this.onHandleShareSuccess}
-            hidden={!this.state.giftOpen}
-            onPayConfirm={this.onPayConfirm}
-            onPayClose={this.onPayConfirmClose}
-          />
-        </AtFloatLayout>
+          isOpened={this.state.giftOpen}
+          giftWatchPrice={match && match.giftWatchRecordEnable && match.giftWatchRecordEternalPrice ? match.giftWatchRecordEternalPrice : null}
+          giftWatchEternalPrice={match && match.giftWatchRecordEnable && match.giftWatchRecordEternalPrice ? match.giftWatchRecordEternalPrice : null}
+          leagueId={this.state.leagueId}
+          matchInfo={match}
+          supportTeam={this.state.currentSupportTeam}
+          supportPlayer={this.state.currentSupportPlayer}
+          heatType={this.state.heatType}
+          gifts={this.props.giftList}
+          loading={this.props.giftList == null || this.props.giftList.length == 0}
+          onHandlePaySuccess={this.onGiftPaySuccess}
+          onHandlePayError={this.onGiftPayError}
+          onHandleShareSuccess={this.onHandleShareSuccess}
+          hidden={!this.state.giftOpen}
+          onPayConfirm={this.onPayConfirm}
+          onPayClose={this.onPayConfirmClose}
+        />
         <ShareMoment
           isOpened={this.state.shareMomentOpen}
           loading={this.state.shareMomentLoading}
@@ -2703,7 +2706,7 @@ class Live extends Component<IProps, PageState> {
               </AtFab>
             </View>
             <View className="qz-live-fab qz-live-fab-square qz-live-fab-heatreward">
-              <AtFab onClick={this.onHeatRewardClick}>
+              <AtFab onClick={this.onHeatRewardClick.bind(this, false)}>
                 <Image className="qz-live-fab-image"
                        src={heat_reward}/>
               </AtFab>
@@ -2711,7 +2714,7 @@ class Live extends Component<IProps, PageState> {
           </View>
           : null
         }
-        {this.state.payOpen && this.props.giftEnabled && this.state.leagueMemberRule && this.state.leagueMemberRule.available ?
+        {this.state.payOpen && this.props.payEnabled && this.state.leagueMemberRule && this.state.leagueMemberRule.available ?
           <RectFab
             className="qz-fab-rect-single-line"
             onClick={this.onLeagueMemberShow}
