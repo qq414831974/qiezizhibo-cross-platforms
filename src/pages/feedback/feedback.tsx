@@ -104,6 +104,19 @@ class Feedback extends Component<IProps, PageState> {
               向微信平台投诉
             </View>
           </View>
+          <View className='qz-feedback__option-cell' onClick={this.onFeedbackClick.bind(this, 5)}>
+            <View className='qz-feedback__option-cell-container'>
+              <View className='qz-feedback__option-cell__title'>
+                交易投诉
+              </View>
+              <View className='qz-feedback__option-cell__hint'>
+                若遇退款、退货退款、商家服务等问题，可向微信投诉。投诉内容将会同步给商家。
+              </View>
+              <View className='qz-feedback__option-cell__arrow'>
+                <AtIcon value='chevron-right' size='15' color='#B2B2B2'/>
+              </View>
+            </View>
+          </View>
           <View className='qz-feedback__option-cell' onClick={this.onFeedbackClick.bind(this, 4)}>
             <View className='qz-feedback__option-cell-container'>
               <View className='qz-feedback__option-cell__title'>

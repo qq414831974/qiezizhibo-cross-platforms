@@ -64,6 +64,8 @@ class FeedbackDetail extends Component<IProps, PageState> {
       } else if (type == 4) {
         title = "违规举报"
         hint = "允许微信使用小程序当前页面的数据和截图作为投诉证据"
+      } else if (type == 5) {
+        title = "交易投诉"
       }
       this.setState({title: title, hint: hint})
     }

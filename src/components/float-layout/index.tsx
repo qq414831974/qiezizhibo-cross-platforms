@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import React, {Component} from 'react';
-import {ScrollView, Text, View} from '@tarojs/components';
+import {ScrollView, View} from '@tarojs/components';
 
 import './index.scss'
 
