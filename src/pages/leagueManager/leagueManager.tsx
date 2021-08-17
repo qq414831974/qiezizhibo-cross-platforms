@@ -1051,7 +1051,7 @@ class LeagueManager extends Component<IProps, PageState> {
     this.setState({levelUpShow: false})
   }
   onLeagueMemberShow = () => {
-    this.setState({leagueMemberOpen: true})
+    this.setState({leagueMemberOpen: true, leagueMemberVerifyOpen: false})
   }
   onLeagueMemberClose = () => {
     this.setState({leagueMemberOpen: false})
@@ -1086,7 +1086,7 @@ class LeagueManager extends Component<IProps, PageState> {
     }
   }
   onLeagueMemberVerifyShow = () => {
-    this.setState({leagueMemberVerifyOpen: true})
+    this.setState({leagueMemberVerifyOpen: true, leagueMemberOpen: false})
   }
   onLeagueMemberVerifyClose = () => {
     this.setState({leagueMemberVerifyOpen: false})
@@ -1335,7 +1335,7 @@ class LeagueManager extends Component<IProps, PageState> {
             className="qz-fab-rect-single-line"
             onClick={this.onLeagueMemberVerifyShow}
             background="linear-gradient(90deg,#f8e2c4,#f3bb6c);"
-            top={`calc(${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px + 35px + 44px + 66px + 10px)`}
+            top={`calc(${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px + 35px + 44px + 33px + 10px)`}
           >
             <Image src={crown}/>
             <Text style={{color: "#754e19"}}>球员VIP(限免)</Text>
