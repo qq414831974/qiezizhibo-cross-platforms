@@ -2,7 +2,7 @@
 
 $float-layout-timer: 300ms;
 
-.qz-league-member {
+.qz-league-member-verfiy {
   position: fixed;
   width: 100%;
   height: 100%;
@@ -96,25 +96,9 @@ $float-layout-timer: 300ms;
       width: 200px;
       margin: 0 10px;
 
-
-      .item {
-        margin: 0 auto;
+      view {
         text-align: center;
-      }
-
-      .item:first-child {
-        margin-top: 40px;
-      }
-
-      .item:last-child {
-        margin-bottom: 40px;
-      }
-
-      &-price-discount {
-        font-size: $font-size-xxl;
-        font-weight: 800;
-        color: $color-grey-3;
-        text-decoration:line-through;
+        margin: 40px 0;
       }
 
       &-price {

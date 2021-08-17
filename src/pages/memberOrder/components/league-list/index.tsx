@@ -72,6 +72,14 @@ class LeagueList extends Component<IProps, PageState> {
       }
     })
   }
+  getMemberIdNumber = (userLeagueMember) => {
+    if (userLeagueMember != null && userLeagueMember.sourceType == 0) {
+      return userLeagueMember.id != null ? `q-${userLeagueMember.leagueId}${userLeagueMember.id}` : null;
+    } else if (userLeagueMember != null && userLeagueMember.sourceType == 1) {
+      return userLeagueMember.id != null ? `v-${userLeagueMember.leagueId}${userLeagueMember.id}` : null;
+    }
+    return null;
+  }
 
   render() {
     const {leagueList} = this.props
@@ -80,15 +88,25 @@ class LeagueList extends Component<IProps, PageState> {
         return <View key={item.orderId}>
           <View className='qz-league-list-content'>
             <View className='qz-league-list-content__inner'>
-              <LeagueItem key={item.orderId} leagueInfo={item.league} onClick={this.onItemClick.bind(this, item.orderId)}/>
+              <LeagueItem key={item.orderId} leagueInfo={item.league}
+                          onClick={this.onItemClick.bind(this, item.orderId)}/>
             </View>
           </View>
           {this.state.orderlist[item.orderId] ? <View className='qz-league-list-order'>
               <View className="at-row at-row--no-wrap">
-                <View className='at-col at-col-12 qz-league-list-order__item'>订单号：{item.orderId}</View>
+                <View className='at-col at-col-12 qz-league-list-order__item'>
+                  会员号：{this.getMemberIdNumber(item)}
+                </View>
               </View>
+              {item.sourceType == 0 ? <View className="at-row at-row--no-wrap">
+                <View className='at-col at-col-12 qz-league-list-order__item'>订单号：{item.orderId}</View>
+              </View> : null}
+              {item.sourceType == 1 ? <View className="at-row at-row--no-wrap">
+                <View className='at-col at-col-12 qz-league-list-order__item'>过期时间：{item.expireTime}</View>
+              </View> : null}
               <View className='item_view'>
-                <View className='item' onClick={this.copyOrderId.bind(this, item.orderId)}>
+                <View className='item'
+                      onClick={this.copyOrderId.bind(this, item.sourceType == 0 ? item.orderId : this.getMemberIdNumber(item))}>
                   <View className='desc'>复制订单号</View>
                 </View>
                 <View className='line'/>

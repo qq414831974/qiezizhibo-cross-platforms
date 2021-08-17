@@ -374,3 +374,24 @@ export const checkIdCard = (idcode) => {
 export const checkNumber = (val) => {
   return parseFloat(val).toString() != "NaN";
 }
+
+export const delay = (delayTime = 25) => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, delayTime);
+  });
+}
+export const delayQuerySelector = (selectorStr, delayTime = 500) => {
+  return new Promise(resolve => {
+    const selector = Taro.createSelectorQuery();
+    delay(delayTime).then(() => {
+      selector
+        .select(selectorStr)
+        .boundingClientRect()
+        .exec((res) => {
+          resolve(res);
+        });
+    });
+  });
+}

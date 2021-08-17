@@ -145,6 +145,9 @@ export const API_SUBSCRIBE = `${system_service}/subscribe`;
 export const API_SUBSCRIBE_REGISTRATION = `${system_service}/subscribe/registration`;
 export const API_SUBSCRIBE_REGISTRATION_VERIFY = `${system_service}/subscribe/registration/verify`;
 
+//person verify
+export const API_PERSON_VERIFY_LEAGUEMEMBER = `${system_service}/person/verify/request/leagueMember`;
+
 //cached
 export const cached_service = `${protocol_http}qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/cached/football`;
 

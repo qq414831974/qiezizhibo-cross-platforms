@@ -256,12 +256,14 @@ class LeagueMember extends Component<IProps, PageState> {
               </View>
               <View className="qz-league-member__card">
                 <View className="qz-league-member__card-item qz-league-member__card-item-hover">
-                  <View>
+                  <View className="item">
                     <Text className="qz-league-member__card-item-price">
                       ¥{this.props.leagueMemberRule && this.props.leagueMemberRule.price ? getYuan(this.props.leagueMemberRule.price) : 999}
                     </Text>
                   </View>
-                  <View><Text className="qz-league-member__card-item-time">永久</Text></View>
+                  <View className="item">
+                    <Text className="qz-league-member__card-item-time">永久</Text>
+                  </View>
                 </View>
               </View>
               <View className="qz-league-member__title">

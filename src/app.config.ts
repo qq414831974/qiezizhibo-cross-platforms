@@ -25,6 +25,8 @@ export default {
     'pages/registrationPlayer/registrationPlayer',
     'pages/registrationList/registrationList',
     'pages/myRegistration/myRegistration',
+    'pages/leagueMemberVerify/leagueMemberVerify',
+    'pages/personVerify/personVerify',
   ],
   window: {
     backgroundTextStyle: 'light',

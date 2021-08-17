@@ -273,12 +273,12 @@ class Registration extends Component<IProps, PageState> {
     return isShare;
   }
   getLeagueInfo = (id) => {
-    new Request().get(api.API_LEAGUE(id), null).then((data: any) => {
+    return new Request().get(api.API_LEAGUE(id), null).then((data: any) => {
       this.setState({leagueInfo: data})
     })
   }
   getLeagueRegistration = (id) => {
-    new Request().get(api.API_LEAGUE_REGISTRATION, {leagueId: id}).then((data: any) => {
+    return new Request().get(api.API_LEAGUE_REGISTRATION, {leagueId: id}).then((data: any) => {
       this.setState({leagueRegistration: data})
     })
   }
