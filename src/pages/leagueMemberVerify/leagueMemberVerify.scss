@@ -3,6 +3,8 @@
 .qz-league-member-verify__result {
   background-color: $color-bg-grey;
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
 
   &-loading {
     width: 100vw;
@@ -64,6 +66,7 @@
   }
 
   &__hint {
+    box-sizing: border-box;
     margin: 20px 0;
     width: 100%;
     display: flex;
@@ -76,6 +79,7 @@
   }
 
   &__tips {
+    box-sizing: border-box;
     margin: 20px 0;
     background-color: $color-white;
     padding: 0 5%;
