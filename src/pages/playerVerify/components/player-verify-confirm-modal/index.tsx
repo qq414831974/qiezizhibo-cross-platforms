@@ -1,4 +1,3 @@
-import Taro from '@tarojs/taro'
 import {Component} from 'react'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button} from '@tarojs/components'
@@ -22,11 +21,11 @@ type PageState = {}
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
-interface ModalVerifyConfirm {
+interface ModalPlayerVerifyConfirm {
   props: IProps;
 }
 
-class ModalVerifyConfirm extends Component<IProps, PageState> {
+class ModalPlayerVerifyConfirm extends Component<IProps, PageState> {
   static defaultProps = {
     handleClose: () => {
     },
@@ -47,27 +46,32 @@ class ModalVerifyConfirm extends Component<IProps, PageState> {
   }
 
 
-
   render() {
     const {isOpened = false, handleConfirm, handleCancel, currentPlayer = {}} = this.props;
     return (
-      <AtModal isOpened={isOpened} onClose={handleCancel}>
+      <AtModal isOpened={isOpened} closeOnClickOverlay={false} className="modal-overlay-blur">
         {isOpened ? <AtModalContent>
           <View className="center">
             <AtAvatar circle image={currentPlayer && currentPlayer.headImg ? currentPlayer.headImg : defaultLogo}/>
           </View>
-          {/*<Text className="center gray qz-verify-confirm-modal-content_text">*/}
-          {/*  {currentPlayer && currentPlayer.name ? currentPlayer.name : "球员"}*/}
-          {/*</Text>*/}
-          <AtDivider height={48} lineColor="#E5E5E5"/>
-          <Text className="gray qz-verify-confirm-modal-content_tip">
-            您将要验证的是
-          </Text>
-          <Text className="highlight qz-verify-confirm-modal-content_tip">
+          <Text className="center gray qz-player-verify-confirm-modal-content_text">
             {currentPlayer && currentPlayer.name ? currentPlayer.name : "球员"}
           </Text>
-          <Text className="gray qz-verify-confirm-modal-content_tip">
-            ，是否确认前往认证？
+          <AtDivider height={48} lineColor="#E5E5E5"/>
+          <Text className="gray qz-player-verify-confirm-modal-content_tip">
+            实名认证
+          </Text>
+          <Text className="highlight qz-player-verify-confirm-modal-content_tip">
+            通过后
+          </Text>
+          <Text className="gray qz-player-verify-confirm-modal-content_tip">
+            才可进行后续操作，必须
+          </Text>
+          <Text className="highlight qz-player-verify-confirm-modal-content_tip">
+            {currentPlayer && currentPlayer.name ? currentPlayer.name : "球员"}
+          </Text>
+          <Text className="gray qz-player-verify-confirm-modal-content_tip">
+            本人操作，是否前往认证？
           </Text>
         </AtModalContent> : null}
         <AtModalAction>
@@ -81,4 +85,4 @@ class ModalVerifyConfirm extends Component<IProps, PageState> {
   }
 }
 
-export default ModalVerifyConfirm
+export default ModalPlayerVerifyConfirm

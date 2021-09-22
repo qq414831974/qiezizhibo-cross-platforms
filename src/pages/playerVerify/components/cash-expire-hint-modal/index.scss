@@ -16,18 +16,18 @@
   color: $color-highlight;
 }
 
-.qz-verify-confirm-modal-title {
+.qz-cash-expire-hint-modal-title {
   font-weight: bold;
   font-size: $font-size-lg;
   margin-bottom: $spacing-v-sm;
 }
 
-.qz-verify-confirm-modal-content_text {
+.qz-cash-expire-hint-modal-content_text {
   font-size: $font-size-sm;
   margin-top: $spacing-v-sm;
 }
 
-.qz-verify-confirm-modal-content_tip {
-  text-align: left;
+.qz-cash-expire-hint-modal-content_tip {
+  text-align: center;
   font-size: $font-size-sm;
 }

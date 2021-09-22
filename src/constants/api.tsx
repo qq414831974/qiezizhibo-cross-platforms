@@ -43,6 +43,7 @@ export const API_REFRESH_TOKEN = `${auth_service}/auth/refresh_token`;
 export const API_USER_ABILITY = `${user_service}/user/ability`;
 export const API_USER_ADDRESS = `${user_service}/user/address`;
 export const API_USER_EXP = `${user_service}/user/exp`;
+export const API_USER_IDENTITY = `${user_service}/user/identity`;
 
 //league
 export const API_LEAGUE = (id) => `${football_service}/league/${id}`;
@@ -83,6 +84,8 @@ export const API_PLAYER = (id) => `${football_service}/player/${id}`;
 export const API_PLAYERS = `${football_service}/player`;
 export const API_PLAYER_BEST = `${football_service}/player/best`;
 export const API_PLAYER_MEDIA = `${media_service}/media/player`;
+export const API_PLAYER_VERIFY  = `${football_service}/player/verify`;
+export const API_PLAYER_VERIFY_INHERIT  = `${system_service}/person/verify/request/player/inherit`;
 
 //live
 export const API_ACTIVITY_MEDIA_LIST = (id) => `${media_service}/media/activity?activityId=${id}`;
@@ -147,6 +150,13 @@ export const API_SUBSCRIBE_REGISTRATION_VERIFY = `${system_service}/subscribe/re
 
 //person verify
 export const API_PERSON_VERIFY_LEAGUEMEMBER = `${system_service}/person/verify/request/leagueMember`;
+export const API_PERSON_VERIFY_PLAYER = `${system_service}/person/verify/request/player`;
+
+//cash
+export const API_CASH_OVERVIEW = `${football_service}/cash/overview`;
+export const API_CASH_RECORD = `${football_service}/cash/record`;
+export const API_CASH_USER_INFO = `${football_service}/cash/info`;
+export const API_CASH_REQUEST = `${football_service}/cash/request`;
 
 //cached
 export const cached_service = `${protocol_http}qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/cached/football`;

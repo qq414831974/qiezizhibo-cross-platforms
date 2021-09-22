@@ -1,4 +1,5 @@
 @import '../../app';
+
 .qz-heat-player-container {
   //height: calc(100vh - (9 / 16 * 100vw) - 36px - 1.45 * 28px);
   position: relative;
@@ -144,6 +145,244 @@
 .qz-heat-player-content {
   height: calc(100vh - (9 / 16 * 100vw) - 36px - 1.45 * 28px - 85px);
   width: 100%;
+}
+
+.qz-heat-player__vertical {
+  display: block;
+  padding: 0 0 160px 0;
+  box-sizing: border-box;
+  position: relative;
+
+  &-item-active {
+    //border: solid $color-bg-blue-main 2px;
+    background-color: $color-grey-5;
+    border-radius: 30px;
+  }
+
+  &-item {
+    position: relative;
+    padding: $spacing-v-md;
+    box-sizing: border-box;
+    height: min-content;
+    display: flex;
+    border-bottom: 1px solid $color-bg-lighter;
+    box-shadow: 5px 2px 2px $color-bg-light;
+    border-radius: 10px;
+
+    &-team {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 20px;
+
+      image {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+      }
+    }
+
+    &-img-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 140px;
+      min-width: 140px;
+
+      image {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+      }
+    }
+
+    &-name {
+      margin: auto 15px;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      .primary {
+        font-size: 30px;
+        color: $color-text-base;
+      }
+
+      .secondary {
+        font-size: $font-size-sm;
+        color: $color-grey-2;
+      }
+    }
+
+    &-heat-container {
+      margin-left: auto;
+      padding: 0 10px;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
+    &-heat {
+      display: flex;
+      align-items: center;
+      font-size: 32px;
+      color: $color-text-base;
+      text-align: right;
+      margin: auto 0;
+
+      &-value {
+        margin-left: $spacing-v-xs;
+      }
+
+      image {
+        margin: auto;
+        width: 42px;
+        height: 42px;
+        animation: zoom ease-in-out 1s infinite;
+      }
+    }
+
+    &-rank {
+      display: none;
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+
+    &-rank-1 {
+      display: none;
+      //background: url("../../assets/live/medal.png");
+      //background-size: 100% 100%;
+    }
+
+    &-rank-2 {
+      display: none;
+      //background: url("../../assets/live/medal-2.png");
+      //background-size: 100% 100%;
+    }
+
+    &-rank-3 {
+      display: none;
+      //background: url("../../assets/live/medal-3.png");
+      //background-size: 100% 100%;
+    }
+
+    &-shirt {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: $font-size-sm;
+      color: $color-grey-1;
+      width: 45px;
+      height: 45px;
+      background: url("../../assets/live/t-shirt.png");
+      background-size: 100% 100%;
+    }
+
+    &-shirtNum {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      font-size: $font-size-sm;
+      color: $color-text-base-inverse;
+      border-radius: 17px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0 10px;
+
+      &-value {
+        margin-left: $spacing-v-xs;
+      }
+
+      image {
+        width: $font-size-sm;
+        height: $font-size-sm;
+      }
+    }
+
+    &-percent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      font-size: $font-size-sm;
+      color: $color-text-base-inverse;
+      border-radius: 17px;
+      background: rgba(255, 153, 0, 0.7);
+      padding: 0 5px;
+
+      &-value {
+        margin-left: $spacing-v-xs;
+      }
+
+      image {
+        width: $font-size-base;
+        height: $font-size-base;
+      }
+    }
+
+    &-verify {
+      display: flex;
+      align-items: center;
+      margin-top: 30px;
+      background-color: $color-text-secondary;
+      border-radius: 10px;
+      padding: 0 10px;
+
+      text {
+        font-size: 26px;
+        color: $color-text-base-inverse;
+        margin-left: 10px;
+      }
+
+      image {
+        height: $font-size-xl;
+        width: $font-size-xl;
+      }
+    }
+
+    &-verify:active {
+      background-color: #3bb36b;
+      transform: scale(1.01);
+    }
+
+    &-popup {
+      display: none;
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      height: 60px;
+      width: 100%;
+      background-color: #2d8cf0;
+      z-index: $zindex-flot-layout;
+      border-radius: 20px;
+      animation: fadeInDown .3s;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &-popup-active {
+      display: flex;
+    }
+
+    &-right-share {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      margin-left: auto;
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+  }
 }
 
 .qz-heat-player__grid {
@@ -303,5 +542,31 @@
     -webkit-transform: scale(1);
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes zoom {
+  0% {
+    transform: scale(1);
+  }
+
+  20% {
+    transform: scale(0.9);
+  }
+
+  40% {
+    transform: scale(1.1);
+  }
+
+  60% {
+    transform: scale(0.9);
+  }
+
+  80% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

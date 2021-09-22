@@ -250,7 +250,9 @@ class HeatLeagueTeam extends Component<IProps, PageState> {
   handleShare = () => {
 
   }
-  handleShareMoment = (teamHeat) => {
+  handleShareMoment = (teamHeat,e) => {
+    e.stopPropagation();
+    e.preventDefault();
     let currentTeamHeat = this.state.currentTeamHeat;
     if (teamHeat != null && teamHeat.teamId != null) {
       currentTeamHeat = teamHeat;

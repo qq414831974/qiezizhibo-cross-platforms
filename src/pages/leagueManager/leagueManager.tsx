@@ -42,7 +42,9 @@ import LeagueMemberVerify from "../../components/league-member-verify";
 import noperson from "../../assets/no-person.png";
 import heatRankIcon from "../../assets/heat_rank.png";
 import HeatRank from "../../components/heat-rank";
-import {bet_rank, crown, gift_rank, heat_reward, vip_card} from "../../utils/assets";
+import ModalAgreement from "../../components/modal-agreement";
+import {bet_rank, crown, disclaimer, gift_rank, heat_reward, vip_card, cash_rule} from "../../utils/assets";
+import CashAgreementModal from "../../components/modal-cash-agreement";
 // import withOfficalAccount from "../../utils/withOfficialAccount";
 
 type PageStateProps = {
@@ -120,6 +122,10 @@ type PageState = {
   leagueRegistration: any,
   userLeagueRegistration: any,
   heatRewardScrollBottom: any,
+  cashAvailableHeats: any,
+  agreementOpen: boolean,
+  cashAgreementOpen: boolean,
+  currentToCashPlayer: any,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -199,6 +205,10 @@ class LeagueManager extends Component<IProps, PageState> {
       leagueRegistration: null,
       userLeagueRegistration: null,
       heatRewardScrollBottom: false,
+      cashAvailableHeats: null,
+      agreementOpen: false,
+      cashAgreementOpen: false,
+      currentToCashPlayer: null,
     }
   }
 
@@ -461,6 +471,17 @@ class LeagueManager extends Component<IProps, PageState> {
         param.leagueId = this.leagueId;
         this.setState({playerHeatLoading: true})
         new Request().get(api.API_LEAGUE_PLAYER_HEAT, param).then((data: any) => {
+          if (this.state.heatRule != null && this.state.heatRule.cashAvailable && this.state.heatRule.cashPercentMap) {
+            const cashPercentMap = this.state.heatRule.cashPercentMap;
+            const keys: Array<any> = Object.keys(cashPercentMap);
+            let max = 0;
+            for (let key of keys) {
+              if (key >= max) {
+                max = key;
+              }
+            }
+            this.setState({cashAvailableHeats: this.getTopHeat(data.records, max)})
+          }
           this.setState({playerHeatLoading: false, topSixHeats: this.getTopSixHeat(data.records)})
           if (name) {
             this.setState({playerHeats: data}, () => {
@@ -614,6 +635,36 @@ class LeagueManager extends Component<IProps, PageState> {
         } else {
           index = index + 1;
           if (index <= 7) {
+            heatObjects[i].index = index;
+            sorted.push(heatObjects[i]);
+          }
+        }
+      }
+    }
+    return sorted;
+  }
+  getTopHeat = (heatObjects, top) => {
+    let sorted: any = [];
+    let index = 1;
+    for (let i = 0; i < heatObjects.length; i++) {
+      let heat = this.getHeat(heatObjects[i]);
+      if (heat == 0) {
+        continue;
+      }
+      if (index <= top) {
+        if (i == 0) {
+          index = 1;
+          heatObjects[i].index = index;
+          sorted.push(heatObjects[i]);
+          continue;
+        }
+        let heatPre = this.getHeat(heatObjects[i - 1]);
+        if (heat == heatPre) {
+          heatObjects[i].index = index;
+          sorted.push(heatObjects[i]);
+        } else {
+          index = index + 1;
+          if (index <= top) {
             heatObjects[i].index = index;
             sorted.push(heatObjects[i]);
           }
@@ -944,7 +995,11 @@ class LeagueManager extends Component<IProps, PageState> {
     tabIndex = tabIndex + 1;
     //人气PK
     if (this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT && this.props.giftEnabled) {
-      tabList.push({title: '人气PK'})
+      let leaguePlayerHeatTitle = '人气PK'
+      if (this.state.heatRule && this.state.heatRule.cashAvailable) {
+        leaguePlayerHeatTitle = '球星夸夸榜'
+      }
+      tabList.push({title: leaguePlayerHeatTitle})
       tabs[global.LEAGUE_TABS_TYPE.heatPlayer] = tabIndex;
       tabIndex = tabIndex + 1;
     }
@@ -1097,6 +1152,37 @@ class LeagueManager extends Component<IProps, PageState> {
   handleHeatRankCancel = () => {
     this.setState({heatRankShow: false});
   }
+  onAgreementShow = () => {
+    this.setState({agreementOpen: true})
+  }
+  onAgreementClose = () => {
+    this.setState({agreementOpen: false})
+  }
+  onToCashClick = (player) => {
+    Taro.getStorage({key: `agreement-${this.leagueId}`}).then(res => {
+      if (res && res.data != null && res.data) {
+        Taro.navigateTo({
+          url: `/pages/playerVerify/playerVerify?playerId=${player.id}`,
+        })
+      } else {
+        this.setState({cashAgreementOpen: true, currentToCashPlayer: player})
+      }
+    }).catch(() => {
+      this.setState({cashAgreementOpen: true, currentToCashPlayer: player})
+    })
+  }
+  onCashAgreementClose = () => {
+    this.setState({cashAgreementOpen: false})
+  }
+  onCashAgreementConfirm = () => {
+    this.setState({cashAgreementOpen: false})
+    if (this.state.currentToCashPlayer != null) {
+      Taro.setStorage({key: `agreement-${this.leagueId}`, data: true});
+      Taro.navigateTo({
+        url: `/pages/playerVerify/playerVerify?playerId=${this.state.currentToCashPlayer.id}`,
+      })
+    }
+  }
 
   render() {
     const {leaguePlayers, leagueTeams} = this.props
@@ -1158,11 +1244,14 @@ class LeagueManager extends Component<IProps, PageState> {
             <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.heatPlayer]}>
               <HeatPlayer
                 isLeauge
+                onToCashClick={this.onToCashClick}
                 tabContainerStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
                 tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px - 85px - 42px)`}}
                 leagueId={this.leagueId}
                 heatType={this.state.heatType}
+                heatRule={this.state.heatRule}
                 onPlayerHeatRefresh={this.onPlayerHeatRefresh}
+                cashAvailableHeats={this.state.cashAvailableHeats}
                 // totalHeat={this.state.playerHeatTotal}
                 topPlayerHeats={this.state.topPlayerHeats}
                 startTime={this.state.heatStartTime}
@@ -1232,6 +1321,7 @@ class LeagueManager extends Component<IProps, PageState> {
           handleError={this.onPhoneError}/>
         <GiftPanel
           onHeatRewardRuleClick={this.onHeatRewardClick}
+          onCashRuleClick={this.state.heatRule && this.state.heatRule.cashAvailable ? this.onAgreementShow : null}
           title={`送给${(this.state.heatType == global.HEAT_TYPE.TEAM_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}
           onClose={this.hideGiftPanel}
           isOpened={this.state.giftOpen}
@@ -1303,7 +1393,7 @@ class LeagueManager extends Component<IProps, PageState> {
             <View className="qz-league-manager-fab qz-league-manager-fab-square qz-league-manager-fab-heatreward">
               <AtFab onClick={this.onHeatRewardClick.bind(this, false)}>
                 <Image className="qz-league-manager-fab-image"
-                       src={heat_reward}/>
+                       src={this.state.heatRule && this.state.heatRule.cashAvailable ? cash_rule : heat_reward}/>
               </AtFab>
             </View>
           </View>
@@ -1356,6 +1446,19 @@ class LeagueManager extends Component<IProps, PageState> {
           isOpened={this.state.leagueMemberVerifyOpen}
           leagueMemberRule={this.state.leagueMemberRule}
           onClose={this.onLeagueMemberVerifyClose}
+        />
+        <ModalAgreement
+          isOpened={this.state.agreementOpen}
+          onClose={this.onAgreementClose}
+          picUrl={disclaimer}
+        />
+        <CashAgreementModal
+          isOpened={this.state.cashAgreementOpen}
+          onClose={this.onCashAgreementClose}
+          onConfirm={this.onCashAgreementConfirm}
+          onAgreementClick={this.onAgreementShow}
+          onHeatRuleClick={this.onHeatRewardClick}
+          player={this.state.currentToCashPlayer}
         />
         {!this.props.giftEnabled && this.state.heatType != null ?
           <RectFab

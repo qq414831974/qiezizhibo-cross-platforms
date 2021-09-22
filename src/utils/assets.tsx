@@ -19,3 +19,6 @@ export const warning = "https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.c
 
 export const passed = "https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202106/checked.png";
 export const banned = "https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202106/cancel.png";
+
+export const disclaimer = "https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202106/disclaimer.jpg";
+export const cash_rule = "https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202106/cash_rule.png";

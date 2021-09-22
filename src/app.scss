@@ -554,6 +554,7 @@ $at-timeline-line-color: $color-border-lighter !default;
 
     .at-tabs__item {
       color: $color-text-base-inverse;
+      overflow: visible;
 
       .at-tabs__item-underline {
         height: 0;
@@ -684,6 +685,12 @@ $at-timeline-line-color: $color-border-lighter !default;
 
 .h-full {
   height: 100%;
+}
+
+.at-modal-small {
+  .at-modal__content {
+    min-height: 0;
+  }
 }
 
 .at-modal-big {

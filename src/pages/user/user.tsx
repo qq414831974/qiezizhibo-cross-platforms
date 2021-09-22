@@ -1,7 +1,7 @@
 import Taro from '@tarojs/taro'
 import {Component} from 'react'
 import {View, Text, Image, Button} from '@tarojs/components'
-import {AtIcon} from 'taro-ui'
+import {AtIcon, AtActionSheet, AtActionSheetItem} from 'taro-ui'
 import {connect} from 'react-redux'
 import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
 import configAction from "../../actions/config";
@@ -10,6 +10,8 @@ import './user.scss'
 
 import {hasLogin, getStorage, clearLoginToken, getExpInfoByExpValue} from "../../utils/utils";
 import account_bg from '../../assets/user/account_bg.png'
+import yuan from '../../assets/yuan.png'
+import idcard from '../../assets/id-card.png'
 import logo from '../../assets/default-logo.png'
 import withShare from "../../utils/withShare";
 import userAction from '../../actions/user'
@@ -21,6 +23,8 @@ import ModalLocation from "../../components/modal-location";
 import LocationSelecter from "./components/location-selecter";
 import areaAction from "../../actions/area";
 import NavBar from "../../components/nav-bar";
+import Request from "../../utils/request";
+import * as api from "../../constants/api";
 // import withOfficalAccount from "../../utils/withOfficialAccount";
 
 type PageStateProps = {
@@ -47,6 +51,8 @@ type PageState = {
   locationShow: boolean,
   locationSelecterShow: boolean,
   collectNum: number,
+  userIdentity: any,
+  logoutOpen: boolean,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -54,6 +60,7 @@ type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 interface User {
   props: IProps;
 }
+
 // @withOfficalAccount()
 @withShare({
   title: '茄子TV',
@@ -74,6 +81,8 @@ class User extends Component<IProps, PageState> {
       locationShow: false,
       locationSelecterShow: false,
       collectNum: 0,
+      userIdentity: null,
+      logoutOpen: false,
     }
   }
 
@@ -135,6 +144,14 @@ class User extends Component<IProps, PageState> {
     this.initLocation();
   }
 
+  getUserIdentity = (userNo) => {
+    new Request().get(api.API_USER_IDENTITY, {userNo: userNo}).then((data: any) => {
+      if (data != null && data.id != null) {
+        this.setState({userIdentity: data})
+      }
+    })
+  }
+
   async getUserInfo(onSuccess?: Function | null) {
     if (await hasLogin()) {
       const openid = await getStorage('wechatOpenid');
@@ -145,6 +162,9 @@ class User extends Component<IProps, PageState> {
           })
           Taro.hideLoading()
           Taro.stopPullDownRefresh()
+          if (res.payload.userNo) {
+            this.getUserIdentity(res.payload.userNo);
+          }
           if (onSuccess) {
             onSuccess(res);
           }
@@ -163,12 +183,13 @@ class User extends Component<IProps, PageState> {
 
   login = async () => {
     if (this.state.isLogin) {
-      this.logout();
+      this.setState({logoutOpen: true})
     } else {
       this.setState({loginOpen: true})
     }
   }
   logout = () => {
+    this.setState({logoutOpen: false})
     // new Request().get(api.API_LOGIN_OUT, null).then(() => {
     this.clearLoginState();
     // });
@@ -415,6 +436,9 @@ class User extends Component<IProps, PageState> {
     }
     Taro.navigateTo({url: `../myRegistration/myRegistration`});
   }
+  onCashClick = () => {
+    Taro.navigateTo({url: `../playerVerify/playerVerify`});
+  }
   getUserExpProgress = (userExp) => {
     const {expInfo} = this.props
     const userExpInfo = getExpInfoByExpValue(expInfo, userExp.exp)
@@ -424,6 +448,23 @@ class User extends Component<IProps, PageState> {
     const expRange = expMax - expMin;
     const userExpOffset = userExpValue - expMin;
     return userExpOffset * 100 / expRange;
+  }
+  onIdCardClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      this.setState({loginOpen: true})
+      return;
+    }
+    if (this.state.userIdentity == null) {
+      return;
+    }
+    Taro.navigateTo({url: `../userIdentity/userIdentity`});
+    this.setState({logoutOpen: false})
+  }
+  handleLogoutClose = () => {
+    this.setState({logoutOpen: false})
   }
 
   render() {
@@ -454,7 +495,12 @@ class User extends Component<IProps, PageState> {
           </View>
           {
             name && name.length > 0 ?
-              <Text className='qz-user-user-info-username'>{name}</Text>
+              <View className='qz-user-user-info-user'>
+                <Text className='qz-user-user-info-username'>{name}</Text>
+                {this.state.userIdentity ?
+                  <Image className='qz-user-user-info-idcard' onClick={this.onIdCardClick} src={idcard}/>
+                  : null}
+              </View>
               :
               <Text className='qz-user-user-info-username'>点击登录</Text>
           }
@@ -481,6 +527,13 @@ class User extends Component<IProps, PageState> {
               <View className='title'>{locationConfig ? locationConfig.province : "未定位"}</View>
               <View className='desc'>地区</View>
             </View>
+            {payEnabled ? <View className='line'/> : null}
+            {payEnabled ? <View className='item' onClick={this.onCashClick}>
+              <View className='title_pic'>
+                <Image src={yuan}/>
+              </View>
+              <View className='desc'>钱包</View>
+            </View> : null}
             <View className='line'/>
             <View className='item' onClick={this.onCollectionClick}>
               <View className='title_number'>{this.state.collectNum}</View>
@@ -489,6 +542,14 @@ class User extends Component<IProps, PageState> {
           </View>
         </View>
         <View className='qz-user-list-view'>
+          {/*{payEnabled ? <Button onClick={this.onCashClick} className='list button-list'>*/}
+          {/*    <View className='list_title'>*/}
+          {/*      <AtIcon className='list-title-icon' value='analytics' size='18' color='#333'/>*/}
+          {/*      钱包*/}
+          {/*    </View>*/}
+          {/*    <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>*/}
+          {/*  </Button>*/}
+          {/*  : null}*/}
           <Button onClick={this.onChargeMatchClick} className='list button-list'>
             <View className='list_title'>
               <AtIcon className='list-title-icon' value='shopping-cart' size='18' color='#333'/>
@@ -591,6 +652,18 @@ class User extends Component<IProps, PageState> {
           location={locationConfig}
           onProvinceSelect={this.onProvinceSelect}
           getLocation={this.getLocation}/>
+        <AtActionSheet
+          isOpened={this.state.logoutOpen}
+          cancelText='取消'
+          onCancel={this.handleLogoutClose}
+          onClose={this.handleLogoutClose}>
+          {this.state.userIdentity ? <AtActionSheetItem onClick={this.onIdCardClick}>
+            查看我的实名认证
+          </AtActionSheetItem> : null}
+          <AtActionSheetItem onClick={this.logout}>
+            退出登陆
+          </AtActionSheetItem>
+        </AtActionSheet>
       </View>
     )
   }

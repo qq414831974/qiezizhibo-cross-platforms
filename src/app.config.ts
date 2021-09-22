@@ -27,6 +27,10 @@ export default {
     'pages/myRegistration/myRegistration',
     'pages/leagueMemberVerify/leagueMemberVerify',
     'pages/personVerify/personVerify',
+    'pages/playerVerify/playerVerify',
+    'pages/cashOut/cashOut',
+    'pages/cashOutRecord/cashOutRecord',
+    'pages/userIdentity/userIdentity',
   ],
   window: {
     backgroundTextStyle: 'light',

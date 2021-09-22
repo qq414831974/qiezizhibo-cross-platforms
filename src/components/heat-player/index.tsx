@@ -8,9 +8,11 @@ import './index.scss'
 import {getTimeDifference} from "../../utils/utils";
 import noperson from '../../assets/no-person.png';
 import defaultLogo from '../../assets/default-logo.png';
+import yuan from '../../assets/yuan.png';
 import flame from '../../assets/live/left-support.png';
 import share from '../../assets/live/share.png';
 import moment from '../../assets/live/moment.png';
+import cash from '../../assets/cash.png';
 import * as global from "../../constants/global";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
@@ -29,16 +31,19 @@ type PageDispatchProps = {
 type PageOwnProps = {
   playerHeats?: any;
   topPlayerHeats?: any;
+  cashAvailableHeats?: any;
   startTime?: any;
   endTime?: any;
   hidden?: any;
   heatType?: any;
+  heatRule?: any;
   totalHeat?: any;
   isLeauge?: any;
   leagueId?: any;
   matchId?: any;
   tabContainerStyle?: any;
   tabScrollStyle?: any;
+  onToCashClick?: any;
 }
 
 type PageState = {
@@ -50,6 +55,8 @@ type PageState = {
   loadingMore: any;
   pulldownRefresh: any;
   heatStatus: any;
+  heatListStyle: "grid" | "vertical";
+  _heatRule: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -79,6 +86,8 @@ class HeatPlayer extends Component<IProps, PageState> {
       loadingMore: false,
       pulldownRefresh: false,
       heatStatus: null,
+      heatListStyle: "grid",
+      _heatRule: null,
     }
   }
 
@@ -90,6 +99,19 @@ class HeatPlayer extends Component<IProps, PageState> {
 
   componentWillUnmount() {
     this.clearTimer_CountDown();
+  }
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    const {heatRule} = nextProps;
+    if (heatRule !== this.state._heatRule) {
+      this.setState({
+        _heatRule: heatRule
+      }, () => {
+        if (heatRule && heatRule.cashAvailable) {
+          this.setState({heatListStyle: "vertical"});
+        }
+      });
+    }
   }
 
   refresh = (first?) => {
@@ -251,8 +273,14 @@ class HeatPlayer extends Component<IProps, PageState> {
   handleShare = () => {
 
   }
-  handleShareMoment = () => {
-    if (this.state.currentPlayerHeat == null) {
+  handleShareMoment = (playerHeat, e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    let currentPlayerHeat = this.state.currentPlayerHeat;
+    if (playerHeat != null && playerHeat.playerId != null) {
+      currentPlayerHeat = playerHeat;
+    }
+    if (currentPlayerHeat == null) {
       Taro.showToast({
         title: "请选择球员",
         icon: "none"
@@ -262,7 +290,7 @@ class HeatPlayer extends Component<IProps, PageState> {
     this.props.onPictureDownLoading && this.props.onPictureDownLoading();
     let params: any = {
       leagueId: this.props.leagueId,
-      playerId: this.state.currentPlayerHeat.playerId,
+      playerId: currentPlayerHeat.playerId,
       heatType: this.props.heatType,
     }
     if (this.props.matchId) {
@@ -291,13 +319,48 @@ class HeatPlayer extends Component<IProps, PageState> {
       url: "/pages/feedback/feedback",
     })
   }
+  onVerifyClick = (player, e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    this.props.onToCashClick && this.props.onToCashClick(player);
+  }
+  getCashAvailablePercent = (heatRule, playerHeat, cashAvailableHeats) => {
+    let index = null;
+    if (cashAvailableHeats && playerHeat && heatRule && heatRule.cashAvailable && heatRule.cashPercentMap) {
+      for (let topPlayer of cashAvailableHeats) {
+        if (topPlayer.id == playerHeat.id) {
+          index = topPlayer.index;
+        }
+      }
+      const keys = Object.keys(heatRule.cashPercentMap);
+      for (let key of keys) {
+        if (key == index) {
+          return heatRule.cashPercentMap[key];
+        }
+      }
+    }
+    if (heatRule.preCashAvailable) {
+      return heatRule.preCashPercent;
+    }
+    return null;
+  }
+  getTeamName = (team) => {
+    if (team && team.shortName != null) {
+      return team.shortName;
+    } else if (team && team.name != null) {
+      return team.name;
+    }
+    return "球队";
+  }
 
   render() {
     const {startDiffDayTime, endDiffDayTime, currentPlayerHeat = null, pulldownRefresh = false} = this.state
-    const {hidden = false, heatType} = this.props
+    const {hidden = false, heatType, heatRule} = this.props
     let playerHeats = this.props.playerHeats;
     let topPlayerHeats = this.props.topPlayerHeats;
+    const cashAvailableHeats = this.props.cashAvailableHeats
     let isTopPlayerHeat = this.isTopPlayerHeat;
+    let getCashAvailablePercent = this.getCashAvailablePercent;
     const onPlayerClick = this.onPlayerClick;
     const getHeat = this.getHeat;
     const heatStatus = this.state.heatStatus;
@@ -371,45 +434,70 @@ class HeatPlayer extends Component<IProps, PageState> {
                     lowerThreshold={20}
                     onScrollToUpper={this.onPullDownRefresh}
                     onScrollToLower={this.onReachBottom}>
-          <View className="qz-heat-player__grid">
+          <View className={`qz-heat-player__${this.state.heatListStyle}`}>
             {pulldownRefresh ? <View className="qz-heat-player__loading">
               <AtActivityIndicator mode="center" content="加载中..."/>
             </View> : null}
-            {playerHeats && playerHeats.records.map((data: any) => (
-                <View key={data.id}
-                      className={`qz-heat-player__grid-item ${currentPlayerHeat && currentPlayerHeat.id == data.id ? "qz-heat-player__grid-item-active" : ""}`}
-                      onClick={onPlayerClick.bind(this, data)}>
-                  <View className="qz-heat-player__grid-item-team">
+            {playerHeats && playerHeats.records.map((data: any) => {
+                const percent = getCashAvailablePercent(heatRule, data, cashAvailableHeats);
+                const isTopHeats = isTopPlayerHeat(data, topPlayerHeats);
+                return <View key={data.id}
+                             className={`qz-heat-player__${this.state.heatListStyle}-item ${currentPlayerHeat && currentPlayerHeat.id == data.id ? `qz-heat-player__${this.state.heatListStyle}-item-active` : ""}`}
+                             onClick={onPlayerClick.bind(this, data)}>
+                  <View className={`qz-heat-player__${this.state.heatListStyle}-item-team`}>
                     <Image src={data.team && data.team.headImg ? data.team.headImg : defaultLogo}/>
                   </View>
-                  <View className="qz-heat-player__grid-item-img-container">
+                  <View className={`qz-heat-player__${this.state.heatListStyle}-item-img-container`}>
                     <Image src={data.player && data.player.headImg ? data.player.headImg : noperson}/>
-                    <View className="qz-heat-player__grid-item-heat">
-                      <Image src={flame}/>
-                      <Text className="qz-heat-player__grid-item-heat-value">{getHeat(data)}</Text>
-                    </View>
-                    {isTopPlayerHeat(data, topPlayerHeats) ?
+                    {this.state.heatListStyle == "grid" ?
+                      <View className={`qz-heat-player__${this.state.heatListStyle}-item-heat`}>
+                        <Image src={flame}/>
+                        <Text className={`qz-heat-player__${this.state.heatListStyle}-item-heat-value`}>
+                          {getHeat(data)}
+                        </Text>
+                      </View> :
+                      <View className={`qz-heat-player__${this.state.heatListStyle}-item-shirtNum`}>
+                        <Text className={`qz-heat-player__${this.state.heatListStyle}-item-shirtNum-value`}>
+                          {heatType && heatType == global.HEAT_TYPE.PLAYER_HEAT ? (data.player && data.player.shirtNum ? data.player.shirtNum : "0") : (data.sequence ? data.sequence : "0")}号
+                        </Text>
+                      </View>
+                    }
+                    {isTopHeats ?
                       <View
-                        className={`qz-heat-player__grid-item-rank qz-heat-player__grid-item-rank-${isTopPlayerHeat(data, topPlayerHeats)}`}>
+                        className={`qz-heat-player__${this.state.heatListStyle}-item-rank qz-heat-player__${this.state.heatListStyle}-item-rank-${isTopHeats}`}>
                       </View> : null}
+                    {this.state.heatListStyle == "vertical" && percent ?
+                      <View className={`qz-heat-player__${this.state.heatListStyle}-item-percent`}>
+                        <Image src={yuan}/>
+                        <Text className={`qz-heat-player__${this.state.heatListStyle}-item-percent-value`}>
+                          {percent}%
+                        </Text>
+                      </View> :
+                      null
+                    }
                   </View>
-                  <View className="qz-heat-player__grid-item-name">
-                    <Text>{data.player && data.player.name ? data.player.name : "球员"}</Text>
-                  </View>
-                  {/*<View className="qz-heat-player__grid-item-shirt">*/}
+                  {this.state.heatListStyle == "grid" ?
+                    <View className={`qz-heat-player__${this.state.heatListStyle}-item-name`}>
+                      <Text>{data.player && data.player.name ? data.player.name : "球员"}</Text>
+                    </View> : <View className={`qz-heat-player__${this.state.heatListStyle}-item-name`}>
+                      <View className="primary">{data.player && data.player.name ? data.player.name : "球员"}</View>
+                      <View className="secondary">@{this.getTeamName(data.team)}</View>
+                    </View>
+                  }
+                  {/*<View className="qz-heat-player__${this.state.heatListStyle}-item-shirt">*/}
                   {/*  <Text>{data.player && data.player.shirtNum ? data.player.shirtNum : "0"}</Text>*/}
                   {/*</View>*/}
-                  {heatType && heatType == global.HEAT_TYPE.PLAYER_HEAT ?
-                    <View className="qz-heat-player__grid-item-shirtNum">
+                  {heatType && heatType == global.HEAT_TYPE.PLAYER_HEAT && this.state.heatListStyle == "grid" ?
+                    <View className={`qz-heat-player__${this.state.heatListStyle}-item-shirtNum`}>
                       <Text>{data.player && data.player.shirtNum ? data.player.shirtNum : "0"}号</Text>
                     </View> : null}
-                  {heatType && heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
-                    <View className="qz-heat-player__grid-item-shirtNum">
+                  {heatType && heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT && this.state.heatListStyle == "grid" ?
+                    <View className={`qz-heat-player__${this.state.heatListStyle}-item-shirtNum`}>
                       <Text>{data.sequence ? data.sequence : "0"}号</Text>
                     </View> : null}
-                  {currentPlayerHeat && currentPlayerHeat.id == data.id ?
+                  {currentPlayerHeat && currentPlayerHeat.id == data.id && this.state.heatListStyle == "grid" ?
                     <View
-                      className={`qz-heat-player__grid-item-popup ${currentPlayerHeat && currentPlayerHeat.id == data.id ? "qz-heat-player__grid-item-popup-active" : ""}`}>
+                      className={`qz-heat-player__${this.state.heatListStyle}-item-popup ${currentPlayerHeat && currentPlayerHeat.id == data.id ? `qz-heat-player__${this.state.heatListStyle}-item-popup-active` : ""}`}>
                       <RoundButton
                         margin="0 5px"
                         size={25}
@@ -430,8 +518,39 @@ class HeatPlayer extends Component<IProps, PageState> {
                         onClick={this.handleSupport}/>
                     </View> : null
                   }
+                  {this.state.heatListStyle == "vertical" ?
+                    <View className={`qz-heat-player__${this.state.heatListStyle}-item-right-share`}>
+                      <RoundButton
+                        margin="0 0 0 10px"
+                        size={25}
+                        img={share}
+                        openType="share"
+                        onClick={() => {
+                        }}/>
+                      <RoundButton
+                        margin="0 0 0 10px"
+                        size={25}
+                        img={moment}
+                        onClick={this.handleShareMoment.bind(this, data)}/>
+                    </View> : null}
+                  <View className={`qz-heat-player__${this.state.heatListStyle}-item-heat-container`}>
+                    {this.state.heatListStyle == "vertical" ?
+                      <View className={`qz-heat-player__${this.state.heatListStyle}-item-heat`}>
+                        <Image src={flame}/>
+                        <Text className={`qz-heat-player__${this.state.heatListStyle}-item-heat-value`}>
+                          {getHeat(data)}
+                        </Text>
+                      </View> : null}
+                    {currentPlayerHeat && currentPlayerHeat.id == data.id && this.state.heatListStyle == "vertical" && (percent || heatRule.preCashAvailable) ?
+                      <View className={`qz-heat-player__${this.state.heatListStyle}-item-verify`}
+                            onClick={this.onVerifyClick.bind(this, data.player)}>
+                        <Image src={cash}/>
+                        <Text>提现</Text>
+                      </View>
+                      : null}
+                  </View>
                 </View>
-              )
+              }
             )}
             {playerHeats && playerHeats.total <= playerHeats.records.length ? <View className="qz-heat-player__nomore">
               <AtLoadMore status="noMore" noMoreText="没有更多了"/>

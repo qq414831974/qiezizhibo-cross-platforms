@@ -184,7 +184,7 @@ class RegistrationPlayer extends Component<IProps, PageState> {
       name: this.state.playerName,
       headImg: this.state.playerHeadImg,
       gender: this.state.playerGender,
-      shirtNum: this.state.playerShirtNum,
+      shirtNum: parseInt(this.state.playerShirtNum),
       identityType: this.state.playerIdType,
       identityNumber: this.state.playerIdCard,
       contactType: this.state.contactType,

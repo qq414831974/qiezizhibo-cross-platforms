@@ -43,6 +43,7 @@
   .qz-user-user-info-avatar-container {
     position: relative;
   }
+
   .qz-user-user-info-avatar {
     width: 100px;
     height: 100px;
@@ -68,10 +69,19 @@
     font-weight: normal;
     transform: translateY(-50%);
   }
-
+  .qz-user-user-info-user {
+    display: flex;
+    align-items: center;
+  }
   .qz-user-user-info-username {
     color: #fff;
     font-size: $font-size-lg;
+  }
+
+  .qz-user-user-info-idcard {
+    margin-left: 20px;
+    height: 50px;
+    width: 50px;
   }
 
   .qz-user-user-info-login_name {
@@ -179,6 +189,16 @@
         color: #333;
         font-size: $font-size-xl;
         font-weight: bold;
+      }
+
+      .title_pic {
+        text-align: center;
+
+        image {
+          height: 40px;
+          width: 40px;
+          border-radius: 50%;
+        }
       }
 
       .title {

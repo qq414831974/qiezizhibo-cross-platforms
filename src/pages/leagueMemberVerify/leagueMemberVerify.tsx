@@ -18,6 +18,7 @@ import ModalVerifyConfirm from "./components/verify-confirm-modal";
 import * as error from "../../constants/error";
 import {clearLoginToken, getStorage, hasLogin} from "../../utils/utils";
 import userAction from "../../actions/user";
+import withShare from "../../utils/withShare";
 
 type PageStateProps = {
   userInfo: any;
@@ -46,7 +47,7 @@ type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 interface LeagueMemberVerify {
   props: IProps;
 }
-
+@withShare({})
 class LeagueMemberVerify extends Component<IProps, PageState> {
 
   navRef: any = null;
@@ -70,6 +71,9 @@ class LeagueMemberVerify extends Component<IProps, PageState> {
       currentPlayer: null
     }
   }
+  $setSharePath = () => `/pages/home/home?id=${this.leagueId}&page=leagueMemberVerify`
+
+  $setShareTitle = () => `球员VIP开通`
 
   componentWillMount() {
   }

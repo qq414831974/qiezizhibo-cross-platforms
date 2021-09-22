@@ -5,7 +5,7 @@
 @import '../../mixins/line.scss';
 @import '../../mixins/active.scss';
 
-.qz-heat-reward {
+.qz-cash-agreement-modal {
   position: fixed;
   width: 100%;
   height: 100%;
@@ -13,7 +13,7 @@
   left: 0;
   visibility: hidden;
   transition: visibility 100ms ease-in;
-  z-index: 1300;
+  z-index: 1000;
 
   &__overlay,
   &__container {
@@ -28,14 +28,14 @@
   &__container {
     @include absolute-center();
 
-    width: 100%;
+    width: 580px;
     border-radius: 12px;
     background-color: #FFF;
     overflow: hidden;
   }
 
   &__content {
-    padding: 0;
+    padding: 32px 24px;
     min-height: 180px;
     max-height: 1100px;
     color: #333;
@@ -87,10 +87,11 @@
       }
     }
   }
+
   &__footer {
     @include hairline-top-relative($color: #E5E5E5);
 
-    .qz-heat-reward__action {
+    .qz-cash-agreement-modal__action {
       @include display-flex;
 
       & > button {
@@ -127,7 +128,7 @@
       }
     }
 
-    &--simple .qz-heat-reward__action > button:last-child:nth-child(2) {
+    &--simple .qz-cash-agreement-modal__action > button:last-child:nth-child(2) {
       color: #6190E8;
     }
   }
@@ -135,8 +136,8 @@
   &--active {
     visibility: visible;
 
-    .qz-heat-reward__overlay,
-    .qz-heat-reward__container {
+    .qz-cash-agreement-modal__overlay,
+    .qz-cash-agreement-modal__container {
       opacity: 1;
     }
   }
@@ -161,5 +162,55 @@
     height: 10vw;
     position: relative;
     margin-top: 18px;
+  }
+
+  &-checkbox-container {
+    display: flex;
+    align-items: center;
+    margin: 50px auto 18px auto;
+    @include line(1);
+
+  }
+
+  &-checkbox {
+    background: #07c160;
+    border: 1px solid #07c160;
+    box-sizing: content-box;
+    border-radius: 50%;
+    width: 33px;
+    height: 33px;
+    min-width: 33px;
+    min-height: 33px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    text {
+    }
+
+    &-text {
+      font-size: 26px;
+      color: #7F7F7F;
+    }
+
+    &-text-underline {
+      font-size: 26px;
+      text-decoration: #6190E8;
+      color: #6190E8;
+    }
+  }
+
+  &-checkbox-disabled {
+    background: #ffffff;
+    border: 1px solid #CCC;
+    box-sizing: content-box;
+    border-radius: 50%;
+    width: 33px;
+    height: 33px;
+    min-width: 33px;
+    min-height: 33px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }

@@ -41,6 +41,7 @@ type PageOwnProps = {
   isOpened: boolean;
   title: any;
   onHeatRewardRuleClick: any;
+  onCashRuleClick: any;
 }
 
 type PageState = {
@@ -282,6 +283,11 @@ class GiftPanel extends Component<IProps, PageState> {
     e.preventDefault();
     this.props.onHeatRewardRuleClick && this.props.onHeatRewardRuleClick(true);
   }
+  onCashRuleClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    this.props.onCashRuleClick && this.props.onCashRuleClick();
+  }
 
   render() {
     const {loading = false, heatType = 0, hidden = false, giftWatchPrice = null, giftWatchEternalPrice = null, payEnabled, giftEnabled} = this.props
@@ -370,7 +376,12 @@ class GiftPanel extends Component<IProps, PageState> {
                         </View>
                         <View className='qz-gifts-checkbox-text'>
                           <Text onClick={this.onHeatRuleCheckBoxClick}>我已阅读并同意</Text>
-                          <Text onClick={this.onHeatRewardRuleClick}>《活动规则》</Text>
+                          <Text className="link-text" onClick={this.onHeatRewardRuleClick}>
+                            {this.props.onCashRuleClick ? "《提现规则》" : "《活动规则》"}
+                          </Text>
+                          {this.props.onCashRuleClick ?
+                            <Text className="link-text" onClick={this.onCashRuleClick}>《免责声明》</Text>
+                            : null}
                         </View>
                       </View>
                     </View>
