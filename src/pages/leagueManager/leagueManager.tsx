@@ -990,7 +990,7 @@ class LeagueManager extends Component<IProps, PageState> {
     tabs[global.LEAGUE_TABS_TYPE.leagueRule] = tabIndex;
     tabIndex = tabIndex + 1;
     //赛程
-    tabList.push({title: "赛程"})
+    tabList.push({title: "赛程/直播"})
     tabs[global.LEAGUE_TABS_TYPE.leagueMatch] = tabIndex;
     tabIndex = tabIndex + 1;
     //人气PK

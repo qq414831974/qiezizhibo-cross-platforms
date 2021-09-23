@@ -1228,7 +1228,7 @@ class Live extends Component<IProps, PageState> {
   }
   getPlayPath = (match) => {
     if (match.status < FootballEventType.FINISH) {
-      if (!match.playPath.startsWith('http')) {
+      if (match.playPath && !match.playPath.startsWith('http')) {
         return "https://" + match.playPath;
       } else {
         return match.playPath;
