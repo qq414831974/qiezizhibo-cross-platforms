@@ -6,6 +6,10 @@
   overflow: hidden;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .qz-live-match {
   &__content {
     width: 100vw;
@@ -318,6 +322,12 @@
 
 .qz-live__top-tabs__content {
   width: 100%;
+
+  .at-tabs__header:not(scroll-view) {
+    .at-tabs__item {
+      overflow: visible;
+    }
+  }
 }
 
 .qz-live__top-tabs__content--fixed {

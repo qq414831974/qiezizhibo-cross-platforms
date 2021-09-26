@@ -33,6 +33,7 @@ export const API_SYS_PAYMENT_CONFIG = `${system_service}/sys/config/payment`;
 export const API_SYS_FEEDBACK = `${system_service}/sys/feedback`;
 export const API_SYS_EXP = `${system_service}/sys/exp`;
 export const API_SYS_UPLOAD_AVATAR = `${system_service}/sys/upload/avatar`;
+export const API_SYS_UPLOAD_FEEDBACK = `${system_service}/sys/upload/feedback`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth`;

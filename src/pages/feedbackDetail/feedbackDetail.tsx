@@ -1,7 +1,7 @@
 import Taro, {getCurrentInstance} from '@tarojs/taro'
 import {Component} from 'react'
 import {View, Textarea, Input} from '@tarojs/components'
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 import {AtImagePicker, AtButton, AtIcon} from 'taro-ui'
 
 import './feedbackdetail.scss'
@@ -20,6 +20,7 @@ type PageState = {
   value: any;
   phone: any;
   files: any;
+  uploadedFiles: any;
   title: any;
   hint: any;
   check: any;
@@ -42,6 +43,7 @@ class FeedbackDetail extends Component<IProps, PageState> {
       value: "",
       phone: "",
       files: [],
+      uploadedFiles: [],
       check: true,
     }
   }
@@ -92,10 +94,37 @@ class FeedbackDetail extends Component<IProps, PageState> {
     })
     return e.detail.value
   }
-  onFileChange = (files) => {
-    this.setState({
-      files
-    })
+  onFileChange = (files, operationType, removeIndex) => {
+    let uploadedFiles = this.state.uploadedFiles;
+    if (operationType == "remove") {
+      uploadedFiles.splice(removeIndex, 1)
+      this.setState({
+        files: files,
+        uploadedFiles: uploadedFiles
+      })
+    } else {
+      if (files.length - 1 >= 0) {
+        const file = files[files.length - 1]
+        if (file.url != null) {
+          Taro.uploadFile({
+            url: api.API_SYS_UPLOAD_FEEDBACK,
+            filePath: file.url,
+            name: "file",
+          }).then((data: any) => {
+            if (data.data) {
+              const response = JSON.parse(data.data)
+              if (response && response.data) {
+                uploadedFiles.push(response.data);
+                this.setState({
+                  files: files,
+                  uploadedFiles: uploadedFiles
+                })
+              }
+            }
+          })
+        }
+      }
+    }
   }
   onCheckBoxClick = () => {
     this.setState({check: !this.state.check})
@@ -128,7 +157,13 @@ class FeedbackDetail extends Component<IProps, PageState> {
       });
       return;
     }
-    new Request().post(api.API_SYS_FEEDBACK, {type, phone, value, userNo}).then((config: any) => {
+    new Request().post(api.API_SYS_FEEDBACK, {
+      type,
+      phone,
+      value,
+      userNo,
+      picList: this.state.uploadedFiles
+    }).then((config: any) => {
       console.log(config)
     })
     Taro.navigateTo({

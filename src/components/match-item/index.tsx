@@ -68,7 +68,7 @@ class MatchItem extends Component<IProps, PageState> {
     // matchInfo.isBetEnable = true
     return (
       <View className={`qz-match-item ${payEnabled && matchInfo.isBetEnable && showBet ? "qz-match-item-big" : ""} ${className}`}
-            onClick={this.onItemClick}>
+        onClick={this.onItemClick}>
         {matchInfo.hostTeam != null && matchInfo.guestTeam != null ?
           <View
             className={`qz-match-item-content ${payEnabled && matchInfo.isBetEnable && showBet ? "qz-match-item-content-big" : ""}`}>
@@ -128,6 +128,7 @@ class MatchItem extends Component<IProps, PageState> {
                     <View
                       className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status].color}`}>
                       <Text className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
+                        {matchInfo.statisticsModeAvailable ? "数据统计-" : ""}
                         {eventType[matchInfo.status].text}
                       </Text>
                       <View
@@ -174,6 +175,7 @@ class MatchItem extends Component<IProps, PageState> {
                     <View
                       className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status].color}`}>
                       <Text className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
+                        {matchInfo.statisticsModeAvailable ? "数据统计-" : ""}
                         {eventType[matchInfo.status].text}
                       </Text>
                       <View

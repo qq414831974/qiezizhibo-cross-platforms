@@ -227,6 +227,7 @@ type PageState = {
   agreementOpen: boolean,
   cashAgreementOpen: boolean,
   currentToCashPlayer: any,
+  statisticsMode: boolean,
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -361,6 +362,7 @@ class Live extends Component<IProps, PageState> {
       agreementOpen: false,
       cashAgreementOpen: false,
       currentToCashPlayer: null,
+      statisticsMode: false,
     }
   }
 
@@ -435,19 +437,28 @@ class Live extends Component<IProps, PageState> {
     Taro.showLoading({title: LOADING_TEXT})
     this.getParamId() && this.initCurtain(this.getParamId());
     this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
-      if (data.activityId) {
+      let statisticsMode = false;
+      if (data.statisticsModeAvailable) {
+        statisticsMode = true;
+      }
+      this.setState({statisticsMode: statisticsMode})
+      if (data.activityId || statisticsMode) {
         if (data.leagueId) {
           this.setState({leagueId: data.leagueId});
-          this.initLeagueMember(data.leagueId);
+          if (!statisticsMode) {
+            this.initLeagueMember(data.leagueId);
+          }
         }
-        if (data.status == FootballEventType.FINISH) {
-          this.getLiveMediaInfo(data.activityId)
-          this.startTimer_Danmu();
-          this.getMatchDanmu(data.id, this.state.currentMedia);
-        } else {
-          this.getLiveInfo(data.activityId, () => {
-            this.getDiffTime(data)
-          });
+        if (!statisticsMode) {
+          if (data.status == FootballEventType.FINISH) {
+            this.getLiveMediaInfo(data.activityId)
+            this.startTimer_Danmu();
+            this.getMatchDanmu(data.id, this.state.currentMedia);
+          } else {
+            this.getLiveInfo(data.activityId, () => {
+              this.getDiffTime(data)
+            });
+          }
         }
         this.setUpNooice(data);
         this.getMatchStatus(data.id).then(() => {
@@ -457,7 +468,9 @@ class Live extends Component<IProps, PageState> {
         this.startTimer_CountDown();
         this.getCollection(data.id);
         this.initSocket(data.id);
-        this.getUserChargeInfo(data, true);
+        if (!statisticsMode) {
+          this.getUserChargeInfo(data, true);
+        }
         this.getSharePicture(data);
         this.enterTime = formatTimeSecond(new Date());
 
@@ -806,7 +819,7 @@ class Live extends Component<IProps, PageState> {
       this.getMatchStatus(id);
       this.getTeamHeatInfo(id, null);
       this.getGiftRanks(id);
-    }, 60000)
+    }, 30000)
     this.setState({timerID_matchStatus: timerID_matchStatus});
   }
   clearTimer_matchStatus = () => {
@@ -1227,7 +1240,13 @@ class Live extends Component<IProps, PageState> {
     })
   }
   getPlayPath = (match) => {
+    if (this.state.statisticsMode) {
+      return null;
+    }
     if (match.status < FootballEventType.FINISH) {
+      if (this.state.liveStatus != LiveStatus.ENABLED) {
+        return null;
+      }
       if (match.playPath && !match.playPath.startsWith('http')) {
         return "https://" + match.playPath;
       } else {
@@ -1882,9 +1901,9 @@ class Live extends Component<IProps, PageState> {
     }
     return rowIndex;
   }
-  bindPlayError = (e) => {
-    console.log("bindPlayError")
-    console.log(e)
+  bindPlayError = (_e) => {
+    // console.log("bindPlayError")
+    // console.log(e)
   }
   onCurtainClose = () => {
     this.setState({curtainShow: false})
@@ -1981,7 +2000,7 @@ class Live extends Component<IProps, PageState> {
       tabs[TABS_TYPE.heatLeagueTeam] = tabIndex;
       tabIndex = tabIndex + 1;
     }
-    tabList.push({title: this.state.heatType == HEAT_TYPE.TEAM_HEAT ? "有奖PK" : "赛况"})
+    tabList.push({title: this.state.heatType == HEAT_TYPE.TEAM_HEAT ? "有奖PK" : (match && match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1 ? "聊天" : "赛况")})
     tabs[TABS_TYPE.matchUp] = tabIndex;
     tabIndex = tabIndex + 1;
     // //开启热度比拼
@@ -2391,14 +2410,14 @@ class Live extends Component<IProps, PageState> {
         />
         <View className='qz-live-match__content'>
           {this.state.needPay ?
-            <View className='qz-live-match__video'>
+            <View className={`${this.state.statisticsMode ? "hidden" : ""} qz-live-match__video`}>
               <Image src={match.poster} className="qz-live-match__video-poster-img"/>
               {match && <AtButton onClick={this.onPayClick} type='primary'
                                   className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "由于相关规范，iOS功能暂不可用"}</AtButton>}
             </View>
             :
             (payEnabled && this.state.needGiftLive && match.status != FootballEventType.FINISH && liveStatus != LiveStatus.UNOPEN && this.state.heatRule && this.state.heatRule.available ?
-              <View className='qz-live-match__video'>
+              <View className={`${this.state.statisticsMode ? "hidden" : ""} qz-live-match__video`}>
                 <Image src={match.poster} className="qz-live-match__video-poster-img"/>
                 {match && <AtButton type='primary' onClick={this.switchToGiftSend}
                                     className="qz-live-match__video-poster-pay">投一票 看直播</AtButton>}
@@ -2406,7 +2425,7 @@ class Live extends Component<IProps, PageState> {
               :
               <Video
                 id="videoPlayer"
-                className='qz-live-match__video'
+                className={`${this.state.statisticsMode ? "hidden" : ""} qz-live-match__video`}
                 src={this.getPlayPath(match)}
                 title={match.name}
                 playBtnPosition="center"
@@ -2505,7 +2524,7 @@ class Live extends Component<IProps, PageState> {
                 }
               </Video>)}
           <View className='qz-live-tabs'
-                style={{top: `calc(9 / 16 * 100vw + ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px)`}}>
+                style={{top: `calc(${this.state.statisticsMode ? "0px" : "9 / 16 * 100vw"} + ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px)`}}>
             <AtTabs current={this.state.currentTab}
                     className="qz-live__top-tabs__content"
                     tabList={tabList}
@@ -2515,8 +2534,8 @@ class Live extends Component<IProps, PageState> {
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
                   <HeatPlayer
                     onToCashClick={this.onToCashClick}
-                    tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
-                    tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 85px - 42px)`}}
+                    tabContainerStyle={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                    tabScrollStyle={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 85px - 42px)`}}
                     matchId={this.getParamId()}
                     leagueId={this.state.leagueId}
                     heatType={this.state.heatType}
@@ -2540,8 +2559,8 @@ class Live extends Component<IProps, PageState> {
               {this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT && this.props.giftEnabled ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatLeagueTeam]}>
                   <HeatLeagueTeam
-                    tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
-                    tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 85px - 42px)`}}
+                    tabContainerStyle={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                    tabScrollStyle={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 85px - 42px)`}}
                     matchId={this.getParamId()}
                     leagueId={this.state.leagueId}
                     heatType={this.state.heatType}
@@ -2563,12 +2582,12 @@ class Live extends Component<IProps, PageState> {
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.matchUp]}>
                 <ScrollView
                   className="qz-live-match-up__scroll-content"
-                  style={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                  style={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
                 >
                   {this.state.currentTab != tabs[TABS_TYPE.matchUp] ? <View/> : (
                     <View
                       className="qz-live-match-up__content"
-                      style={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                      style={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
                     >
                       <MatchUp className="qz-live-match-up__match-up" matchInfo={match}
                                matchStatus={matchStatus}
@@ -2628,10 +2647,10 @@ class Live extends Component<IProps, PageState> {
                         ) : null}
                       {match.type && match.type.indexOf(MATCH_TYPE.chattingRoom) != -1 &&
                       <ChattingRoom
-                        tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px)`}}
-                        tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 40px)`}}
-                        tabContainerStyleIphoneX={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 34px)`}}
-                        tabScrollStyleIphoneX={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 40px - 34px)`}}
+                        tabContainerStyle={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px)`}}
+                        tabScrollStyle={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 40px)`}}
+                        tabContainerStyleIphoneX={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 34px)`}}
+                        tabScrollStyleIphoneX={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 40px - 34px)`}}
                         isIphoneX={this.state.isIphoneX}
                         matchInfo={this.props.match}
                         userInfo={this.props.userInfo}
@@ -2659,7 +2678,7 @@ class Live extends Component<IProps, PageState> {
                 <ScrollView
                   scrollY
                   className="qz-live-statistics"
-                  style={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                  style={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
                 >
                   {this.state.currentTab != tabs[TABS_TYPE.statistics] ? <View/>
                     :
@@ -2679,8 +2698,8 @@ class Live extends Component<IProps, PageState> {
               {match.type && match.type.indexOf(MATCH_TYPE.lineUp) != -1 &&
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.lineUp]}>
                 <LineUp
-                  tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
-                  tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 5vw - 28px)`}}
+                  tabContainerStyle={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                  tabScrollStyle={{height: `calc(100vh - ${this.state.statisticsMode ? "0px" : "(9 / 16 * 100vw)"} - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 5vw - 28px)`}}
                   players={this.props.playerList}
                   matchInfo={this.props.match}
                   switchTab={this.switchTeamPlayer}
